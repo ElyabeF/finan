@@ -177,6 +177,18 @@
         .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
         @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 40% { color: inherit; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 60% { text-shadow: .25em 0 0 inherit, .5em 0 0 rgba(0,0,0,0);} 80%, 100% { text-shadow: .25em 0 0 inherit, .5em 0 0 inherit;} }
 
+        /* Categorias clicáveis */
+        .cat-group { margin-bottom: 10px; border-radius: 8px; }
+        .cat-head { cursor: pointer; padding: 6px 8px; border-radius: 8px; transition: background .15s; }
+        .cat-head:hover, .cat-head:focus-visible { background: rgba(255,255,255,0.05); outline: none; }
+        .cat-arrow { display: inline-block; width: 14px; transition: transform .15s; color: var(--text-muted); }
+        .cat-group.open .cat-arrow { transform: rotate(90deg); }
+        .cat-items { display: none; margin: 4px 8px 8px 22px; border-left: 2px solid var(--border); padding-left: 10px; overflow-x: auto; }
+        .cat-group.open .cat-items { display: block; }
+        .cat-items table { width: 100%; font-size: 0.8rem; }
+        .cat-items td { padding: 4px 6px; }
+        .cat-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+
         /* API Key Banner inside chat */
         .api-setup { background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; }
     </style>
@@ -381,6 +393,10 @@
                             <input type="checkbox" id="csvReplaceOption" style="cursor:pointer;">
                             Substituir fatura existente deste cartão (evita duplicar)
                         </label>
+                        <select id="csvDestMode" title="Onde lançar as compras do CSV" style="padding: 9px 12px; border-radius: 8px; background: var(--bg-card); font-size:0.85rem;">
+                            <option value="selected">Lançar tudo no mês selecionado (fatura)</option>
+                            <option value="date">Distribuir pelo mês da data de cada compra</option>
+                        </select>
                         <input type="file" id="csvFile" accept=".csv, .txt" style="display:none" onchange="importBankCSV(event)">
                         <button class="btn" style="padding: 9px 18px;" onclick="document.getElementById('csvFile').click()">📂 Escolher Arquivo CSV</button>
                     </div>
@@ -885,6 +901,82 @@ function getBankTotal(bank, month = currentMonth) {
 
 
 // -----------------------------------------------------
+// HELPERS GERAIS
+// -----------------------------------------------------
+function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function normText(s) {
+    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+}
+
+// Linhas do CSV que NÃO são compras do mês (comparadas sem acento e em maiúsculas).
+// Para voltar a contar algum tipo (ex.: estornos), basta remover a palavra desta lista.
+const CSV_IGNORE_KEYWORDS = [
+    "PAGAMENTO RECEBIDO", "PAGAMENTO DE FATURA", "PAGTO", "PGTO FATURA",
+    "ESTORNO",
+    "LIMITE CONVERTIDO EM SALDO",
+    "RENEGOCIACAO DE PENDENCIAS",
+    "CREDITO DE PARCELAMENTO"
+];
+
+function splitCSVLine(line, delim) {
+    const out = []; let cur = "", inQ = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+        } else if (ch === delim && !inQ) { out.push(cur.trim()); cur = ""; }
+        else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+}
+
+function parseCSVDate(s) {
+    s = String(s || "").trim(); let m;
+    if ((m = s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/))) return { d: m[1], m: m[2], y: m[3] };
+    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return { d: m[3], m: m[2], y: m[1] };
+    return null;
+}
+
+// Converte "70,90", "- 70,90", "-70.90", "R$ 1.234,56", "(28,00)" em número, MANTENDO o sinal.
+function parseMoney(raw) {
+    let s = String(raw == null ? "" : raw).trim();
+    if (!s) return null;
+    let neg = false;
+    if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+    s = s.replace(/R\$|BRL/gi, "").replace(/\s+/g, "");
+    if (s.startsWith("-") || s.startsWith("\u2212")) { neg = true; s = s.slice(1); }
+    else if (s.startsWith("+")) s = s.slice(1);
+    if (s.endsWith("-")) { neg = true; s = s.slice(0, -1); }
+    if (!/^\d[\d.,]*$/.test(s)) return null;
+    const lc = s.lastIndexOf(","), ld = s.lastIndexOf(".");
+    if (lc > -1 && ld > -1) {
+        s = lc > ld ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+    } else if (lc > -1) {
+        s = (s.match(/,/g) || []).length > 1 ? s.replace(/,/g, "") : s.replace(",", ".");
+    } else if (ld > -1) {
+        const dots = (s.match(/\./g) || []).length;
+        if (dots > 1) s = s.replace(/\./g, "");
+    }
+    const n = parseFloat(s);
+    if (isNaN(n)) return null;
+    return neg ? -n : n;
+}
+
+function categorizeDesc(upDesc) {
+    const has = (...k) => k.some(x => upDesc.includes(x));
+    if (has("UBER", "POSTO", "GASOLINA", "COMBUSTIVEL", "SHELL", "IPIRANGA") || /\b99\b/.test(upDesc) || /\b99\s?(POP|TAXI|FOOD)/.test(upDesc)) return "🚗 Transp/Combust.";
+    if (has("IFOOD", "MCDONALD", "BURGER", "PIZZA", "RESTAURANTE", "LANCHONETE", "PADARIA", "SORVETE")) return "🍔 Alimentação/Lazer";
+    if (has("MERCADO", "SUPERMERC", "ATACADAO", "ASSAI", "CARREFOUR", "COMPER", "BRETAS", "EXTRA", "PAO DE ACUCAR")) return "🛒 Supermercado";
+    if (has("NETFLIX", "AMAZON PRIME", "SPOTIFY", "HBO", "DISNEY", "YOUTUBE", "APPLE.COM", "GOOGLE ONE", "DEEZER")) return "📺 Assinaturas";
+    if (has("FARMACIA", "DROGASIL", "PAGUE MENOS", "RAIA", "DROGARIA")) return "💊 Saúde";
+    return "";
+}
+
+// -----------------------------------------------------
 // IMPORTAÇÃO CSV & HISTÓRICO
 // -----------------------------------------------------
 function updateCSVBankSelect() {
@@ -892,7 +984,7 @@ function updateCSVBankSelect() {
     if(csvBank) {
         csvBank.innerHTML = "";
         store.config.banks.forEach(b => {
-            csvBank.innerHTML += `<option value="${b}">${b}</option>`;
+            csvBank.innerHTML += `<option value="${esc(b)}">${esc(b)}</option>`;
         });
     }
 }
@@ -901,20 +993,20 @@ function renderImportedBatches() {
     const listEl = document.getElementById("importedBatchesList");
     if (!listEl) return;
     listEl.innerHTML = "";
-    
+
     const batches = store.profiles[currentProfile].importedBatches || [];
     if (batches.length === 0) {
         listEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">Nenhum extrato registrado ainda neste perfil.</p>';
         return;
     }
-    
+
     batches.forEach(b => {
         listEl.innerHTML += `
             <div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
-                    <span style="font-weight:bold; font-size:0.85rem; color:var(--text-main);">${b.fileName}</span>
-                    <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${b.bank} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Importado em: ${b.importDate}</div>
+                    <span style="font-weight:bold; font-size:0.85rem; color:var(--text-main);">${esc(b.fileName)}</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${esc(b.bank)} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Importado em: ${esc(b.importDate)}${b.ignoredCount ? ` • ${b.ignoredCount} linhas ignoradas` : ""}</div>
                 </div>
                 <button class="btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="deleteImportedBatch('${b.id}')">🗑️ Excluir Extrato e Despesas</button>
             </div>
@@ -924,137 +1016,166 @@ function renderImportedBatches() {
 
 function deleteImportedBatch(batchId) {
     if (!confirm("Deseja apagar este extrato e remover todos os lançamentos que vieram dele?")) return;
-    
-    // Remover todas as transações com esse batchId de todos os meses do perfil atual
+
     MONTHS.forEach(m => {
         if (store.profiles[currentProfile][m] && store.profiles[currentProfile][m].transactions) {
             store.profiles[currentProfile][m].transactions = store.profiles[currentProfile][m].transactions.filter(t => t.batchId !== batchId);
         }
     });
-    
-    // Remover da lista de extratos
     store.profiles[currentProfile].importedBatches = (store.profiles[currentProfile].importedBatches || []).filter(b => b.id !== batchId);
-    
+
     saveStore();
     renderAll();
+    checkNotifications();
     alert("Extrato e transações associadas removidos com sucesso!");
 }
 
 function importBankCSV(e) {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = function(evt) {
-        const text = evt.target.result;
-        const bankName = document.getElementById("csvBankSelect").value;
-        const replaceOption = document.getElementById("csvReplaceOption") && document.getElementById("csvReplaceOption").checked;
-        
-        // Se a opção de substituir estiver marcada, limpa as transações do banco no mês antes de importar
-        if (replaceOption) {
-            store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => t.bank !== bankName);
+        try {
+            runCSVImport(String(evt.target.result || ""), file.name);
+        } catch (err) {
+            console.error(err);
+            alert("❌ Não foi possível ler este CSV: " + err.message);
         }
-        
-        let addedCount = 0;
-        let ignoredCount = 0;
-        let batchTotal = 0;
-        const batchId = "batch_" + Date.now();
-        
-        const lines = text.split('\n');
-        lines.forEach(line => {
-            if(!line.trim()) return;
-            const cols = line.split(/[,;\t]/).map(c => c.replace(/"/g, '').trim());
-            if(cols.length < 2) return;
-            
-            let dateStr = "";
-            let desc = "";
-            let val = null;
-            
-            cols.forEach(col => {
-                if (/^\d{2}\/\d{2}\/\d{4}$/.test(col)) dateStr = col;
-                else if (/^\d{4}-\d{2}-\d{2}$/.test(col)) {
-                    let [y, m, d] = col.split('-');
-                    dateStr = `${d}/${m}/${y}`;
-                }
-                else if ((/^[-+]?\d*\.?\d+(?:,\d+)?$/.test(col) || /^[-+]?\d*\,?\d+(?:\.\d+)?$/.test(col)) && !col.includes('/')) {
-                    let numStr = col;
-                    if (numStr.includes(',') && numStr.includes('.')) {
-                        if (numStr.lastIndexOf(',') > numStr.lastIndexOf('.')) {
-                            numStr = numStr.replace(/\./g, '').replace(',', '.');
-                        } else {
-                            numStr = numStr.replace(/,/g, '');
-                        }
-                    } else if (numStr.includes(',')) {
-                        numStr = numStr.replace(',', '.');
-                    }
-                    let num = parseFloat(numStr);
-                    if (!isNaN(num) && val === null) val = num;
-                }
-                else if (isNaN(col) && col.length > 2 && col.toUpperCase() !== "BRL" && !col.includes("COMPRA") && !dateStr.includes(col)) {
-                    if(!desc) desc = col;
-                }
-            });
-            
-            if (dateStr && desc && val !== null) {
-                const upDesc = desc.toUpperCase();
-                // Ignorar pagamentos, estornos e créditos que não são compras
-                if (upDesc.includes("PAGAMENTO") || upDesc.includes("PAGTO") || upDesc.includes("ESTORNO") || upDesc.includes("CRÉDITO") || upDesc.includes("CREDITO") || upDesc.includes("SALDO")) {
-                    ignoredCount++;
-                    return;
-                }
-                
-                val = Math.abs(val);
-
-                if (val > 0) {
-                    const parts = dateStr.split('/');
-                    const mIdx = parseInt(parts[1], 10) - 1;
-                    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                    const targetMonthStr = `${monthNames[mIdx]}/${parts[2]}`;
-                    
-                    let category = "";
-                    if(upDesc.includes("UBER") || upDesc.includes("99") || upDesc.includes("POSTO") || upDesc.includes("GASOLINA")) category = "🚗 Transp/Combust.";
-                    else if(upDesc.includes("IFOOD") || upDesc.includes("MCDONALDS") || upDesc.includes("BURGER") || upDesc.includes("PIZZA") || upDesc.includes("RESTAURANTE")) category = "🍔 Alimentação/Lazer";
-                    else if(upDesc.includes("MERCADO") || upDesc.includes("ATACADAO") || upDesc.includes("ASSAI") || upDesc.includes("CARREFOUR") || upDesc.includes("COMPER") || upDesc.includes("BRETAS")) category = "🛒 Supermercado";
-                    else if(upDesc.includes("NETFLIX") || upDesc.includes("AMAZON") || upDesc.includes("SPOTIFY") || upDesc.includes("HBO") || upDesc.includes("DISNEY")) category = "📺 Assinaturas";
-                    else if(upDesc.includes("FARMACIA") || upDesc.includes("DROGASIL") || upDesc.includes("PAGUE MENOS") || upDesc.includes("RAIA")) category = "💊 Saúde";
-                    
-                    if (category) desc = `[${category}] ${desc}`;
-                    
-                    let destMonth = MONTHS.includes(targetMonthStr) ? targetMonthStr : currentMonth;
-                    
-                    store.profiles[currentProfile][destMonth].transactions.push({
-                        id: String(Date.now()) + "_" + Math.floor(Math.random()*10000),
-                        date: dateStr,
-                        bank: bankName,
-                        desc: desc,
-                        parcela: "Auto (CSV)",
-                        val: val,
-                        batchId: batchId
-                    });
-                    addedCount++;
-                    batchTotal += val;
-                }
-            }
-        });
-        
-        // Registrar extrato importado para poder excluir ou substituir facilmente
-        if (addedCount > 0) {
-            if (!store.profiles[currentProfile].importedBatches) store.profiles[currentProfile].importedBatches = [];
-            store.profiles[currentProfile].importedBatches.unshift({
-                id: batchId,
-                fileName: file.name,
-                bank: bankName,
-                importDate: new Date().toLocaleString("pt-BR"),
-                count: addedCount,
-                totalVal: batchTotal
-            });
-        }
-        
-        saveStore();
-        renderAll();
-        alert(`✅ Sucesso! ${addedCount} despesas importadas (${fmtBRL(batchTotal)}).\n⚠️ ${ignoredCount} pagamentos/estornos ignorados.`);
     };
-    reader.readAsText(file);
+    reader.readAsText(file, "UTF-8");
     e.target.value = "";
+}
+
+function runCSVImport(text, fileName) {
+    const bankName = document.getElementById("csvBankSelect").value;
+    const replaceOption = !!(document.getElementById("csvReplaceOption") && document.getElementById("csvReplaceOption").checked);
+    const destMode = document.getElementById("csvDestMode") ? document.getElementById("csvDestMode").value : "selected";
+    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+    const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(l => l.trim());
+    if (lines.length === 0) throw new Error("arquivo vazio.");
+
+    // Delimitador
+    const first = lines[0];
+    const delim = first.includes(";") ? ";" : (first.includes("\t") ? "\t" : ",");
+
+    // Cabeçalho (se existir) -> mapeia as colunas
+    const map = { date: -1, desc: -1, val: -1 };
+    let startIdx = 0;
+    const firstCells = splitCSVLine(first, delim);
+    if (!firstCells.some(c => parseCSVDate(c))) {
+        firstCells.forEach((c, i) => {
+            const n = normText(c);
+            if (map.date < 0 && /^(DATA|DATE)/.test(n)) map.date = i;
+            else if (map.val < 0 && /(VALOR|AMOUNT|VALUE)/.test(n)) map.val = i;
+            else if (map.desc < 0 && /(TITULO|TITLE|DESCRI|HISTORICO|LANCAMENTO|ESTABELECIMENTO|MERCHANT|NAME)/.test(n)) map.desc = i;
+        });
+        startIdx = 1;
+    }
+
+    const items = [];     // compras válidas (valor mantém o sinal: crédito < 0)
+    const ignored = [];   // linhas descartadas
+
+    for (let i = startIdx; i < lines.length; i++) {
+        const cells = splitCSVLine(lines[i], delim);
+        if (cells.length < 2) continue;
+
+        let dateObj = map.date >= 0 ? parseCSVDate(cells[map.date]) : null;
+        let val = map.val >= 0 ? parseMoney(cells[map.val]) : null;
+        let desc = map.desc >= 0 ? (cells[map.desc] || "").trim() : "";
+
+        // Fallback heurístico para o que o cabeçalho não resolveu
+        if (!dateObj) { for (const c of cells) { dateObj = parseCSVDate(c); if (dateObj) break; } }
+        if (val === null) {
+            for (let k = 0; k < cells.length; k++) {
+                if (k === map.desc || k === map.date) continue;
+                const c = cells[k];
+                if (parseCSVDate(c)) continue;
+                const v = parseMoney(c);
+                if (v !== null) { val = v; break; }
+            }
+        }
+        if (!desc) {
+            for (const c of cells) {
+                if (parseCSVDate(c) || parseMoney(c) !== null) continue;
+                if (/[A-Za-zÀ-ú]{3,}/.test(c) && !/^[0-9a-f-]{32,}$/i.test(c) && normText(c) !== "BRL") { desc = c; break; }
+            }
+        }
+
+        if (!dateObj || !desc || val === null) continue;
+
+        const upDesc = normText(desc);
+        if (CSV_IGNORE_KEYWORDS.some(k => upDesc.includes(k))) {
+            ignored.push({ desc, val });
+            continue;
+        }
+        if (val === 0) continue;
+
+        items.push({ dateObj, desc, upDesc, val });
+    }
+
+    if (items.length === 0) {
+        alert(`⚠️ Nenhuma compra encontrada no arquivo.\n${ignored.length} linhas de pagamento/ajuste foram ignoradas.`);
+        return;
+    }
+
+    // Mês de destino de cada item
+    const destOf = (it) => {
+        if (destMode === "selected") return currentMonth;
+        const key = `${monthNames[parseInt(it.dateObj.m, 10) - 1]}/${it.dateObj.y}`;
+        return MONTHS.includes(key) ? key : currentMonth;
+    };
+    const destMonths = new Set(items.map(destOf));
+
+    // Substituir fatura anterior do mesmo cartão nos meses afetados
+    if (replaceOption) {
+        destMonths.forEach(m => {
+            store.profiles[currentProfile][m].transactions = store.profiles[currentProfile][m].transactions.filter(t => t.bank !== bankName);
+        });
+        const stillUsed = new Set();
+        MONTHS.forEach(m => store.profiles[currentProfile][m].transactions.forEach(t => { if (t.batchId) stillUsed.add(t.batchId); }));
+        store.profiles[currentProfile].importedBatches = (store.profiles[currentProfile].importedBatches || []).filter(b => b.bank !== bankName || stillUsed.has(b.id));
+    }
+
+    const batchId = "batch_" + Date.now();
+    let batchTotal = 0, credits = 0;
+    items.forEach(it => {
+        let desc = it.desc;
+        const category = categorizeDesc(it.upDesc);
+        if (category) desc = `[${category}] ${desc}`;
+        const pm = it.desc.match(/parcela\s+(\d+)\s*\/\s*(\d+)/i);
+        store.profiles[currentProfile][destOf(it)].transactions.push({
+            id: String(Date.now()) + "_" + Math.floor(Math.random() * 1000000),
+            date: `${it.dateObj.d}/${it.dateObj.m}/${it.dateObj.y}`,
+            bank: bankName,
+            desc,
+            parcela: pm ? `${pm[1]}/${pm[2]}` : "Auto (CSV)",
+            val: it.val,          // mantém o sinal: negativo (reembolso) subtrai da fatura
+            batchId
+        });
+        batchTotal += it.val;
+        if (it.val < 0) credits++;
+    });
+
+    if (!store.profiles[currentProfile].importedBatches) store.profiles[currentProfile].importedBatches = [];
+    store.profiles[currentProfile].importedBatches.unshift({
+        id: batchId, fileName: fileName, bank: bankName,
+        importDate: new Date().toLocaleString("pt-BR"),
+        count: items.length, totalVal: batchTotal, ignoredCount: ignored.length
+    });
+
+    saveStore();
+    renderAll();
+    checkNotifications();
+
+    let msg = `✅ ${items.length} lançamentos importados em ${bankName}.\nTotal líquido: ${fmtBRL(batchTotal)}`;
+    if (credits) msg += `\n↩️ ${credits} reembolso(s)/crédito(s) subtraídos do total.`;
+    if (ignored.length) {
+        msg += `\n\n⚠️ ${ignored.length} linhas ignoradas (pagamentos/ajustes):`;
+        ignored.slice(0, 8).forEach(x => { msg += `\n• ${x.desc.slice(0, 45)} (${fmtBRL(x.val)})`; });
+        if (ignored.length > 8) msg += `\n• … e mais ${ignored.length - 8}`;
+    }
+    alert(msg);
 }
 
 function renderHistoryTable() {
@@ -1174,71 +1295,90 @@ function renderCompareBadge(curr, prev, elemId, invert = false) {
 }
 
 
+let openCategories = new Set();
+let _catList = [];
+
+function getTxCategory(t) {
+    const m = String(t.desc || "").match(/^\[(.*?)\]/);
+    return m ? m[0] : "💳 Outros Cartão / Não Categorizado";
+}
+function stripCatTag(d) { return String(d || "").replace(/^\[.*?\]\s*/, ""); }
+
+// Agrupa todos os gastos do mês por categoria, guardando as compras de cada uma
+function buildCategoryData(month) {
+    const data = store.profiles[currentProfile][month];
+    const cats = {};
+    const add = (name, item) => {
+        if (!cats[name]) cats[name] = { name, val: 0, items: [] };
+        cats[name].val += item.val;
+        cats[name].items.push(item);
+    };
+    if (!data) return [];
+    data.transactions.forEach(t => add(getTxCategory(t), {
+        date: t.date || "-", bank: t.bank, desc: stripCatTag(t.desc), parcela: t.parcela, val: Number(t.val) || 0
+    }));
+    store.config.banks.forEach(b => {
+        const extra = Number(data.cardStatus?.[b]?.manualExtra) || 0;
+        if (extra !== 0) add("💳 Valor fixo lançado no cartão", { date: "-", bank: b, desc: "Valor fixo / extra manual", parcela: "", val: extra });
+    });
+    data.essenciais.forEach(e => { if (Number(e.valor) > 0) add("🏠 Fixo: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
+    data.naoEssenciais.forEach(e => { if (Number(e.valor) > 0) add("💸 Variável: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
+    return Object.values(cats);
+}
+
+function toggleCategory(idx) {
+    const c = _catList[idx];
+    if (!c) return;
+    if (openCategories.has(c.name)) openCategories.delete(c.name); else openCategories.add(c.name);
+    renderCategoryReport();
+}
+
 function renderCategoryReport() {
-    const data = store.profiles[currentProfile][currentMonth];
-    let categories = {};
-    let totalVal = 0;
-
-    // 1. Extrair dos cartões (Transações)
-    data.transactions.forEach(t => {
-        let cat = "💳 Outros Cartão / Não Categorizado";
-        const match = t.desc.match(/^\[(.*?)\]/);
-        if (match) {
-            cat = match[0]; // ex: [🛒 Supermercado]
-        }
-        
-        if (!categories[cat]) categories[cat] = 0;
-        categories[cat] += Number(t.val) || 0;
-        totalVal += Number(t.val) || 0;
-    });
-
-    // 2. Extrair das Despesas Essenciais
-    data.essenciais.forEach(e => {
-        if(Number(e.valor) > 0) {
-            let cat = "🏠 Fixo: " + e.nome;
-            if (!categories[cat]) categories[cat] = 0;
-            categories[cat] += Number(e.valor) || 0;
-            totalVal += Number(e.valor) || 0;
-        }
-    });
-
-    // 3. Extrair das Despesas Variáveis Manuais
-    data.naoEssenciais.forEach(e => {
-        if(Number(e.valor) > 0) {
-            let cat = "💸 Variável: " + e.nome;
-            if (!categories[cat]) categories[cat] = 0;
-            categories[cat] += Number(e.valor) || 0;
-            totalVal += Number(e.valor) || 0;
-        }
-    });
-
     const catContainer = document.getElementById("categoryReportBody");
     if (!catContainer) return;
-    catContainer.innerHTML = "";
+
+    const sorted = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((a, b) => b.val - a.val);
+    _catList = sorted;
+    const totalVal = sorted.reduce((a, c) => a + c.val, 0);
 
     if (totalVal === 0) {
         catContainer.innerHTML = "<p style='color:var(--text-muted); text-align:center; padding: 20px;'>Nenhum gasto registrado neste mês.</p>";
         return;
     }
 
-    // Ordenar do maior para o menor
-    const sorted = Object.keys(categories).map(k => ({ name: k, val: categories[k] })).sort((a, b) => b.val - a.val);
+    const colors = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
+    let html = `<div class="cat-hint">👆 Clique em uma categoria para ver as compras dela.</div>`;
 
-    sorted.forEach((item, idx) => {
-        if (item.val <= 0) return;
-        const pct = ((item.val / totalVal) * 100).toFixed(1);
-        
-        // Cores vibrantes alternadas para o gráfico
-        const colors = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
+    sorted.forEach((cat, idx) => {
+        const pct = ((cat.val / totalVal) * 100).toFixed(1);
         const color = colors[idx % colors.length];
+        const isOpen = openCategories.has(cat.name);
+        const items = cat.items.slice().sort((a, b) => b.val - a.val);
 
-        catContainer.innerHTML += `
-            <div class="bar-group" style="margin-bottom: 12px;">
-                <div class="bar-label" style="font-size:0.85rem;"><span>${item.name}</span><span style="color:${color};">${fmtBRL(item.val)} (${pct}%)</span></div>
-                <div class="bar-track" style="height:8px; background:rgba(255,255,255,0.05);"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
-            </div>
-        `;
+        const rows = items.map(it => `
+            <tr>
+                <td style="white-space:nowrap; color:var(--text-muted);">${esc(it.date)}</td>
+                <td>${it.bank ? createBankBadgeHTML(it.bank) : ""}</td>
+                <td>${esc(it.desc)}${it.parcela && it.parcela !== "Auto (CSV)" && it.parcela !== "À vista" ? ` <span style="color:var(--text-muted);">(${esc(it.parcela)})</span>` : ""}</td>
+                <td class="val-col" style="font-weight:600; ${it.val < 0 ? "color:#22c55e;" : ""}">${fmtBRL(it.val)}</td>
+            </tr>`).join("");
+
+        html += `
+            <div class="cat-group ${isOpen ? "open" : ""}">
+                <div class="cat-head" role="button" tabindex="0" aria-expanded="${isOpen}"
+                     onclick="toggleCategory(${idx})"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCategory(${idx});}">
+                    <div class="bar-label" style="font-size:0.85rem;">
+                        <span><span class="cat-arrow">▶</span> ${esc(cat.name)} <small style="color:var(--text-muted);">(${items.length} ${items.length === 1 ? "item" : "itens"})</small></span>
+                        <span style="color:${color};">${fmtBRL(cat.val)} (${pct}%)</span>
+                    </div>
+                    <div class="bar-track" style="height:8px; background:rgba(255,255,255,0.05);"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
+                </div>
+                <div class="cat-items"><table><tbody>${rows}</tbody></table></div>
+            </div>`;
     });
+
+    catContainer.innerHTML = html;
 }
 
 function renderAll() {
@@ -1262,7 +1402,7 @@ function renderAll() {
     const txBody = document.getElementById("txTableBody"); const filter = document.getElementById("filterBank").value; txBody.innerHTML = "";
     const list = data.transactions.filter(t => filter === "TODOS" || t.bank === filter);
     if (list.length === 0) txBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:16px;">Sem lançamentos neste mês.</td></tr>`;
-    else list.forEach(t => { txBody.innerHTML += `<tr><td><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${t.desc}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx(${t.id})">✖</button></td></tr>`; });
+    else list.forEach(t => { txBody.innerHTML += `<tr><td><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${esc(t.desc)}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx('${t.id}')">✖</button></td></tr>`; });
 
     renderFuturePurchases();
     if(typeof renderHistoryTable === 'function') renderHistoryTable();
@@ -1347,7 +1487,7 @@ function addTransaction() {
     store.profiles[currentProfile][currentMonth].transactions.push({ id: Date.now(), date: document.getElementById("txDate").value.split("-").reverse().join("/"), bank: document.getElementById("txBank").value, desc, parcela: document.getElementById("txParcela").value.trim() || "À vista", val });
     document.getElementById("txDesc").value = ""; document.getElementById("txParcela").value = ""; document.getElementById("txVal").value = ""; saveStore(); renderAll(); checkNotifications();
 }
-function deleteTx(id) { store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => t.id !== id); saveStore(); renderAll(); checkNotifications();}
+function deleteTx(id) { store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => String(t.id) !== String(id)); saveStore(); renderAll(); checkNotifications();}
 
 function exportBackup() {
     const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
@@ -1384,134 +1524,190 @@ function appendMessage(sender, text) {
     const chatContainer = document.getElementById("chatContainer");
     const div = document.createElement("div");
     div.className = `chat-bubble ${sender === 'user' ? 'chat-user' : 'chat-ai'}`;
-    
-    let htmlText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    let htmlText = esc(text);
+    htmlText = htmlText.replace(/^#{1,6}\s*(.*)$/gm, '<strong>$1</strong>');
+    htmlText = htmlText.replace(/^\s*[\*\-]\s+/gm, '• ');
+    htmlText = htmlText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    htmlText = htmlText.replace(/\*(.+?)\*/g, '<em>$1</em>');
     htmlText = htmlText.replace(/\n/g, '<br>');
-    
+
     div.innerHTML = htmlText;
     chatContainer.appendChild(div);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+    return div;
+}
+
+// Modelos testados em ordem. Só aparecem aqui modelos estáveis de texto.
+const GEMINI_PREFERRED = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-pro"];
+const GEMINI_EXCLUDE = /tts|image|embed|aqa|live|audio|vision|robotics|computer|learnlm|gemma|imagen|veo|exp|preview|thinking|deep-research|-00\d/i;
+const GEMINI_API = "https://generativelanguage.googleapis.com/v1beta";
+let workingGeminiModel = null;
+let chatBusy = false;
+
+async function fetchWithTimeout(url, options = {}, ms = 25000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+        return await fetch(url, { ...options, signal: ctrl.signal });
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function getGeminiCandidates(apiKey) {
+    let names = [];
+    try {
+        const res = await fetchWithTimeout(`${GEMINI_API}/models?pageSize=200`, { headers: { "x-goog-api-key": apiKey } }, 8000);
+        const json = await res.json();
+        if (!res.ok) {
+            const msg = json.error?.message || "";
+            if (/api key|API_KEY|permission|unregistered/i.test(msg + (json.error?.status || ""))) {
+                const e = new Error(msg); e.fatal = true; throw e;
+            }
+        } else if (Array.isArray(json.models)) {
+            names = json.models
+                .filter(m => (m.supportedGenerationMethods || []).includes("generateContent"))
+                .map(m => m.name.replace(/^models\//, ""))
+                .filter(n => n.startsWith("gemini") && !GEMINI_EXCLUDE.test(n));
+        }
+    } catch (e) {
+        if (e.fatal) throw e;
+        console.warn("Não foi possível listar modelos, usando lista padrão:", e);
+    }
+
+    let ordered;
+    if (names.length) {
+        ordered = GEMINI_PREFERRED.filter(n => names.includes(n));
+        names.filter(n => !ordered.includes(n) && /flash/.test(n)).forEach(n => ordered.push(n));
+        if (!ordered.length) ordered = names.slice(0, 4);
+    } else {
+        ordered = GEMINI_PREFERRED.slice();
+    }
+    if (workingGeminiModel) ordered = [workingGeminiModel, ...ordered.filter(n => n !== workingGeminiModel)];
+    return ordered.slice(0, 5);   // limite: nunca ficar tentando dezenas de modelos
+}
+
+function buildChatSystemPrompt() {
+    const curTot = calcMonthTotals(currentMonth);
+    const prevTot = prevMonthStr ? calcMonthTotals(prevMonthStr) : null;
+    let ctx = `Você é um consultor financeiro pessoal, direto e prático. Responda sempre em português do Brasil, de forma objetiva (no máximo ~250 palavras), usando os dados abaixo. Não invente valores que não estejam nos dados.\n\n`;
+    ctx += `PERFIL: ${currentProfile}\nMÊS ATUAL (${currentMonth}):\n- Entradas: R$ ${curTot.rec.toFixed(2)}\n- Despesas essenciais: R$ ${curTot.ess.toFixed(2)}\n- Cartões: R$ ${curTot.cards.toFixed(2)} (${store.config.banks.map(b => `${b} R$ ${getBankTotal(b).toFixed(2)}`).join(", ")})\n- Outras variáveis: R$ ${curTot.out.toFixed(2)}\n- Saldo previsto: R$ ${curTot.saldo.toFixed(2)}\n`;
+
+    const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((a, b) => b.val - a.val).slice(0, 12);
+    if (cats.length) {
+        ctx += `\nGASTOS POR CATEGORIA:\n` + cats.map(c => `- ${c.name}: R$ ${c.val.toFixed(2)} (${c.items.length} itens)`).join("\n") + "\n";
+    }
+    const tx = (store.profiles[currentProfile][currentMonth].transactions || []).slice().sort((a, b) => (Number(b.val) || 0) - (Number(a.val) || 0)).slice(0, 25);
+    if (tx.length) {
+        ctx += `\nMAIORES COMPRAS NOS CARTÕES:\n` + tx.map(t => `- ${t.date || "-"} | ${t.bank} | ${stripCatTag(t.desc)} | R$ ${(Number(t.val) || 0).toFixed(2)}`).join("\n") + "\n";
+    }
+    if (prevTot) ctx += `\nMÊS ANTERIOR (${prevMonthStr}): entradas R$ ${prevTot.rec.toFixed(2)}, gastos totais R$ ${prevTot.saidas.toFixed(2)}\n`;
+    return ctx;
+}
+
+async function callGemini(model, apiKey, systemText, history) {
+    const body = {
+        systemInstruction: { parts: [{ text: systemText }] },
+        contents: history,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+    };
+    // Modelos 2.5 "pensam" e podem gastar todos os tokens sem responder: desliga o thinking nos flash
+    if (/2\.5-flash/.test(model)) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+
+    const res = await fetchWithTimeout(`${GEMINI_API}/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify(body)
+    }, 30000);
+
+    let json = {};
+    try { json = await res.json(); } catch (_) {}
+
+    if (!res.ok) {
+        const err = new Error(json.error?.message || `HTTP ${res.status}`);
+        err.status = res.status;
+        err.fatal = res.status === 401 || res.status === 403 || /api key not valid|API_KEY_INVALID/i.test(err.message);
+        throw err;
+    }
+    const cand = json.candidates && json.candidates[0];
+    const text = (cand?.content?.parts || []).map(p => p.text || "").join("").trim();
+    if (!text) {
+        const why = json.promptFeedback?.blockReason || cand?.finishReason || "resposta vazia";
+        throw new Error(`Modelo não devolveu texto (${why}).`);
+    }
+    return text;
 }
 
 async function sendChatMessage() {
+    if (chatBusy) return;
     const inputEl = document.getElementById("chatInput");
     const text = inputEl.value.trim();
-    const apiKey = store.config.geminiApiKey;
+    const apiKey = (store.config.geminiApiKey || document.getElementById("chatApiKey").value || "").trim();
 
-    if (!apiKey) { alert("Por favor, cole a sua API Key do Gemini no aviso acima."); return; }
+    if (!apiKey) { document.getElementById("apiSetupBox").style.display = 'block'; alert("Por favor, cole a sua API Key do Gemini no aviso acima."); return; }
+    if (!store.config.geminiApiKey) saveApiKey(apiKey);
     if (!text) return;
+
+    chatBusy = true;
+    const sendBtn = document.querySelector("#chatModal .modal-footer button");
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.style.opacity = "0.6"; }
 
     appendMessage('user', text);
     inputEl.value = "";
-    
+    chatHistory.push({ role: "user", parts: [{ text }] });
+    // mantém só as últimas mensagens (sempre começando por "user")
+    while (chatHistory.length > 12) chatHistory.shift();
+    while (chatHistory.length && chatHistory[0].role !== "user") chatHistory.shift();
+
     const loadingDiv = document.createElement("div");
     loadingDiv.className = "chat-bubble chat-ai loading-dots";
     loadingDiv.textContent = "Consultando IA Gemini";
-    document.getElementById("chatContainer").appendChild(loadingDiv);
+    const chatContainer = document.getElementById("chatContainer");
+    chatContainer.appendChild(loadingDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    const curTot = calcMonthTotals(currentMonth);
-    const prevTot = prevMonthStr ? calcMonthTotals(prevMonthStr) : null;
-    let contexto = `PERFIL ATUAL: ${currentProfile}\nCONTEXTO FINANCEIRO:\nMês Atual (${currentMonth}):\n- Entradas: R$ ${curTot.rec.toFixed(2)}\n- Despesas Essenciais: R$ ${curTot.ess.toFixed(2)}\n- Cartões: R$ ${curTot.cards.toFixed(2)} (Bancos: ${store.config.banks.map(b => `${b} R$ ${getBankTotal(b).toFixed(2)}`).join(", ")})\n- Outras Variáveis: R$ ${curTot.out.toFixed(2)}\n- Sobra: R$ ${curTot.saldo.toFixed(2)}\n\n`;
-    
-    if (prevTot) {
-        contexto += `Mês Anterior (${prevMonthStr}):\n- Entradas: R$ ${prevTot.rec.toFixed(2)}\n- Gastos Totais: R$ ${prevTot.saidas.toFixed(2)}\n\n`;
-    }
-
-    chatHistory.push({ role: "user", parts: [{ text: contexto + "Pergunta do usuário: " + text }] });
-
+    let replyText = "", lastError = null;
     try {
-        // 1. Chamar dinamicamente a lista de modelos autorizados na Google Cloud para esta chave
-        let modelCandidates = [];
-        let listError = null;
+        const systemText = buildChatSystemPrompt();
+        const candidates = await getGeminiCandidates(apiKey);
 
-        try {
-            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-            const listData = await listRes.json();
-            
-            if (listData.models && Array.isArray(listData.models)) {
-                // Pegar todos os modelos que suportam geração de texto
-                const valid = listData.models.filter(m => 
-                    m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")
-                );
-                
-                // Ordenar dando prioridade para flash e versões 2.0 / 1.5
-                valid.sort((a, b) => {
-                    const aFlash = a.name.includes("flash") ? 1 : 0;
-                    const bFlash = b.name.includes("flash") ? 1 : 0;
-                    return bFlash - aFlash;
-                });
-                
-                modelCandidates = valid.map(m => `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent`);
-            } else if (listData.error) {
-                listError = listData.error;
-            }
-        } catch (eList) {
-            console.warn("Erro ao listar modelos:", eList);
-        }
-
-        // Se ListModels não retornou nada ou falhou, usar fallback amplo
-        if (modelCandidates.length === 0) {
-            modelCandidates = [
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent"
-            ];
-        }
-
-        let success = false;
-        let lastError = listError;
-        let replyText = "";
-
-        const payload = JSON.stringify({
-            contents: chatHistory,
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1000
-            }
-        });
-
-        for (const ep of modelCandidates) {
+        for (const model of candidates) {
+            loadingDiv.textContent = `Consultando IA Gemini (${model})`;
             try {
-                const response = await fetch(`${ep}?key=${apiKey}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: payload
-                });
-
-                const json = await response.json();
-                if (response.ok && json.candidates && json.candidates[0]?.content) {
-                    replyText = json.candidates[0].content.parts[0].text;
-                    success = true;
-                    break;
-                } else {
-                    lastError = json.error || json;
-                    // Se for erro de chave inválida, não adianta tentar os outros
-                    if (response.status === 400 && lastError?.message?.toLowerCase().includes("api key not valid")) {
-                        break;
-                    }
-                }
+                replyText = await callGemini(model, apiKey, systemText, chatHistory);
+                workingGeminiModel = model;
+                lastError = null;
+                break;
             } catch (err) {
-                lastError = err;
+                lastError = err.name === "AbortError" ? new Error("Tempo esgotado (a IA demorou demais).") : err;
+                console.warn(`Gemini ${model} falhou:`, lastError.message);
+                if (lastError.fatal) break;
+                if (workingGeminiModel === model) workingGeminiModel = null;
             }
-        }
-
-        loadingDiv.remove();
-        if (success) {
-            chatHistory.push({ role: "model", parts: [{ text: replyText }] });
-            appendMessage('model', replyText);
-        } else {
-            const errDetail = lastError?.message || JSON.stringify(lastError);
-            appendMessage('model', `⚠️ Não foi possível obter resposta: ${errDetail}\n\nDica: Clique em "🔑 Chave API" no topo para verificar se a sua chave do Google AI Studio está correta.`);
-            chatHistory.pop();
         }
     } catch (err) {
-        loadingDiv.remove();
-        appendMessage('model', `⚠️ Erro de conexão: ${err.message}`);
-        chatHistory.pop();
+        lastError = err;
     }
+
+    loadingDiv.remove();
+    if (!lastError && replyText) {
+        chatHistory.push({ role: "model", parts: [{ text: replyText }] });
+        appendMessage('model', replyText);
+    } else {
+        chatHistory.pop();            // remove a pergunta que falhou
+        inputEl.value = text;         // devolve o texto para o usuário tentar de novo
+        let detail = lastError?.message || "erro desconhecido";
+        let dica = 'Clique em "🔑 Chave API" no topo e confira se a chave do Google AI Studio está correta.';
+        if (lastError?.status === 429) dica = "Limite de uso gratuito atingido. Aguarde um minuto e tente novamente.";
+        else if (lastError?.status === 503) dica = "Os servidores do Gemini estão sobrecarregados. Tente novamente em instantes.";
+        else if (/Failed to fetch|NetworkError|Load failed/i.test(detail)) dica = "Falha de conexão. Verifique sua internet.";
+        appendMessage('model', `⚠️ Não foi possível obter resposta: ${detail}\n\n${dica}`);
+    }
+
+    chatBusy = false;
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.style.opacity = "1"; }
+    inputEl.focus();
 }
 init();
 </script>
