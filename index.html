@@ -218,48 +218,83 @@
 
         /* API Key Banner inside chat */
         .api-setup { background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; }
+        /* ===== Layout de aplicativo ===== */
+        header.appbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; margin: 0 0 14px; background: rgba(15,23,42,.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); border-radius: 0 0 14px 14px; }
+        .ab-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .ab-logo { width: 36px; height: 36px; border-radius: 10px; background: var(--profile-color, #6366f1); color: #fff; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
+        .ab-title { font-size: 1rem; font-weight: 700; line-height: 1.1; }
+        .ab-sub { font-size: .72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ab-right { display: flex; align-items: center; gap: 8px; }
+        .ab-right select { padding: 7px 8px; border-radius: 10px; font-size: .82rem; }
+        .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-size: 1.05rem; cursor: pointer; display: grid; place-items: center; transition: background .15s; }
+        .icon-btn:hover { background: var(--bg-input); }
+        .badge-dot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #ef4444; color: #fff; font-size: .68rem; font-weight: 700; display: none; place-items: center; }
+        .tabs { overflow-x: auto; flex-wrap: nowrap !important; scrollbar-width: none; gap: 6px; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { white-space: nowrap; border-radius: 999px !important; }
+        .panel { border-radius: 14px; }
+
+        /* Painel de notificações */
+        #notifPanel { position: fixed; top: 64px; right: 12px; width: min(380px, calc(100vw - 24px)); max-height: 70vh; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.5); z-index: 150; display: none; }
+        #notifPanel.open { display: block; }
+        .np-head { padding: 14px 16px 8px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+        .np-card { display: flex; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--border); cursor: pointer; border-left: 3px solid transparent; }
+        .np-card:hover { background: var(--bg-input); }
+        .np-card.danger { border-left-color: #ef4444; } .np-card.warn { border-left-color: #facc15; } .np-card.info { border-left-color: #38bdf8; }
+        .np-ico { font-size: 1.2rem; } .np-t { font-weight: 600; font-size: .88rem; } .np-s { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
+        .np-empty { padding: 26px 16px; text-align: center; color: var(--text-muted); font-size: .88rem; }
+        .np-foot { padding: 10px 16px; border-top: 1px solid var(--border); }
+
+        /* Menu lateral */
+        #drawerOverlay { position: fixed; inset: 0; background: rgba(2,6,23,.6); z-index: 190; display: none; }
+        #drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(340px, 92vw); background: var(--bg-card); border-left: 1px solid var(--border); z-index: 200; transform: translateX(100%); transition: transform .22s ease; overflow-y: auto; padding-bottom: 24px; }
+        body.drawer-open #drawer { transform: none; } body.drawer-open #drawerOverlay { display: block; }
+        .dr-head { display: flex; justify-content: space-between; align-items: center; padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border); }
+        .dr-sec { padding: 14px 16px 4px; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+        .dr-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: transparent; border: 0; color: var(--text-main); padding: 10px 16px; cursor: pointer; }
+        .dr-item:hover { background: var(--bg-input); }
+        .dr-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--bg-input); display: grid; place-items: center; flex-shrink: 0; }
+        .dr-t { font-size: .88rem; font-weight: 600; } .dr-s { font-size: .74rem; color: var(--text-muted); }
+        @media (max-width: 560px) { .ab-sub { max-width: 120px; } .ab-title { font-size: .92rem; } #notifPanel { top: 60px; } .ab-right #monthSelect { max-width: 118px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="icon-192.png">
 </head>
 <body>
 <div class="container">
-    <header>
-        <div class="title-area">
-            <h1>CONTROLE FINANCEIRO & CARTÕES</h1>
-            <p>Multiperfil • Comparações Mensais • Chatbot IA</p>
-        </div>
-        <div class="controls">
-            <!-- Novo Seletor de Perfis -->
-            <div class="profile-badge">
-                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:var(--profile-color); font-weight:bold; padding:0; outline:none; cursor:pointer; filter: brightness(1.5);"></select>
-                <button class="btn-icon" style="color:var(--profile-color); filter: brightness(1.5); margin-left:-2px; padding:0 4px;" onclick="openProfileModal()" title="Editar Perfil">⚙️</button>
+    <header class="appbar">
+        <div class="ab-left">
+            <div class="ab-logo">$</div>
+            <div style="min-width:0;">
+                <div class="ab-title">Controle Financeiro</div>
+                <div class="ab-sub" id="abSub">—</div>
             </div>
-            <button class="btn-outline" style="border-color:var(--profile-color); color:#a855f7;" onclick="promptNewProfile()">+ Novo Perfil</button>
-            
-            <span style="color:var(--border);">|</span>
-            
-            <select id="monthSelect" onchange="changeMonth()"></select>
-            <button class="btn-ai" onclick="openChat()">✨ Chat com Consultor IA</button>
-            <button class="btn-outline" onclick="exportBackup()">Backup</button>
-            <button class="btn-outline" onclick="document.getElementById('importFile').click()">Importar</button>
-            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
-            <button class="btn-outline" onclick="manualRefresh()" title="Recarregar e atualizar todos os dados">🔄 Atualizar</button>
-            <button class="btn-outline" style="border-color:#38bdf8; color:#38bdf8;" onclick="openFirebaseModal()">☁️ Nuvem</button>
         </div>
+        <div class="ab-right">
+            <div class="profile-badge" style="padding:0 6px;">
+                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:var(--profile-color); font-weight:bold; padding:0; outline:none; cursor:pointer; filter: brightness(1.5);"></select>
+            </div>
+            <select id="monthSelect" onchange="changeMonth()"></select>
+            <button class="icon-btn" onclick="openChat()" title="Consultor IA">✨</button>
+            <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel(event)" title="Notificações">🔔<span class="badge-dot" id="bellBadge">0</span></button>
+            <button class="icon-btn" onclick="toggleDrawer(true)" title="Menu">☰</button>
+        </div>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
     </header>
 
-    <div id="notificationBanner">
-        <div class="notif-text" id="notifList"></div>
-        <button class="btn-icon" style="color:var(--text-main);" onclick="document.getElementById('notificationBanner').style.display='none'">✖</button>
-    </div>
+    <div id="notifPanel"></div>
+    <div id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+    <aside id="drawer"></aside>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('visao', this)">1. Visão Mensal (Entradas x Saídas)</button>
-        <button class="tab-btn" onclick="switchTab('cartoes', this)">2. Cartões & Faturas</button>
-        <button class="tab-btn" onclick="switchTab('futuras', this)">3. Compras Futuras</button>
-        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">📊 Relatórios & Importação (CSV)</button>
+        <button class="tab-btn active" onclick="switchTab('visao', this)">Visão Mensal</button>
+        <button class="tab-btn" onclick="switchTab('cartoes', this)">Cartões & Faturas</button>
+        <button class="tab-btn" onclick="switchTab('futuras', this)">Compras Futuras</button>
+        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">📊 Relatórios & CSV</button>
     </div>
 
     <!-- KPI SUMMARY -->
@@ -1638,43 +1673,7 @@ function renderAll() {
     }
 }
 
-function checkNotifications() {
-    const data = store.profiles[currentProfile][currentMonth];
-    let alerts = [];
-    
-    // Alerta de faturas pendentes
-    let pendentes = [];
-    store.config.banks.forEach(b => {
-        if(data.cardStatus[b]?.status === "Pendente" && getBankTotal(b) > 0) {
-            pendentes.push(`${b} (Venc: ${data.cardStatus[b].venc})`);
-        }
-    });
-    
-    if (pendentes.length > 0) {
-        alerts.push(`💳 <strong>Faturas Pendentes (${currentProfile}):</strong> Lembre-se de pagar: ${pendentes.join(", ")}`);
-    }
-
-    // Alerta de limite ultrapassado (Comparação)
-    if (prevMonthStr) {
-        const curTot = calcMonthTotals(currentMonth);
-        const prevTot = calcMonthTotals(prevMonthStr);
-        if (prevTot.saidas > 0 && curTot.saidas > prevTot.saidas) {
-            const diff = curTot.saidas - prevTot.saidas;
-            alerts.push(`⚠️ <strong>Alerta de Gastos (${currentProfile}):</strong> Até o momento gastou <strong>${fmtBRL(diff)} a mais</strong> que no mês anterior (${prevMonthStr}).`);
-        }
-    }
-
-    const notifBox = document.getElementById("notificationBanner");
-    const notifList = document.getElementById("notifList");
-    if (alerts.length > 0) {
-        notifList.innerHTML = alerts.map(a => `<div class="notif-item"><span class="alert-dot"></span> <span>${a}</span></div>`).join("");
-        notifBox.style.display = "flex";
-    } else {
-        notifBox.style.display = "none";
-    }
-}
-
-function updateItem(group, index, field, val) { store.profiles[currentProfile][currentMonth][group][index][field] = val; saveStore(); renderAll(); }
+function checkNotifications() { renderNotifications(); notifyDue(); }
 function updateCardStatus(bank, field, val) { store.profiles[currentProfile][currentMonth].cardStatus[bank][field] = val; saveStore(); renderAll(); checkNotifications();}
 function addTransaction() {
     const desc = document.getElementById("txDesc").value.trim(); const val = parseInputCurrency(document.getElementById("txVal").value);
@@ -2027,16 +2026,115 @@ function showLock() {
     inp.addEventListener("keydown", e => { if (e.key === "Enter") check(true); });
 }
 
-function injectToolbar() {
-    const ms = document.getElementById("monthSelect"); if (!ms || document.getElementById("toolbarExtra")) return;
-    ms.insertAdjacentHTML("afterend", `<span class="toolbar-extra" id="toolbarExtra">
-        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="copyFixedFromPrev()" title="Copia entradas e despesas do mês anterior">📋 Copiar mês anterior</button>
-        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="exportMonthCSV()">⬇️ CSV</button>
-        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="window.print()" title="Na janela de impressão escolha Salvar como PDF">🖨️ PDF</button>
-        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="configurePin()">🔒 PIN</button>
-        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="cloudAccount()">👤 Conta</button></span>`);
+// -----------------------------------------------------
+// NOTIFICAÇÕES (painel + avisos do sistema) E MENU
+// -----------------------------------------------------
+const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+function getDueList() {
+    const out = [], today = new Date(); today.setHours(0, 0, 0, 0);
+    [-1, 0, 1].forEach(off => {
+        const base = new Date(today.getFullYear(), today.getMonth() + off, 1);
+        const key = `${_mn[base.getMonth()]}/${base.getFullYear()}`;
+        const md = store.profiles[currentProfile][key]; if (!md) return;
+        store.config.banks.forEach(b => {
+            const cs = md.cardStatus[b], total = getBankTotal(b, key);
+            const dm = String(cs?.venc || "").match(/\d+/);
+            if (!cs || cs.status !== "Pendente" || total <= 0 || !dm) return;
+            const last = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+            const due = new Date(base.getFullYear(), base.getMonth(), Math.min(parseInt(dm[0], 10), last));
+            const diff = Math.round((due - today) / 86400000);
+            if (diff < -30 || diff > 7) return;
+            out.push({ bank: b, key, total, diff, iso: isoDate(due) });
+        });
+    });
+    return out.sort((a, b) => a.diff - b.diff);
 }
-injectToolbar();
+
+function getAlerts() {
+    const al = [];
+    getDueList().forEach(x => {
+        const when = x.diff < 0 ? `Vencida há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
+        al.push({ level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon: "💳", title: `${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: `due_${x.bank}_${x.iso}`, notify: x.diff <= 3, tab: "cartoes" });
+    });
+    const cur = calcMonthTotals(currentMonth);
+    if (cur.saldo < 0) al.push({ level: "danger", icon: "📉", title: "Saldo previsto negativo", text: `${currentMonth}: ${fmtBRL(cur.saldo)}`, key: `neg_${currentMonth}`, tab: "visao" });
+    const goals = store.profiles[currentProfile].goals || {};
+    buildCategoryData(currentMonth).forEach(c => { if (goals[c.name] > 0 && c.val > goals[c.name]) al.push({ level: "warn", icon: "🎯", title: `Meta estourada: ${c.name}`, text: `${fmtBRL(c.val)} de ${fmtBRL(goals[c.name])}`, key: `goal_${c.name}_${currentMonth}`, tab: "openfinance" }); });
+    if (prevMonthStr) {
+        const pv = calcMonthTotals(prevMonthStr);
+        if (pv.saidas > 0 && cur.saidas > pv.saidas) al.push({ level: "info", icon: "📊", title: "Gastos acima do mês anterior", text: `${fmtBRL(cur.saidas - pv.saidas)} a mais que ${prevMonthStr}`, key: `cmp_${currentMonth}`, tab: "openfinance" });
+    }
+    return al;
+}
+
+function renderNotifications() {
+    const al = getAlerts(), panel = document.getElementById("notifPanel"), badge = document.getElementById("bellBadge");
+    const sub = document.getElementById("abSub"); if (sub) sub.textContent = `${currentProfile} · ${currentMonth}`;
+    const n = al.filter(a => a.level !== "info").length;
+    badge.textContent = n; badge.style.display = n ? "grid" : "none";
+    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` +
+        (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="goAlert('${a.tab || ""}')"><div class="np-ico">${a.icon}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">✅ Tudo em dia por aqui.</div>`) +
+        `<div class="np-foot"><button class="btn-outline" style="width:100%;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Avisos no celular: ativados" : "🔔 Ativar avisos no celular"}</button></div>`;
+}
+function toggleNotifPanel(e) { if (e) e.stopPropagation(); document.getElementById("notifPanel").classList.toggle("open"); }
+function goAlert(tab) {
+    document.getElementById("notifPanel").classList.remove("open");
+    const btn = tab && document.querySelector(`.tab-btn[onclick*="'${tab}'"]`); if (btn) switchTab(tab, btn);
+}
+document.addEventListener("click", e => { const p = document.getElementById("notifPanel"); if (p && !p.contains(e.target) && e.target.id !== "bellBtn") p.classList.remove("open"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { toggleDrawer(false); document.getElementById("notifPanel").classList.remove("open"); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkNotifications(); });
+
+async function showSysNotif(title, body, tag) {
+    const opts = { body, tag, icon: "icon-192.png", badge: "icon-192.png" };
+    try { const reg = await navigator.serviceWorker?.getRegistration(); if (reg) return reg.showNotification(title, opts); } catch (e) {}
+    try { new Notification(title, opts); } catch (e) {}
+}
+async function notifyDue() {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const seen = JSON.parse(localStorage.getItem("fin_notified") || "{}"), today = isoDate(new Date());
+    for (const a of getAlerts().filter(a => a.notify)) {
+        if (seen[a.key] === today) continue;
+        seen[a.key] = today;
+        await showSysNotif(`${a.icon} ${a.title}`, a.text, a.key);
+    }
+    Object.keys(seen).forEach(k => { if (seen[k] !== today) delete seen[k]; });
+    localStorage.setItem("fin_notified", JSON.stringify(seen));
+    try { const c = await caches.open("fin-due"); await c.put(new Request(new URL("due.json", location.href)), new Response(JSON.stringify(getDueList()))); } catch (e) {}
+}
+async function registerSW() {
+    if (!("serviceWorker" in navigator)) return;
+    try {
+        const reg = await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
+        if (reg.periodicSync) { try { await reg.periodicSync.register("fin-due-check", { minInterval: 12 * 3600 * 1000 }); } catch (e) {} }
+    } catch (e) { console.warn("SW:", e); }
+}
+async function toggleNotifications() {
+    if (!("Notification" in window)) return toast("Este navegador não suporta notificações.");
+    if (Notification.permission === "denied") return toast("Notificações bloqueadas. Libere nas configurações do site no navegador.");
+    const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+    if (perm !== "granted") return toast("Permissão não concedida.");
+    await registerSW();
+    await showSysNotif("🔔 Avisos ativados", "Você será lembrado dos vencimentos das faturas.", "test");
+    notifyDue(); renderNotifications();
+}
+
+function toggleDrawer(open) { if (open) renderDrawer(); document.body.classList.toggle("drawer-open", !!open); }
+function renderDrawer() {
+    const notif = ("Notification" in window && Notification.permission === "granted") ? "Ativados" : "Desativados";
+    const groups = [
+        ["Perfil", [["✏️", "Editar perfil", "Nome e cor de destaque", "openProfileModal()"], ["➕", "Novo perfil", "Separar contas (ex.: Casa)", "promptNewProfile()"]]],
+        ["Mês atual", [["📋", "Copiar mês anterior", "Entradas e despesas fixas", "copyFixedFromPrev()"], ["⬇️", "Exportar CSV", "Planilha do mês", "exportMonthCSV()"], ["🖨️", "Salvar PDF / imprimir", "Aba que está aberta", "window.print()"], ["🔄", "Atualizar dados", "Recalcular tudo", "manualRefresh()"]]],
+        ["Dados", [["💾", "Fazer backup", "Baixar arquivo .json", "exportBackup()"], ["📂", "Importar backup", "Restaurar de um arquivo", "document.getElementById('importFile').click()"]]],
+        ["Nuvem e segurança", [["☁️", "Configurar Firebase", "Sincronização entre aparelhos", "openFirebaseModal()"], ["👤", "Conta da nuvem", cloudUser ? cloudUser.email : "Não conectado", "cloudAccount()"], ["🔒", "PIN de acesso", localStorage.getItem("fin_pin_hash") ? "Ativado neste aparelho" : "Desativado", "configurePin()"], ["🔔", "Avisos de vencimento", notif + " neste aparelho", "toggleNotifications()"]]],
+        ["Inteligência", [["✨", "Consultor IA e chave API", "Gemini", "openChat()"]]]
+    ];
+    document.getElementById("drawer").innerHTML = `<div class="dr-head"><span>Menu</span><button class="btn-icon" onclick="toggleDrawer(false)">✖</button></div>` +
+        groups.map(([t, items]) => `<div class="dr-sec">${t}</div>` + items.map(([i, n, d, f]) => `<button class="dr-item" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-ico">${i}</span><span><div class="dr-t">${n}</div><div class="dr-s">${esc(d)}</div></span></button>`).join("")).join("");
+}
+
+if ("Notification" in window && Notification.permission === "granted") registerSW();
 showLock();
 
 init();
