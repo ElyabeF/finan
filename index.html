@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Controle Financeiro & Cartões</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #facc15;
+            --accent-hover: #eab308;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f97316;
+            --profile-color: #6366f1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); padding: 12px; line-height: 1.4; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 1280px; margin: 0 auto; }
+        
+        /* Header */
+        header {
+            background: var(--bg-card); padding: 14px 18px; border-radius: 12px;
+            border: 1px solid var(--border); margin-bottom: 16px;
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+        }
+        .title-area h1 { font-size: 1.25rem; color: var(--accent); }
+        .title-area p { font-size: 0.8rem; color: var(--text-muted); }
+        .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        
+        .profile-badge { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--profile-color); color: #c7d2fe; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        
+        select, input, button {
+            background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border);
+            padding: 8px 10px; border-radius: 8px; font-size: 0.9rem; outline: none;
+        }
+        select:focus, input:focus { border-color: var(--accent); }
+        .btn {
+            cursor: pointer; font-weight: 600; border: none;
+            background: var(--accent); color: #0f172a; padding: 8px 12px; border-radius: 8px;
+        }
+        .btn:hover { background: var(--accent-hover); }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); cursor: pointer; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem;}
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-add { background: rgba(250, 204, 21, 0.08); color: var(--accent); border: 1px dashed var(--accent); padding: 7px; font-size: 0.85rem; cursor: pointer; width: 100%; border-radius: 6px; }
+        .btn-icon { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
+        .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
+        .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; font-weight: 600; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+        
+        /* Notifications Banner */
+        #notificationBanner {
+            background: rgba(249, 115, 22, 0.15); border: 1px solid var(--warning); border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #fff; display: none; align-items: center; justify-content: space-between;
+        }
+        .notif-text { display: flex; flex-direction: column; gap: 4px; }
+        .notif-item { display: flex; align-items: center; gap: 6px; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+        .tab-btn {
+            background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; white-space: nowrap; flex: 1; text-align: center;
+        }
+        .tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .kpi-card {
+            background: var(--bg-card); padding: 12px 14px; border-radius: 10px;
+            border: 1px solid var(--border); border-left: 4px solid var(--accent); position: relative;
+        }
+        .kpi-card.positive { border-left-color: var(--success); }
+        .kpi-card.negative { border-left-color: var(--danger); }
+        .kpi-title { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+        .kpi-value { font-size: 1.25rem; font-weight: 700; margin-top: 3px; }
+        .kpi-compare { font-size: 0.7rem; margin-top: 4px; padding: 2px 4px; border-radius: 4px; display: inline-block; }
+        .compare-up { background: rgba(239,68,68,0.2); color: #fca5a5; }
+        .compare-down { background: rgba(34,197,94,0.2); color: #86efac; }
+
+        /* Main Grid */
+        .main-grid { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 16px; align-items: start; }
+        @media (max-width: 960px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+        }
+        .panel-header {
+            background: #0f172a; color: var(--accent); padding: 10px 14px;
+            font-weight: 700; font-size: 0.9rem; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+        th { background: rgba(250, 204, 21, 0.1); color: var(--accent); font-size: 0.75rem; text-transform: uppercase; }
+        td input {
+            width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid transparent;
+            padding: 5px 7px; border-radius: 6px; color: var(--text-main); font-size: 0.88rem;
+        }
+        td input:hover, td input:focus { border-color: var(--accent); background: var(--bg-input); }
+        .val-col { width: 125px; text-align: right; }
+        .val-col input { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .action-col { width: 36px; text-align: center; }
+        .total-row td { background: rgba(250, 204, 21, 0.12); font-weight: 700; color: var(--accent); }
+        .subcat-label {
+            background: rgba(148, 163, 184, 0.08); color: var(--text-muted);
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 6px 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.82rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer; position: relative; user-select: none; transition: transform 0.1s, opacity 0.2s;
+        }
+        .badge:hover { opacity: 0.9; transform: scale(1.02); }
+        .badge-color-picker {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+        }
+
+        /* Chart */
+        .chart-box { padding: 16px; }
+        .bar-group { margin-bottom: 12px; }
+        .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; font-weight: 600; }
+        .bar-track { width: 100%; height: 12px; background: var(--bg-input); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+        .bar-fill { height: 100%; border-radius: 99px; transition: width 0.3s ease; }
+
+        /* Cards */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .bank-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 14px; position: relative; overflow: hidden;
+        }
+        .bank-card-strip { position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
+        .bank-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .bank-total { font-size: 1.3rem; font-weight: 700; margin: 6px 0; }
+        .bank-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .alert-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 5px var(--danger); animation: pulse 2s infinite;}
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .form-row { display: grid; grid-template-columns: 130px 150px 1fr 100px 130px auto; gap: 8px; padding: 12px; align-items: center; }
+        @media (max-width: 800px) { .form-row { grid-template-columns: 1fr 1fr; } }
+        .future-form-row { display: grid; grid-template-columns: 1fr 140px 140px 140px auto; gap: 8px; padding: 14px; align-items: center; }
+        @media (max-width: 800px) { .future-form-row { grid-template-columns: 1fr 1fr; } }
+        .prio-alta { color: #f87171; font-weight: 700; }
+        .prio-media { color: #facc15; font-weight: 600; }
+        .prio-baixa { color: #38bdf8; }
+
+        /* Modal Chat Gemini */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            width: 100%; max-width: 700px; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .modal-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.5; }
+        .chat-user { background: var(--accent); color: #0f172a; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-ai { background: var(--bg-input); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-ai ul, .chat-ai ol { margin-left: 20px; margin-top: 5px; }
+        .modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--bg-card); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;}
+        .modal-footer input[type="text"] { flex: 1; padding: 10px; border-radius: 20px; }
+        .modal-footer button { border-radius: 20px; padding: 0 20px; }
+        
+        .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 40% { color: inherit; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 60% { text-shadow: .25em 0 0 inherit, .5em 0 0 rgba(0,0,0,0);} 80%, 100% { text-shadow: .25em 0 0 inherit, .5em 0 0 inherit;} }
+
+        /* API Key Banner inside chat */
+        .api-setup { background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="title-area">
+            <h1>CONTROLE FINANCEIRO & CARTÕES</h1>
+            <p>Multiperfil • Comparações Mensais • Chatbot IA</p>
+        </div>
+        <div class="controls">
+            <!-- Novo Seletor de Perfis -->
+            <div class="profile-badge">
+                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:#c7d2fe; font-weight:bold; padding:0; outline:none; cursor:pointer;"></select>
+            </div>
+            <button class="btn-outline" style="border-color:var(--profile-color); color:#a855f7;" onclick="promptNewProfile()">+ Novo Perfil</button>
+            
+            <span style="color:var(--border);">|</span>
+            
+            <select id="monthSelect" onchange="changeMonth()"></select>
+            <button class="btn-ai" onclick="openChat()">✨ Chat com Consultor IA</button>
+            <button class="btn-outline" onclick="exportBackup()">Backup</button>
+            <button class="btn-outline" onclick="document.getElementById('importFile').click()">Importar</button>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
+        </div>
+    </header>
+
+    <div id="notificationBanner">
+        <div class="notif-text" id="notifList"></div>
+        <button class="btn-icon" style="color:var(--text-main);" onclick="document.getElementById('notificationBanner').style.display='none'">✖</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('visao', this)">1. Visão Mensal (Entradas x Saídas)</button>
+        <button class="tab-btn" onclick="switchTab('cartoes', this)">2. Cartões & Faturas</button>
+        <button class="tab-btn" onclick="switchTab('futuras', this)">3. Compras Futuras</button>
+        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">🔗 Conectar Open Finance</button>
+    </div>
+
+    <!-- KPI SUMMARY -->
+    <div class="kpi-grid">
+        <div class="kpi-card positive">
+            <div class="kpi-title">Total de Entradas</div>
+            <div class="kpi-value" id="kpiEntradas">R$ 0,00</div>
+            <div class="kpi-compare" id="kpiCompEntradas"></div>
+        </div>
+        <div class="kpi-card negative">
+            <div class="kpi-title">Total de Saídas</div>
+            <div class="kpi-value" id="kpiSaidas">R$ 0,00</div>
+            <div class="kpi-compare" id="kpiCompSaidas"></div>
+        </div>
+        <div class="kpi-card" id="kpiSaldoCard">
+            <div class="kpi-title">Vai Sobrar</div>
+            <div class="kpi-value" id="kpiSaldo">R$ 0,00</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Reserva Ideal (6x)</div>
+            <div class="kpi-value" id="kpiReserva">R$ 0,00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #38bdf8;">
+            <div class="kpi-title">Compras Futuras</div>
+            <div class="kpi-value" id="kpiFuturas" style="color:#38bdf8;">R$ 0,00</div>
+        </div>
+    </div>
+
+    <!-- TAB 1: VISÃO MENSAL -->
+    <div id="tab-visao" class="tab-content active">
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">RECEITAS (ENTRADAS)</div>
+                <table>
+                    <thead><tr><th>Descrição</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
+                    <tbody id="receitasBody"></tbody>
+                    <tbody><tr><td colspan="3" style="padding:8px;"><button class="btn-add" onclick="addRow('receitas')">+ Nova Receita</button></td></tr></tbody>
+                    <tfoot><tr class="total-row"><td>TOTAL DE ENTRADAS</td><td class="val-col" id="totalReceitasCell">R$ 0,00</td><td></td></tr></tfoot>
+                </table>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">DESPESAS (SAÍDAS)</div>
+                <table>
+                    <thead><tr><th>Descrição</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
+                    
+                    <tbody><tr><td colspan="3" class="subcat-label">Custo Essencial</td></tr></tbody>
+                    <tbody id="essenciaisBody"></tbody>
+                    <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
+
+                    <tbody><tr><td colspan="3" class="subcat-label"><span>Cartões & Faturas</span><button class="btn-outline" style="padding: 2px 6px; font-size: 0.72rem;" onclick="promptNewBank()">+ Novo Cartão</button></td></tr></tbody>
+                    <tbody id="cartoesResumoBody"></tbody>
+
+                    <tbody><tr><td colspan="3" class="subcat-label">Variáveis / Não Essenciais</td></tr></tbody>
+                    <tbody id="naoEssenciaisBody"></tbody>
+                    <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('naoEssenciais')">+ Despesa Variável</button></td></tr></tbody>
+
+                    <tfoot>
+                        <tr class="total-row"><td>TOTAL ESSENCIAIS</td><td class="val-col" id="totalEssenciaisCell">R$ 0,00</td><td></td></tr>
+                        <tr class="total-row"><td>TOTAL CARTÕES + VARIÁVEIS</td><td class="val-col" id="totalNaoEssenciaisCell">R$ 0,00</td><td></td></tr>
+                        <tr class="total-row" style="font-size:0.95rem;"><td>TOTAL GERAL DE DESPESAS</td><td class="val-col" id="totalGeralDespesasCell">R$ 0,00</td><td></td></tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">BALANÇO VISUAL</div>
+                <div class="chart-box">
+                    <div class="bar-group"><div class="bar-label"><span>Entradas</span><span id="barValEntradas">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillEntradas" style="width:0%; background:#22c55e;"></div></div></div>
+                    <div class="bar-group"><div class="bar-label"><span>Essenciais</span><span id="barValEssenciais">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillEssenciais" style="width:0%; background:#38bdf8;"></div></div></div>
+                    <div class="bar-group"><div class="bar-label"><span>Cartões + Variáveis</span><span id="barValNaoEssenciais">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillNaoEssenciais" style="width:0%; background:#facc15;"></div></div></div>
+                    <div class="bar-group"><div class="bar-label"><span>Total Geral Saídas</span><span id="barValSaidas">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillSaidas" style="width:0%; background:#ef4444;"></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: CARTÕES E CONTAS -->
+    <div id="tab-cartoes" class="tab-content">
+        <div class="panel-header" style="margin-bottom: 12px; border-radius: 8px;">
+            <span>PAINEL DE CARTÕES</span>
+            <button class="btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="promptNewBank()">+ Novo Cartão</button>
+        </div>
+        <div class="cards-grid" id="bankCardsContainer"></div>
+
+        <div class="panel">
+            <div class="panel-header">NOVO LANÇAMENTO</div>
+            <div class="form-row">
+                <input type="date" id="txDate">
+                <select id="txBank"></select>
+                <input type="text" id="txDesc" placeholder="Descrição (Ex: Tênis...)">
+                <input type="text" id="txParcela" placeholder="Parcela (Ex: 1/3)">
+                <input type="text" id="txVal" inputmode="numeric" placeholder="R$ 0,00" oninput="maskCurrencyInput(this)">
+                <button class="btn" onclick="addTransaction()">+ Lançar</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><span>LANÇAMENTOS DO MÊS</span><select id="filterBank" onchange="renderAll()" style="padding:3px 6px; font-size:0.8rem;"></select></div>
+            <table>
+                <thead><tr><th>Data</th><th>Cartão</th><th>Descrição</th><th>Parcela</th><th class="val-col">Valor</th><th style="width:60px; text-align:center;">Ação</th></tr></thead>
+                <tbody id="txTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 3: COMPRAS FUTURAS -->
+    <div id="tab-futuras" class="tab-content">
+        <div class="panel">
+            <div class="panel-header"><span>ADICIONAR COMPRA FUTURA</span></div>
+            <div class="future-form-row">
+                <input type="text" id="futureDesc" placeholder="O que planeja comprar?">
+                <input type="text" id="futureVal" inputmode="numeric" placeholder="Valor Estimado" oninput="maskCurrencyInput(this)">
+                <select id="futureBank"></select>
+                <select id="futurePriority"><option value="Alta">Prioridade Alta</option><option value="Média" selected>Prioridade Média</option><option value="Baixa">Prioridade Baixa</option></select>
+                <button class="btn" onclick="addFuturePurchase()">+ Adicionar</button>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><span>ITENS PLANEJADOS</span><span id="futureTotalBadge" style="font-size:0.85rem; color:var(--accent); font-weight:700;">Total: R$ 0,00</span></div>
+            <table>
+                <thead><tr><th>Status</th><th>Item / Descrição</th><th>Cartão</th><th>Prioridade</th><th class="val-col">Valor Estimado</th><th style="width:130px; text-align:center;">Ações</th></tr></thead>
+                <tbody id="futureTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 4: OPEN FINANCE -->
+    <div id="tab-openfinance" class="tab-content">
+        <div class="panel" style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+            <h2 style="color: #6366f1; margin-bottom: 10px;">🔗 Integração Open Finance</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Por ser uma aplicação 100% estática (segura, a correr no seu próprio navegador e sem servidor central), <strong>não é possível efetuar uma ligação OAuth direta e real aos bancos</strong>, pois o Banco Central exige que as aplicações recetoras sejam instituições regulamentadas com servidores autenticados.</p>
+            
+            <div style="background: var(--bg-input); padding: 20px; border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 10px; color: var(--accent);">Alternativa Segura: Importação de Extrato (CSV)</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Pode descarregar o extrato do seu banco em formato Excel/CSV e colar os dados aqui para classificar automaticamente.</p>
+                <button class="btn-outline" style="cursor:not-allowed; opacity:0.5;" title="Em desenvolvimento">Importar CSV Nubank / Itaú (Em breve)</button>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Esta é a única forma segura de garantir que os seus dados bancários não vão parar às mãos de terceiros.</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CHAT GEMINI -->
+<div class="modal-overlay" id="chatModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 style="color:var(--accent);">✨ Consultor Financeiro IA (Gemini)</h3>
+            <button class="btn-icon" onclick="closeChat()">✖</button>
+        </div>
+        <div class="chat-container" id="chatContainer">
+            <div class="api-setup" id="apiSetupBox">
+                <strong>Para começar, insira a sua chave Google Gemini API (gratuita):</strong>
+                <input type="password" id="chatApiKey" placeholder="AIzaSy..." style="width:100%; margin-top:8px; padding:8px; border-radius:6px; background:#0f172a; border:1px solid #6366f1; color:#fff;" onchange="saveApiKey(this.value)">
+            </div>
+            <div class="chat-bubble chat-ai">Olá! Eu sou o seu assistente financeiro. Como posso ajudar com o seu orçamento deste mês? (Pode pedir dicas, para analisar onde cortamos gastos, ou comparar com meses anteriores).</div>
+        </div>
+        <div class="modal-footer">
+            <input type="text" id="chatInput" placeholder="Pergunte algo sobre as suas finanças..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+            <button class="btn-ai" onclick="sendChatMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const MONTHS = [
+    "Agosto/2026", "Setembro/2026", "Outubro/2026", "Novembro/2026", "Dezembro/2026",
+    "Janeiro/2027", "Fevereiro/2027", "Março/2027",
+    "Abril/2027", "Maio/2027", "Junho/2027"
+];
+
+const DEFAULT_BANK_COLORS = { "Nubank": "#8a05be", "Itaú": "#ec7000", "Shopee": "#ee4d2d", "Mercado Pago": "#009ee3", "Neon": "#00e5ff", "Santander": "#ec0000" };
+let chatHistory = [];
+
+function getDefaultMonthData() {
+    let defaultData = {
+        receitas: [{ nome: "Salário Líquido", valor: 0 }, { nome: "Vale-Alimentação", valor: 0 }, { nome: "Renda Extra", valor: 0 }],
+        essenciais: [{ nome: "Moradia (Aluguel/Cond.)", valor: 0 }, { nome: "Água", valor: 0 }, { nome: "Energia Elétrica", valor: 0 }, { nome: "Supermercado", valor: 0 }],
+        naoEssenciais: [{ nome: "Assinaturas", valor: 0 }, { nome: "Lazer / Restaurantes", valor: 0 }],
+        cardStatus: {}, transactions: []
+    };
+    ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"].forEach(b => { defaultData.cardStatus[b] = { venc: "Dia 10", status: "Pendente", manualExtra: 0 }; });
+    return defaultData;
+}
+
+function sanitizeStore(rawData) {
+    if (!rawData) return null;
+    let data = rawData;
+    
+    // Migração para multi-perfil v8
+    if (!data.profiles) {
+        let migrated = {
+            version: 8,
+            config: data.config || { banks: ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"], bankColors: {}, geminiApiKey: "" },
+            profiles: {
+                "Meu Perfil": { futurePurchases: data.futurePurchases || [] },
+                "Esposa": { futurePurchases: [] },
+                "Casa": { futurePurchases: [] }
+            }
+        };
+        migrated.config.profilesList = ["Meu Perfil", "Esposa", "Casa"];
+        
+        // Move os meses da raiz para "Meu Perfil"
+        MONTHS.forEach(m => {
+            if (data[m]) migrated.profiles["Meu Perfil"][m] = data[m];
+        });
+        data = migrated;
+    }
+
+    if (!data.config) data.config = {};
+    if (!data.config.profilesList) data.config.profilesList = ["Meu Perfil", "Esposa", "Casa"];
+    if (!Array.isArray(data.config.banks) || data.config.banks.length === 0) data.config.banks = ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"];
+    if (!data.config.bankColors) data.config.bankColors = {};
+    data.config.banks.forEach(b => { if (!data.config.bankColors[b]) data.config.bankColors[b] = DEFAULT_BANK_COLORS[b] || "#64748b"; });
+
+    // Garante que cada perfil tem todos os meses e a estrutura interna correta
+    data.config.profilesList.forEach(prof => {
+        if (!data.profiles[prof]) data.profiles[prof] = { futurePurchases: [] };
+        if (!data.profiles[prof].futurePurchases) data.profiles[prof].futurePurchases = [];
+        
+        MONTHS.forEach(m => {
+            if (!data.profiles[prof][m] || typeof data.profiles[prof][m] !== "object") data.profiles[prof][m] = getDefaultMonthData();
+            let pData = data.profiles[prof][m];
+            if (!Array.isArray(pData.receitas)) pData.receitas = [];
+            if (!Array.isArray(pData.essenciais)) pData.essenciais = [];
+            if (!Array.isArray(pData.naoEssenciais)) pData.naoEssenciais = [];
+            if (!Array.isArray(pData.transactions)) pData.transactions = [];
+            if (!pData.cardStatus) pData.cardStatus = {};
+            data.config.banks.forEach(b => {
+                if (!pData.cardStatus[b]) pData.cardStatus[b] = { venc: "Dia 10", status: "Pendente", manualExtra: 0 };
+            });
+        });
+    });
+
+    return data;
+}
+
+let rawStore = JSON.parse(localStorage.getItem("controle_financeiro_2026_v8")) || 
+               JSON.parse(localStorage.getItem("controle_financeiro_2026_v7")) ||
+               JSON.parse(localStorage.getItem("controle_financeiro_2026_v6")) || 
+               JSON.parse(localStorage.getItem("controle_financeiro_2026_v5")) || {};
+let store = sanitizeStore(rawStore) || { 
+    version: 8, 
+    config: { profilesList: ["Meu Perfil", "Esposa", "Casa"], banks: ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"], bankColors: { ...DEFAULT_BANK_COLORS }, geminiApiKey: "" }, 
+    profiles: { "Meu Perfil": { futurePurchases: [] }, "Esposa": { futurePurchases: [] }, "Casa": { futurePurchases: [] } } 
+};
+store = sanitizeStore(store);
+
+function getBankColor(bank) { return store.config.bankColors[bank] || "#64748b"; }
+function createBankBadgeHTML(bank, showPicker = false) {
+    const col = getBankColor(bank);
+    if (!showPicker) return `<span class="badge" style="background:${col};">${bank}</span>`;
+    return `<label class="badge" style="background:${col};" title="Alterar cor">${bank} ✎ <input type="color" value="${col}" class="badge-color-picker" onchange="updateBankColor('${bank}', this.value)" onclick="event.stopPropagation()"></label>`;
+}
+function formatCentsToBRL(cents) { return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+function parseInputCurrency(valStr) {
+    const clean = String(valStr).replace(/[^0-9]/g, "");
+    return clean ? (parseInt(clean, 10) / 100) : 0;
+}
+function maskCurrencyInput(el) {
+    let clean = el.value.replace(/[^0-9]/g, "");
+    el.value = formatCentsToBRL(parseInt(clean || "0", 10));
+}
+
+let currentProfile = store.config.profilesList[0] || "Meu Perfil";
+let currentMonth = "Outubro/2026";
+let prevMonthStr = "Setembro/2026";
+
+function init() {
+    const pSel = document.getElementById("profileSelect");
+    pSel.innerHTML = "";
+    store.config.profilesList.forEach(p => {
+        const opt = document.createElement("option"); opt.value = p; opt.textContent = p;
+        if(p === currentProfile) opt.selected = true;
+        pSel.appendChild(opt);
+    });
+
+    const mSel = document.getElementById("monthSelect");
+    mSel.innerHTML = "";
+    MONTHS.forEach(m => {
+        const opt = document.createElement("option"); opt.value = m; opt.textContent = m;
+        if(m === currentMonth) opt.selected = true;
+        mSel.appendChild(opt);
+    });
+    
+    document.getElementById("txDate").valueAsDate = new Date();
+    document.getElementById("chatApiKey").value = store.config.geminiApiKey || "";
+    if (store.config.geminiApiKey) document.getElementById("apiSetupBox").style.display = 'none';
+    
+    saveStore();
+    updateBankSelects();
+    renderAll();
+    checkNotifications();
+}
+
+function saveStore() { localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store)); }
+
+function changeProfile() {
+    currentProfile = document.getElementById("profileSelect").value;
+    renderAll();
+    checkNotifications();
+}
+
+function promptNewProfile() {
+    const name = prompt("Nome do novo perfil (Ex: Empresa, Filhos):");
+    if (name && name.trim() && !store.config.profilesList.includes(name.trim())) {
+        const clean = name.trim();
+        store.config.profilesList.push(clean);
+        store = sanitizeStore(store); // Auto constrói a estrutura
+        currentProfile = clean;
+        init();
+    }
+}
+
+function changeMonth() {
+    currentMonth = document.getElementById("monthSelect").value;
+    const idx = MONTHS.indexOf(currentMonth);
+    prevMonthStr = idx > 0 ? MONTHS[idx-1] : null;
+    renderAll();
+    checkNotifications();
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    document.getElementById("tab-" + tabId).classList.add("active");
+    btn.classList.add("active");
+}
+function fmtBRL(v) { return (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+
+function getBankTotal(bank, month = currentMonth) {
+    const data = store.profiles[currentProfile][month];
+    if (!data) return 0;
+    const sumTx = data.transactions.filter(t => t.bank === bank).reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+    const manual = Number(data.cardStatus?.[bank]?.manualExtra) || 0;
+    return sumTx + manual;
+}
+
+function updateBankSelects() {
+    const txBank = document.getElementById("txBank"); const filterBank = document.getElementById("filterBank"); const futureBank = document.getElementById("futureBank");
+    txBank.innerHTML = ""; filterBank.innerHTML = '<option value="TODOS">Todos os Cartões</option>'; futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>';
+    store.config.banks.forEach(b => {
+        txBank.innerHTML += `<option value="${b}">${b}</option>`; filterBank.innerHTML += `<option value="${b}">${b}</option>`; futureBank.innerHTML += `<option value="${b}">${b}</option>`;
+    });
+}
+
+function promptNewBank() {
+    const name = prompt("Digite o nome do novo cartão ou banco:");
+    if (name && name.trim() && !store.config.banks.includes(name.trim())) {
+        const clean = name.trim();
+        store.config.banks.push(clean); store.config.bankColors[clean] = "#3b82f6";
+        store = sanitizeStore(store);
+        saveStore(); updateBankSelects(); renderAll();
+    }
+}
+function updateBankColor(bank, colorHex) { store.config.bankColors[bank] = colorHex; saveStore(); renderAll(); }
+function addRow(group) { store.profiles[currentProfile][currentMonth][group].push({ nome: "Nova Despesa", valor: 0 }); saveStore(); renderAll(); }
+function removeRow(group, index) { if (confirm("Remover este item?")) { store.profiles[currentProfile][currentMonth][group].splice(index, 1); saveStore(); renderAll(); } }
+
+function renderTableRows(group, containerId) {
+    const body = document.getElementById(containerId); body.innerHTML = "";
+    store.profiles[currentProfile][currentMonth][group].forEach((item, i) => {
+        body.innerHTML += `<tr><td><input type="text" value="${item.nome}" onchange="updateItem('${group}', ${i}, 'nome', this.value)"></td><td class="val-col"><input type="text" inputmode="numeric" value="${fmtBRL(item.valor)}" oninput="maskCurrencyInput(this)" onchange="updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))"></td><td class="action-col"><button class="btn-icon" onclick="removeRow('${group}', ${i})">✖</button></td></tr>`;
+    });
+}
+
+function addFuturePurchase() {
+    const desc = document.getElementById("futureDesc").value.trim(); const val = parseInputCurrency(document.getElementById("futureVal").value); const bank = document.getElementById("futureBank").value; const priority = document.getElementById("futurePriority").value;
+    if (!desc || val <= 0) return alert("Informe descrição e valor.");
+    store.profiles[currentProfile].futurePurchases.push({ id: Date.now(), desc, val, bank, priority, status: "Pendente" });
+    document.getElementById("futureDesc").value = ""; document.getElementById("futureVal").value = ""; saveStore(); renderAll();
+}
+function deleteFuturePurchase(id) { store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => f.id !== id); saveStore(); renderAll(); }
+function toggleFutureStatus(id) { const item = store.profiles[currentProfile].futurePurchases.find(f => f.id === id); if (item) { item.status = item.status === "Pendente" ? "Comprado" : "Pendente"; saveStore(); renderAll(); } }
+function moveFutureToCurrentMonth(id) {
+    const item = store.profiles[currentProfile].futurePurchases.find(f => f.id === id); if (!item) return;
+    if (confirm(`Lançar "${item.desc}" na fatura de ${currentMonth}?`)) {
+        const bankName = store.config.banks.includes(item.bank) ? item.bank : store.config.banks[0];
+        store.profiles[currentProfile][currentMonth].transactions.push({ id: Date.now(), date: new Date().toLocaleDateString("pt-BR"), bank: bankName, desc: item.desc, parcela: "À vista", val: item.val });
+        item.status = "Comprado"; saveStore(); renderAll();
+    }
+}
+function renderFuturePurchases() {
+    const tbody = document.getElementById("futureTableBody"); tbody.innerHTML = "";
+    const list = store.profiles[currentProfile].futurePurchases;
+    if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhuma compra futura cadastrada neste perfil.</td></tr>`; document.getElementById("futureTotalBadge").textContent = "Total: R$ 0,00"; return; }
+    let totFut = 0;
+    list.forEach(item => {
+        if (item.status === "Pendente") totFut += Number(item.val) || 0;
+        const prioCls = item.priority === "Alta" ? "prio-alta" : (item.priority === "Média" ? "prio-media" : "prio-baixa");
+        const isDone = item.status === "Comprado";
+        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td style="width:100px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? '✅ Comprado' : '⏳ Pendente'}</button></td><td style="font-weight:600;">${item.desc}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : item.bank}</td><td class="${prioCls}">${item.priority}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;"><button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="moveFutureToCurrentMonth(${item.id})">➔ Lançar</button> <button class="btn-danger" onclick="deleteFuturePurchase(${item.id})">✖</button></td></tr>`;
+    });
+    document.getElementById("futureTotalBadge").textContent = "Total Pendente: " + fmtBRL(totFut);
+}
+
+function calcMonthTotals(month) {
+    const data = store.profiles[currentProfile][month];
+    if(!data) return { rec:0, ess:0, cards:0, out:0, saidas:0, saldo:0 };
+    const rec = data.receitas.reduce((a, b) => a + (Number(b.valor) || 0), 0);
+    const ess = data.essenciais.reduce((a, b) => a + (Number(b.valor) || 0), 0);
+    const cards = store.config.banks.reduce((a, b) => a + getBankTotal(b, month), 0);
+    const out = data.naoEssenciais.reduce((a, b) => a + (Number(b.valor) || 0), 0);
+    const saidas = ess + cards + out;
+    return { rec, ess, cards, out, saidas, saldo: rec - saidas };
+}
+
+function renderCompareBadge(curr, prev, elemId, invert = false) {
+    const el = document.getElementById(elemId);
+    if (!prev || prev === 0) { el.style.display = 'none'; return; }
+    const diff = curr - prev;
+    if (diff === 0) { el.style.display = 'none'; return; }
+    
+    el.style.display = 'inline-block';
+    const pct = ((Math.abs(diff) / prev) * 100).toFixed(1) + "%";
+    
+    let isGood = diff > 0;
+    if (invert) isGood = diff < 0; 
+    
+    el.className = `kpi-compare ${isGood ? 'compare-down' : 'compare-up'}`;
+    el.textContent = `${diff > 0 ? '▲' : '▼'} ${pct} vs mês ant.`;
+}
+
+function renderAll() {
+    renderTableRows('receitas', 'receitasBody'); renderTableRows('essenciais', 'essenciaisBody'); renderTableRows('naoEssenciais', 'naoEssenciaisBody');
+    const data = store.profiles[currentProfile][currentMonth];
+    
+    const cardBody = document.getElementById("cartoesResumoBody"); cardBody.innerHTML = "";
+    store.config.banks.forEach(bank => { cardBody.innerHTML += `<tr><td colspan="2">${createBankBadgeHTML(bank, true)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(getBankTotal(bank))}</td></tr>`; });
+
+    const bankContainer = document.getElementById("bankCardsContainer"); bankContainer.innerHTML = "";
+    store.config.banks.forEach(bank => {
+        const info = data.cardStatus[bank] || { venc: "Dia 10", status: "Pendente", manualExtra: 0 };
+        bankContainer.innerHTML += `<div class="bank-card"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<select onchange="updateCardStatus('${bank}', 'status', this.value)" style="padding:2px 5px; font-size:0.75rem;"><option value="Pendente" ${info.status==='Pendente'?'selected':''}>Pendente</option><option value="Pago" ${info.status==='Pago'?'selected':''}>Pago ✅</option></select></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta"><span>Venc: <input type="text" value="${info.venc}" onchange="updateCardStatus('${bank}', 'venc', this.value)" style="width:50px; padding:2px; font-size:0.75rem;"></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" oninput="maskCurrencyInput(this)" onchange="updateCardStatus('${bank}', 'manualExtra', parseInputCurrency(this.value))" style="width:75px; padding:2px; font-size:0.75rem;"></span></div></div>`;
+    });
+
+    const txBody = document.getElementById("txTableBody"); const filter = document.getElementById("filterBank").value; txBody.innerHTML = "";
+    const list = data.transactions.filter(t => filter === "TODOS" || t.bank === filter);
+    if (list.length === 0) txBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px;">Sem lançamentos neste mês.</td></tr>`;
+    else list.forEach(t => { txBody.innerHTML += `<tr><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${t.desc}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx(${t.id})">✖</button></td></tr>`; });
+
+    renderFuturePurchases();
+    
+    // Updates
+    const curTot = calcMonthTotals(currentMonth);
+    let prevTot = null;
+    if (prevMonthStr) prevTot = calcMonthTotals(prevMonthStr);
+
+    document.getElementById("totalReceitasCell").textContent = fmtBRL(curTot.rec);
+    document.getElementById("totalEssenciaisCell").textContent = fmtBRL(curTot.ess);
+    document.getElementById("totalNaoEssenciaisCell").textContent = fmtBRL(curTot.cards + curTot.out);
+    document.getElementById("totalGeralDespesasCell").textContent = fmtBRL(curTot.saidas);
+
+    document.getElementById("kpiEntradas").textContent = fmtBRL(curTot.rec);
+    document.getElementById("kpiSaidas").textContent = fmtBRL(curTot.saidas);
+    document.getElementById("kpiSaldo").textContent = fmtBRL(curTot.saldo);
+    document.getElementById("kpiReserva").textContent = fmtBRL(curTot.ess * 6);
+    document.getElementById("kpiFuturas").textContent = fmtBRL(store.profiles[currentProfile].futurePurchases.filter(f => f.status === "Pendente").reduce((a, b) => a + (Number(b.val) || 0), 0));
+    document.getElementById("kpiSaldoCard").className = "kpi-card " + (curTot.saldo >= 0 ? "positive" : "negative");
+
+    // Gráficos
+    const maxVal = Math.max(curTot.rec, curTot.saidas, 1);
+    document.getElementById("barValEntradas").textContent = fmtBRL(curTot.rec); document.getElementById("barFillEntradas").style.width = Math.min(100, (curTot.rec / maxVal) * 100) + "%";
+    document.getElementById("barValEssenciais").textContent = fmtBRL(curTot.ess); document.getElementById("barFillEssenciais").style.width = Math.min(100, (curTot.ess / maxVal) * 100) + "%";
+    document.getElementById("barValNaoEssenciais").textContent = fmtBRL(curTot.cards + curTot.out); document.getElementById("barFillNaoEssenciais").style.width = Math.min(100, ((curTot.cards + curTot.out) / maxVal) * 100) + "%";
+    document.getElementById("barValSaidas").textContent = fmtBRL(curTot.saidas); document.getElementById("barFillSaidas").style.width = Math.min(100, (curTot.saidas / maxVal) * 100) + "%";
+
+    // Comparações
+    if (prevTot) {
+        renderCompareBadge(curTot.rec, prevTot.rec, "kpiCompEntradas", false);
+        renderCompareBadge(curTot.saidas, prevTot.saidas, "kpiCompSaidas", true);
+    } else {
+        document.getElementById("kpiCompEntradas").style.display = 'none';
+        document.getElementById("kpiCompSaidas").style.display = 'none';
+    }
+}
+
+function checkNotifications() {
+    const data = store.profiles[currentProfile][currentMonth];
+    let alerts = [];
+    
+    // Alerta de faturas pendentes
+    let pendentes = [];
+    store.config.banks.forEach(b => {
+        if(data.cardStatus[b]?.status === "Pendente" && getBankTotal(b) > 0) {
+            pendentes.push(`${b} (Venc: ${data.cardStatus[b].venc})`);
+        }
+    });
+    
+    if (pendentes.length > 0) {
+        alerts.push(`💳 <strong>Faturas Pendentes (${currentProfile}):</strong> Lembre-se de pagar: ${pendentes.join(", ")}`);
+    }
+
+    // Alerta de limite ultrapassado (Comparação)
+    if (prevMonthStr) {
+        const curTot = calcMonthTotals(currentMonth);
+        const prevTot = calcMonthTotals(prevMonthStr);
+        if (prevTot.saidas > 0 && curTot.saidas > prevTot.saidas) {
+            const diff = curTot.saidas - prevTot.saidas;
+            alerts.push(`⚠️ <strong>Alerta de Gastos (${currentProfile}):</strong> Até o momento gastou <strong>${fmtBRL(diff)} a mais</strong> que no mês anterior (${prevMonthStr}).`);
+        }
+    }
+
+    const notifBox = document.getElementById("notificationBanner");
+    const notifList = document.getElementById("notifList");
+    if (alerts.length > 0) {
+        notifList.innerHTML = alerts.map(a => `<div class="notif-item"><span class="alert-dot"></span> <span>${a}</span></div>`).join("");
+        notifBox.style.display = "flex";
+    } else {
+        notifBox.style.display = "none";
+    }
+}
+
+function updateItem(group, index, field, val) { store.profiles[currentProfile][currentMonth][group][index][field] = val; saveStore(); renderAll(); }
+function updateCardStatus(bank, field, val) { store.profiles[currentProfile][currentMonth].cardStatus[bank][field] = val; saveStore(); renderAll(); checkNotifications();}
+function addTransaction() {
+    const desc = document.getElementById("txDesc").value.trim(); const val = parseInputCurrency(document.getElementById("txVal").value);
+    if (!desc || val <= 0) return alert("Preencha descrição e valor.");
+    store.profiles[currentProfile][currentMonth].transactions.push({ id: Date.now(), date: document.getElementById("txDate").value.split("-").reverse().join("/"), bank: document.getElementById("txBank").value, desc, parcela: document.getElementById("txParcela").value.trim() || "À vista", val });
+    document.getElementById("txDesc").value = ""; document.getElementById("txParcela").value = ""; document.getElementById("txVal").value = ""; saveStore(); renderAll(); checkNotifications();
+}
+function deleteTx(id) { store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => t.id !== id); saveStore(); renderAll(); checkNotifications();}
+
+function exportBackup() {
+    const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "backup_financeiro_multi_perfil.json"; a.click();
+}
+function importBackup(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try { store = sanitizeStore(JSON.parse(evt.target.result)); saveStore(); init(); alert("Restaurado com sucesso!"); } 
+        catch (err) { alert("Erro ao processar backup."); }
+    };
+    reader.readAsText(file); e.target.value = "";
+}
+
+// -----------------------------------------------------
+// IA GEMINI - CHAT INTERATIVO (Fix 1.5 Stable)
+// -----------------------------------------------------
+function openChat() { document.getElementById("chatModal").style.display = "flex"; }
+function closeChat() { document.getElementById("chatModal").style.display = "none"; }
+function saveApiKey(key) { 
+    store.config.geminiApiKey = key.trim(); 
+    saveStore(); 
+    if(key.trim()) document.getElementById("apiSetupBox").style.display = 'none';
+}
+
+function appendMessage(sender, text) {
+    const chatContainer = document.getElementById("chatContainer");
+    const div = document.createElement("div");
+    div.className = `chat-bubble ${sender === 'user' ? 'chat-user' : 'chat-ai'}`;
+    
+    let htmlText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    htmlText = htmlText.replace(/
+/g, '<br>');
+    
+    div.innerHTML = htmlText;
+    chatContainer.appendChild(div);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+async function sendChatMessage() {
+    const inputEl = document.getElementById("chatInput");
+    const text = inputEl.value.trim();
+    const apiKey = store.config.geminiApiKey;
+
+    if (!apiKey) { alert("Por favor, cole a sua API Key do Gemini no aviso acima."); return; }
+    if (!text) return;
+
+    appendMessage('user', text);
+    inputEl.value = "";
+    
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "chat-bubble chat-ai loading-dots";
+    loadingDiv.textContent = "A pensar";
+    document.getElementById("chatContainer").appendChild(loadingDiv);
+
+    // Preparar contexto completo do PERFIL ATUAL
+    const curTot = calcMonthTotals(currentMonth);
+    const prevTot = prevMonthStr ? calcMonthTotals(prevMonthStr) : null;
+    let contexto = `PERFIL ATUAL: ${currentProfile}
+CONTEXTO FINANCEIRO:
+Mês Atual (${currentMonth}):
+- Entradas: R$ ${curTot.rec.toFixed(2)}
+- Despesas Essenciais: R$ ${curTot.ess.toFixed(2)}
+- Cartões: R$ ${curTot.cards.toFixed(2)} (Bancos: ${store.config.banks.map(b => `${b} R$ ${getBankTotal(b).toFixed(2)}`).join(", ")})
+- Outras Variáveis: R$ ${curTot.out.toFixed(2)}
+- Sobra: R$ ${curTot.saldo.toFixed(2)}
+
+`;
+    
+    if (prevTot) {
+        contexto += `Mês Anterior (${prevMonthStr}):
+- Entradas: R$ ${prevTot.rec.toFixed(2)}
+- Gastos Totais: R$ ${prevTot.saidas.toFixed(2)}
+
+`;
+    }
+
+    chatHistory.push({ role: "user", parts: [{ text: contexto + "Pergunta do usuário: " + text }] });
+
+    try {
+        const ep = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+        const response = await fetch(`${ep}?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: "Você é um consultor financeiro pessoal direto e amigável. Analise os dados que o usuário enviou e responda à pergunta dele. Seja objetivo, fale em português do Brasil de forma clara, use listas bullet-points se citar várias coisas, e ajude-o a economizar considerando o perfil atual dele. Não forneça introduções muito longas." }]},
+                contents: chatHistory
+            })
+        });
+
+        const json = await response.json();
+        loadingDiv.remove();
+
+        if (response.ok && json.candidates && json.candidates[0]?.content) {
+            const reply = json.candidates[0].content.parts[0].text;
+            chatHistory.push({ role: "model", parts: [{ text: reply }] });
+            appendMessage('model', reply);
+        } else {
+            console.error("Erro da API:", json);
+            appendMessage('model', `⚠️ Erro da API: ${json.error?.message || "Ocorreu um erro ao comunicar com a inteligência artificial."}`);
+            chatHistory.pop();
+        }
+    } catch (err) {
+        loadingDiv.remove();
+        appendMessage('model', `⚠️ Erro de rede: ${err.message}. Verifique a sua conexão.`);
+        chatHistory.pop();
+    }
+}
+
+init();
+</script>
+</body>
+</html>
