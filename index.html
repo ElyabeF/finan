@@ -177,6 +177,33 @@
         .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
         @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 40% { color: inherit; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 60% { text-shadow: .25em 0 0 inherit, .5em 0 0 rgba(0,0,0,0);} 80%, 100% { text-shadow: .25em 0 0 inherit, .5em 0 0 inherit;} }
 
+        #toastBox { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: min(92vw, 440px); }
+        .toast { background: #1e293b; color: #e2e8f0; border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; white-space: pre-line; font-size: .85rem; display: flex; gap: 12px; justify-content: space-between; align-items: center; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+        .toast button { background: var(--accent); color: #0f172a; border: 0; border-radius: 6px; padding: 4px 10px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+        .toolbar-extra { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+        @media (max-width: 700px) {
+            table.m-cards thead { display: none; }
+            table.m-cards, table.m-cards tbody, table.m-cards tr, table.m-cards td { display: block; width: 100%; }
+            table.m-cards tr { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; padding: 6px 8px; }
+            table.m-cards td { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 3px 0; border: 0; text-align: right; }
+            table.m-cards td::before { content: attr(data-label); color: var(--text-muted); font-size: .72rem; text-align: left; }
+        }
+        @media print {
+            button, .tab-btn, select, .modal-overlay, #toastBox, .toolbar-extra, input[type=file] { display: none !important; }
+            body, .panel, .kpi-card, .chart-box { background: #fff !important; color: #000 !important; }
+        }
+
+        /* Status pago/pendente */
+        .status-pill { border: 0; border-radius: 999px; padding: 4px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: transform .1s; }
+        .status-pill:active { transform: scale(.95); }
+        .status-pill.paid { background: rgba(34,197,94,.18); color: #4ade80; }
+        .status-pill.pending { background: rgba(250,204,21,.18); color: #facc15; }
+        .bank-card.is-paid { opacity: .72; border-color: rgba(34,197,94,.45); }
+        .donut { width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 16px; display: grid; place-items: center; position: relative; }
+        .donut::before { content: ""; position: absolute; inset: 28px; background: var(--bg-card); border-radius: 50%; }
+        .donut span { position: relative; font-weight: 700; font-size: .8rem; text-align: center; }
+        .cat-sel { font-size: .72rem; padding: 2px 4px; max-width: 130px; }
+
         /* Categorias clicáveis */
         .cat-group { margin-bottom: 10px; border-radius: 8px; }
         .cat-head { cursor: pointer; padding: 6px 8px; border-radius: 8px; transition: background .15s; }
@@ -194,6 +221,7 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -424,6 +452,16 @@
             </div>
 
             <div class="panel">
+                <div class="panel-header">📅 PARCELAS JÁ COMPROMETIDAS NOS PRÓXIMOS MESES</div>
+                <div id="installmentsBody" style="padding:16px; overflow-x:auto;"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📈 EVOLUÇÃO MENSAL (ENTRADAS × SAÍDAS)</div>
+                <div id="evolutionChart" style="padding:16px; overflow-x:auto;"></div>
+            </div>
+
+            <div class="panel">
                 <div class="panel-header">📊 HISTÓRICO DE MESES ANTERIORES (COMPARAÇÃO)</div>
                 <div style="padding: 20px; overflow-x: auto;">
                     <table style="min-width: 600px;">
@@ -517,11 +555,12 @@
 </div>
 
 <script>
-const MONTHS = [
-    "Agosto/2026", "Setembro/2026", "Outubro/2026", "Novembro/2026", "Dezembro/2026",
-    "Janeiro/2027", "Fevereiro/2027", "Março/2027",
-    "Abril/2027", "Maio/2027", "Junho/2027"
-];
+const MONTHS = (() => {
+    const n = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const now = new Date();
+    const total = Math.max(11, (now.getFullYear() - 2026) * 12 + now.getMonth() - 7 + 13);
+    return Array.from({ length: total }, (_, i) => { const k = 7 + i; return `${n[k % 12]}/${2026 + Math.floor(k / 12)}`; });
+})();
 
 const DEFAULT_BANK_COLORS = { "Nubank": "#8a05be", "Itaú": "#ec7000", "Shopee": "#ee4d2d", "Mercado Pago": "#009ee3", "Neon": "#00e5ff", "Santander": "#ec0000" };
 let chatHistory = [];
@@ -750,8 +789,9 @@ function maskCurrencyInput(el) {
 }
 
 let currentProfile = store.config.profilesList[0] || "Meu Perfil";
-let currentMonth = "Outubro/2026";
-let prevMonthStr = "Setembro/2026";
+const _mn = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+let currentMonth = (() => { const d = new Date(); const k = `${_mn[d.getMonth()]}/${d.getFullYear()}`; return MONTHS.includes(k) ? k : MONTHS[0]; })();
+let prevMonthStr = MONTHS.indexOf(currentMonth) > 0 ? MONTHS[MONTHS.indexOf(currentMonth) - 1] : null;
 
 function init() {
     const pSel = document.getElementById("profileSelect");
@@ -785,59 +825,158 @@ function init() {
 
 let isSyncing = false;
 
-function saveStore() { 
-    localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store)); 
-    if (store.config.firebaseConfig && !isSyncing && firebase.apps.length > 0) {
+function cloudCopy() {
+    const c = JSON.parse(JSON.stringify(store));
+    if (c.config) { delete c.config.geminiApiKey; delete c.config.firebaseConfig; }   // segredos nunca saem deste aparelho
+    return c;
+}
+// -----------------------------------------------------
+// NUVEM: LOGIN (Firebase Auth) + CRIPTOGRAFIA NO NAVEGADOR (AES-GCM)
+// -----------------------------------------------------
+let cloudUser = null, cloudBlocked = false, fbListening = false, pushTimer = null;
+const ENC_SALT = "controle-financeiro-v1";
+let _ek = null, _ekPass = null;
+
+function b64(buf) {
+    const a = new Uint8Array(buf); let str = "";
+    for (let i = 0; i < a.length; i += 0x8000) str += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000));
+    return btoa(str);
+}
+function unb64(x) { return Uint8Array.from(atob(x), c => c.charCodeAt(0)); }
+
+async function getEncKey() {
+    const pass = localStorage.getItem("fin_enc_pass");
+    if (!pass) return null;
+    if (_ek && _ekPass === pass) return _ek;
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+    _ek = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: new TextEncoder().encode(ENC_SALT), iterations: 250000, hash: "SHA-256" },
+        base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    _ekPass = pass;
+    return _ek;
+}
+async function encodeCloud(obj) {
+    const key = await getEncKey();
+    if (!key) return obj;
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+    return { enc: 1, iv: b64(iv), data: b64(ct), updatedAt: Date.now() };
+}
+async function decodeCloud(raw) {
+    if (!raw || !raw.enc) return raw;
+    const key = await getEncKey();
+    if (!key) throw new Error("NEEDKEY");
+    try {
+        const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(raw.iv) }, key, unb64(raw.data));
+        return JSON.parse(new TextDecoder().decode(pt));
+    } catch (e) { throw new Error("BADKEY"); }
+}
+
+function saveStore() {
+    localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store));
+    pushCloud();
+}
+
+function pushCloud() {
+    if (!store.config.firebaseConfig || !cloudUser || cloudBlocked || typeof firebase === "undefined" || !firebase.apps.length) return;
+    clearTimeout(pushTimer);
+    const flush = async () => {
+        if (isSyncing) { pushTimer = setTimeout(flush, 800); return; }   // espera o eco anterior terminar
         try {
             isSyncing = true;
-            firebase.database().ref('financeStore').set(store).then(() => {
-                setTimeout(() => isSyncing = false, 800);
-            }).catch(e => {
-                console.error("Firebase save erro", e);
-                isSyncing = false;
-            });
-        } catch(e) { 
-            console.error("Firebase call erro", e); 
-            isSyncing = false; 
+            const payload = await encodeCloud(cloudCopy());
+            await firebase.database().ref('financeStore').set(payload);
+        } catch (e) {
+            console.error("Firebase save erro", e);
+            toast("⚠️ Falha ao sincronizar com a nuvem: " + (e.message || e));
+        } finally { setTimeout(() => isSyncing = false, 800); }
+    };
+    pushTimer = setTimeout(flush, 600);
+}
+
+function attachCloud() {
+    const ref = firebase.database().ref('financeStore');
+    ref.off('value');
+    ref.on('value', async (snapshot) => {
+        const raw = snapshot.val();
+        if (!raw) { cloudBlocked = false; pushCloud(); return; }   // nuvem vazia: envia os dados locais
+        if (isSyncing) return;
+        let data;
+        try { data = await decodeCloud(raw); cloudBlocked = false; }
+        catch (e) {
+            cloudBlocked = true;   // nunca sobrescreve a nuvem sem conseguir ler
+            showCloudLogin(e.message === "BADKEY" ? "Senha de criptografia incorreta." : "Os dados da nuvem estão criptografados. Informe a senha de criptografia.");
+            return;
         }
-    }
+        isSyncing = true;
+        const localFbConfig = store.config.firebaseConfig;
+        const localGeminiKey = store.config.geminiApiKey;
+        store = sanitizeStore(data);
+        if (!store.config.firebaseConfig) store.config.firebaseConfig = localFbConfig;
+        if (!store.config.geminiApiKey && localGeminiKey) store.config.geminiApiKey = localGeminiKey;
+        localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store));
+        renderAll(); checkNotifications(); updateBankSelects();
+        if (typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
+        setTimeout(() => isSyncing = false, 800);
+        // nuvem ainda em texto puro e há senha neste aparelho: criptografa agora
+        if (!raw.enc && localStorage.getItem("fin_enc_pass")) pushCloud();
+    });
 }
 
 function initFirebase() {
     const configStr = store.config.firebaseConfig;
-    if (!configStr) return;
+    if (!configStr || fbListening) return;
     try {
         const config = JSON.parse(configStr);
-        if (!firebase.apps.length) {
-            firebase.initializeApp(config);
-        }
-        const db = firebase.database();
-        db.ref('financeStore').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && !isSyncing) {
-                isSyncing = true;
-                const localFbConfig = store.config.firebaseConfig;
-                const localGeminiKey = store.config.geminiApiKey;
-                
-                store = sanitizeStore(data);
-                
-                // Manter as chaves de API que estavam na máquina local se o Firebase sobrepôs com vazio
-                if (!store.config.firebaseConfig) store.config.firebaseConfig = localFbConfig;
-                if (!store.config.geminiApiKey && localGeminiKey) store.config.geminiApiKey = localGeminiKey;
-                
-                localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store));
-                
-                renderAll();
-                checkNotifications();
-                updateBankSelects();
-                if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
-                
-                setTimeout(() => isSyncing = false, 800);
-            }
+        if (!firebase.apps.length) firebase.initializeApp(config);
+        fbListening = true;
+        firebase.auth().onAuthStateChanged(user => {
+            cloudUser = user;
+            if (user) { const l = document.getElementById("cloudLogin"); if (l && !cloudBlocked) l.remove(); attachCloud(); }
+            else { try { firebase.database().ref('financeStore').off('value'); } catch (e) {} showCloudLogin(); }
         });
-    } catch (e) {
-        console.error("Erro ao iniciar Firebase:", e);
+    } catch (e) { console.error("Erro ao iniciar Firebase:", e); }
+}
+
+function showCloudLogin(msg) {
+    const old = document.getElementById("cloudLogin"); if (old) old.remove();
+    const o = document.createElement("div"); o.id = "cloudLogin";
+    o.style.cssText = "position:fixed;inset:0;z-index:2500;background:rgba(15,23,42,.94);display:flex;align-items:center;justify-content:center;padding:16px";
+    const inp = "width:100%;padding:10px;border-radius:8px;margin-top:4px;background:#0f172a;border:1px solid #334155;color:#e2e8f0";
+    o.innerHTML = `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:400px;color:#e2e8f0;display:flex;flex-direction:column;gap:12px">
+        <h3>☁️ Entrar na nuvem</h3>
+        <div id="cloudMsg" style="color:#fbbf24;font-size:.85rem;min-height:1em">${esc(msg || "")}</div>
+        <label style="font-size:.8rem">E-mail<input id="cloudEmail" type="email" autocomplete="username" style="${inp}" value="${esc(localStorage.getItem("fin_email") || "")}"></label>
+        <label style="font-size:.8rem">Senha da conta<input id="cloudPass" type="password" autocomplete="current-password" style="${inp}"></label>
+        <label style="font-size:.8rem">Senha de criptografia (opcional, igual nos dois aparelhos)<input id="cloudEnc" type="password" autocomplete="off" style="${inp}" value="${esc(localStorage.getItem("fin_enc_pass") || "")}"></label>
+        <div style="font-size:.72rem;color:#94a3b8">Com senha de criptografia, os dados vão para o Firebase ilegíveis. Se você a esquecer, os dados da nuvem não podem ser recuperados.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-outline" onclick="document.getElementById('cloudLogin').remove()">Usar só local</button><button class="btn" onclick="doCloudLogin()">Entrar</button></div></div>`;
+    document.body.appendChild(o);
+    o.querySelector("#cloudPass").addEventListener("keydown", e => { if (e.key === "Enter") doCloudLogin(); });
+}
+
+async function doCloudLogin() {
+    const email = document.getElementById("cloudEmail").value.trim();
+    const pass = document.getElementById("cloudPass").value;
+    const enc = document.getElementById("cloudEnc").value;
+    const msgEl = document.getElementById("cloudMsg");
+    if (enc) localStorage.setItem("fin_enc_pass", enc); else localStorage.removeItem("fin_enc_pass");
+    _ek = null; localStorage.setItem("fin_email", email);
+    try {
+        if (firebase.auth().currentUser) { cloudBlocked = false; document.getElementById("cloudLogin").remove(); attachCloud(); return; }
+        await firebase.auth().signInWithEmailAndPassword(email, pass);
+        cloudBlocked = false;
+        const l = document.getElementById("cloudLogin"); if (l) l.remove();
+        toast("☁️ Conectado como " + email);
+    } catch (err) {
+        const map = { "auth/invalid-credential": "E-mail ou senha incorretos.", "auth/wrong-password": "E-mail ou senha incorretos.", "auth/user-not-found": "Usuário não encontrado.", "auth/too-many-requests": "Muitas tentativas. Aguarde um pouco.", "auth/network-request-failed": "Sem conexão.", "auth/operation-not-allowed": "Ative E-mail/senha em Authentication no console." };
+        msgEl.textContent = map[err.code] || err.message;
     }
+}
+
+function cloudAccount() {
+    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro (botão ☁️ do topo).");
+    if (cloudUser) { if (confirm(`Conectado como ${cloudUser.email}.\nSair da nuvem? (os dados locais continuam)`)) firebase.auth().signOut(); }
+    else showCloudLogin();
 }
 
 function openFirebaseModal() {
@@ -967,12 +1106,28 @@ function parseMoney(raw) {
     return neg ? -n : n;
 }
 
+const CATEGORY_LIST = ["🚗 Transp/Combust.", "🍔 Alimentação/Lazer", "🛒 Supermercado", "📺 Assinaturas", "💊 Saúde", "🐾 Pet", "🛍️ Compras"];
+function merchantKey(desc) {
+    return normText(String(desc || "").replace(/^\[.*?\]\s*/, "")).replace(/\s*-?\s*(PARCELA\s*)?\d+\/\d+\s*$/, "").slice(0, 24);
+}
+function recategorizeTx(id, cat) {
+    const month = store.profiles[currentProfile][currentMonth];
+    const t = month.transactions.find(x => String(x.id) === String(id));
+    if (!t) return;
+    const key = merchantKey(t.desc);
+    const prof = store.profiles[currentProfile];
+    if (!prof.catRules) prof.catRules = {};
+    if (cat) prof.catRules[key] = cat; else delete prof.catRules[key];
+    month.transactions.forEach(x => { if (merchantKey(x.desc) === key) x.desc = (cat ? `[${cat}] ` : "") + stripCatTag(x.desc); });
+    saveStore(); renderAll();
+}
 function categorizeDesc(upDesc) {
     const has = (...k) => k.some(x => upDesc.includes(x));
     if (has("UBER", "POSTO", "GASOLINA", "COMBUSTIVEL", "SHELL", "IPIRANGA") || /\b99\b/.test(upDesc) || /\b99\s?(POP|TAXI|FOOD)/.test(upDesc)) return "🚗 Transp/Combust.";
     if (has("IFOOD", "MCDONALD", "BURGER", "PIZZA", "RESTAURANTE", "LANCHONETE", "PADARIA", "SORVETE")) return "🍔 Alimentação/Lazer";
     if (has("MERCADO", "SUPERMERC", "ATACADAO", "ASSAI", "CARREFOUR", "COMPER", "BRETAS", "EXTRA", "PAO DE ACUCAR")) return "🛒 Supermercado";
     if (has("NETFLIX", "AMAZON PRIME", "SPOTIFY", "HBO", "DISNEY", "YOUTUBE", "APPLE.COM", "GOOGLE ONE", "DEEZER")) return "📺 Assinaturas";
+    if (has("PET LOVE", "PETLOVE", "PETSHOP", "PET CAO")) return "🐾 Pet";
     if (has("FARMACIA", "DROGASIL", "PAGUE MENOS", "RAIA", "DROGARIA")) return "💊 Saúde";
     return "";
 }
@@ -1120,6 +1275,13 @@ function runCSVImport(text, fileName) {
         return;
     }
 
+    const preTotal = items.reduce((a, i) => a + i.val, 0);
+    const dup = (store.profiles[currentProfile].importedBatches || []).find(b => b.bank === bankName && b.count === items.length && Math.abs(b.totalVal - preTotal) < 0.01);
+    let pv = `📄 PRÉ-VISUALIZAÇÃO (${bankName})\n${items.length} compras • Total líquido ${fmtBRL(preTotal)}\n↩️ ${items.filter(i => i.val < 0).length} reembolso(s) subtraído(s)\n🚫 ${ignored.length} linha(s) ignorada(s)`;
+    ignored.slice(0, 6).forEach(x => { pv += `\n   • ${x.desc.slice(0, 40)} (${fmtBRL(x.val)})`; });
+    if (dup && !replaceOption) pv += `\n\n⚠️ ATENÇÃO: este extrato parece JÁ ter sido importado (${dup.fileName}). Importar de novo vai duplicar os valores.`;
+    if (!confirm(pv + "\n\nConfirmar importação?")) return;
+
     // Mês de destino de cada item
     const destOf = (it) => {
         if (destMode === "selected") return currentMonth;
@@ -1142,9 +1304,9 @@ function runCSVImport(text, fileName) {
     let batchTotal = 0, credits = 0;
     items.forEach(it => {
         let desc = it.desc;
-        const category = categorizeDesc(it.upDesc);
+        const category = (store.profiles[currentProfile].catRules || {})[merchantKey(it.desc)] || categorizeDesc(it.upDesc);
         if (category) desc = `[${category}] ${desc}`;
-        const pm = it.desc.match(/parcela\s+(\d+)\s*\/\s*(\d+)/i);
+        const pm = it.desc.match(/(?:parcela\s+|-\s*)(\d{1,2})\s*\/\s*(\d{1,2})\s*$/i);
         store.profiles[currentProfile][destOf(it)].transactions.push({
             id: String(Date.now()) + "_" + Math.floor(Math.random() * 1000000),
             date: `${it.dateObj.d}/${it.dateObj.m}/${it.dateObj.y}`,
@@ -1316,7 +1478,7 @@ function buildCategoryData(month) {
     };
     if (!data) return [];
     data.transactions.forEach(t => add(getTxCategory(t), {
-        date: t.date || "-", bank: t.bank, desc: stripCatTag(t.desc), parcela: t.parcela, val: Number(t.val) || 0
+        id: t.id, tag: (String(t.desc || '').match(/^\[(.*?)\]/) || [])[1] || '', date: t.date || "-", bank: t.bank, desc: stripCatTag(t.desc), parcela: t.parcela, val: Number(t.val) || 0
     }));
     store.config.banks.forEach(b => {
         const extra = Number(data.cardStatus?.[b]?.manualExtra) || 0;
@@ -1325,6 +1487,28 @@ function buildCategoryData(month) {
     data.essenciais.forEach(e => { if (Number(e.valor) > 0) add("🏠 Fixo: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
     data.naoEssenciais.forEach(e => { if (Number(e.valor) > 0) add("💸 Variável: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
     return Object.values(cats);
+}
+
+function renderInstallments() {
+    const el = document.getElementById("installmentsBody");
+    if (!el) return;
+    const idx = MONTHS.indexOf(currentMonth);
+    const byMonth = {};
+    store.profiles[currentProfile][currentMonth].transactions.forEach(t => {
+        const m = String(t.parcela || "").match(/^(\d+)\/(\d+)$/);
+        if (!m) return;
+        const n = +m[1], tot = +m[2], v = Number(t.val) || 0;
+        for (let k = 1; k <= tot - n; k++) {
+            const label = MONTHS[idx + k];
+            if (!label) break;
+            if (!byMonth[label]) byMonth[label] = { val: 0, count: 0 };
+            byMonth[label].val += v; byMonth[label].count++;
+        }
+    });
+    const keys = Object.keys(byMonth);
+    el.innerHTML = keys.length
+        ? `<table style="min-width:360px;"><thead><tr><th>Mês</th><th>Parcelas</th><th class="val-col">Já comprometido</th></tr></thead><tbody>${keys.map(k => `<tr><td>${k}</td><td>${byMonth[k].count}</td><td class="val-col" style="font-weight:600;">${fmtBRL(byMonth[k].val)}</td></tr>`).join("")}</tbody></table><p class="cat-hint" style="margin-top:8px;">Baseado nas parcelas (ex.: 3/12) das compras de ${currentMonth}. Parcelas novas de compras futuras ainda não entram.</p>`
+        : `<p style="color:var(--text-muted);">Nenhuma parcela em aberto encontrada neste mês.</p>`;
 }
 
 function toggleCategory(idx) {
@@ -1350,9 +1534,15 @@ function renderCategoryReport() {
     const colors = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
     let html = `<div class="cat-hint">👆 Clique em uma categoria para ver as compras dela.</div>`;
 
+    let acc = 0;
+    const stops = sorted.map((c, i) => { const a = acc; acc += (c.val / totalVal) * 100; return `${colors[i % colors.length]} ${a.toFixed(2)}% ${acc.toFixed(2)}%`; });
+    html += `<div class="donut" style="background:conic-gradient(${stops.join(",")})"><span>${fmtBRL(totalVal)}</span></div>`;
+
     sorted.forEach((cat, idx) => {
         const pct = ((cat.val / totalVal) * 100).toFixed(1);
         const color = colors[idx % colors.length];
+        const goal = Number((store.profiles[currentProfile].goals || {})[cat.name]) || 0;
+        const over = goal > 0 && cat.val > goal;
         const isOpen = openCategories.has(cat.name);
         const items = cat.items.slice().sort((a, b) => b.val - a.val);
 
@@ -1361,6 +1551,7 @@ function renderCategoryReport() {
                 <td style="white-space:nowrap; color:var(--text-muted);">${esc(it.date)}</td>
                 <td>${it.bank ? createBankBadgeHTML(it.bank) : ""}</td>
                 <td>${esc(it.desc)}${it.parcela && it.parcela !== "Auto (CSV)" && it.parcela !== "À vista" ? ` <span style="color:var(--text-muted);">(${esc(it.parcela)})</span>` : ""}</td>
+                <td>${it.id ? `<select class="cat-sel" onchange="recategorizeTx('${it.id}', this.value)"><option value="">Outros</option>${CATEGORY_LIST.map(c => `<option value="${c}" ${c === it.tag ? "selected" : ""}>${c}</option>`).join("")}</select>` : ""}</td>
                 <td class="val-col" style="font-weight:600; ${it.val < 0 ? "color:#22c55e;" : ""}">${fmtBRL(it.val)}</td>
             </tr>`).join("");
 
@@ -1371,11 +1562,11 @@ function renderCategoryReport() {
                      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCategory(${idx});}">
                     <div class="bar-label" style="font-size:0.85rem;">
                         <span><span class="cat-arrow">▶</span> ${esc(cat.name)} <small style="color:var(--text-muted);">(${items.length} ${items.length === 1 ? "item" : "itens"})</small></span>
-                        <span style="color:${color};">${fmtBRL(cat.val)} (${pct}%)</span>
+                        <span style="color:${over ? '#ef4444' : color};">${over ? "⚠️ " : ""}${fmtBRL(cat.val)} (${pct}%)${goal ? ` / meta ${fmtBRL(goal)}` : ""}</span>
                     </div>
-                    <div class="bar-track" style="height:8px; background:rgba(255,255,255,0.05);"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
+                    <div class="bar-track" style="height:8px; background:rgba(255,255,255,0.05);"><div class="bar-fill" style="width:${pct}%; background:${over ? '#ef4444' : color};"></div></div>
                 </div>
-                <div class="cat-items"><table><tbody>${rows}</tbody></table></div>
+                <div class="cat-items"><div class="cat-hint">Meta mensal: <input type="text" inputmode="numeric" value="${fmtBRL(goal)}" oninput="maskCurrencyInput(this)" onchange="setGoal(${idx}, parseInputCurrency(this.value))" style="width:100px; padding:2px 4px;"> <span>(0 = sem meta)</span></div><table><tbody>${rows}</tbody></table></div>
             </div>`;
     });
 
@@ -1397,7 +1588,7 @@ function renderAll() {
     const bankContainer = document.getElementById("bankCardsContainer"); bankContainer.innerHTML = "";
     store.config.banks.forEach(bank => {
         const info = data.cardStatus[bank] || { venc: "Dia 10", status: "Pendente", manualExtra: 0 };
-        bankContainer.innerHTML += `<div class="bank-card"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<select onchange="updateCardStatus('${bank}', 'status', this.value)" style="padding:2px 5px; font-size:0.75rem;"><option value="Pendente" ${info.status==='Pendente'?'selected':''}>Pendente</option><option value="Pago" ${info.status==='Pago'?'selected':''}>Pago ✅</option></select></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta"><span>Venc: <input type="text" value="${info.venc}" onchange="updateCardStatus('${bank}', 'venc', this.value)" style="width:50px; padding:2px; font-size:0.75rem;"></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" oninput="maskCurrencyInput(this)" onchange="updateCardStatus('${bank}', 'manualExtra', parseInputCurrency(this.value))" style="width:75px; padding:2px; font-size:0.75rem;"></span></div></div>`;
+        bankContainer.innerHTML += `<div class="bank-card ${info.status==='Pago'?'is-paid':''}"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${info.status==='Pago'?'paid':'pending'}" onclick="updateCardStatus('${bank}','status','${info.status==='Pago'?'Pendente':'Pago'}')">${info.status==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta"><span>Venc: <input type="text" value="${info.venc}" onchange="updateCardStatus('${bank}', 'venc', this.value)" style="width:50px; padding:2px; font-size:0.75rem;"></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" oninput="maskCurrencyInput(this)" onchange="updateCardStatus('${bank}', 'manualExtra', parseInputCurrency(this.value))" style="width:75px; padding:2px; font-size:0.75rem;"></span></div></div>`;
     });
 
     const txBody = document.getElementById("txTableBody"); const filter = document.getElementById("filterBank").value; txBody.innerHTML = "";
@@ -1408,6 +1599,9 @@ function renderAll() {
     renderFuturePurchases();
     if(typeof renderHistoryTable === 'function') renderHistoryTable();
     if(typeof renderCategoryReport === 'function') renderCategoryReport();
+    renderInstallments();
+    renderEvolution();
+    labelTables();
     if(typeof renderImportedBatches === 'function') renderImportedBatches();
     
     // Updates
@@ -1710,6 +1904,141 @@ async function sendChatMessage() {
     if (sendBtn) { sendBtn.disabled = false; sendBtn.style.opacity = "1"; }
     inputEl.focus();
 }
+// -----------------------------------------------------
+// AVISOS (toast) + DESFAZER
+// -----------------------------------------------------
+function toast(msg, undoFn) {
+    let box = document.getElementById("toastBox");
+    if (!box) { box = document.createElement("div"); box.id = "toastBox"; document.body.appendChild(box); }
+    const t = document.createElement("div"); t.className = "toast";
+    const span = document.createElement("span"); span.textContent = msg; t.appendChild(span);
+    if (undoFn) {
+        const b = document.createElement("button"); b.textContent = "↩ Desfazer";
+        b.onclick = () => { undoFn(); t.remove(); }; t.appendChild(b);
+    }
+    box.appendChild(t);
+    setTimeout(() => t.remove(), undoFn ? 9000 : (msg.length > 120 ? 12000 : 4500));
+}
+window.alert = (m) => toast(String(m));
+
+// Qualquer exclusão em massa/individual passa a oferecer "Desfazer"
+["deleteBulkTx", "deleteBulkFut", "deleteTx", "deleteFuturePurchase", "clearCurrentMonthTransactions", "deleteImportedBatch", "copyFixedFromPrev"].forEach(name => {
+    const orig = window[name];
+    if (typeof orig !== "function") return;
+    window[name] = function (...args) {
+        const prof = currentProfile, snap = JSON.stringify(store.profiles[prof]);
+        const r = orig.apply(this, args);
+        if (JSON.stringify(store.profiles[prof]) !== snap) {
+            toast("Alteração feita.", () => { store.profiles[prof] = JSON.parse(snap); saveStore(); renderAll(); checkNotifications(); });
+        }
+        return r;
+    };
+});
+
+// -----------------------------------------------------
+// METAS, COPIAR FIXOS, EXPORTAR, TABELAS NO CELULAR
+// -----------------------------------------------------
+function setGoal(idx, val) {
+    const c = _catList[idx]; if (!c) return;
+    const prof = store.profiles[currentProfile];
+    if (!prof.goals) prof.goals = {};
+    if (val > 0) prof.goals[c.name] = val; else delete prof.goals[c.name];
+    saveStore(); renderAll();
+}
+
+function copyFixedFromPrev() {
+    if (!prevMonthStr) return alert("Não há mês anterior.");
+    if (!confirm(`Copiar entradas, despesas fixas/variáveis e valores fixos de cartão de ${prevMonthStr} para ${currentMonth}? Os valores atuais serão substituídos.`)) return;
+    const prev = store.profiles[currentProfile][prevMonthStr], cur = store.profiles[currentProfile][currentMonth];
+    ["receitas", "essenciais", "naoEssenciais"].forEach(g => { cur[g] = JSON.parse(JSON.stringify(prev[g])); });
+    store.config.banks.forEach(b => {
+        const pc = prev.cardStatus[b]; if (!pc) return;
+        cur.cardStatus[b] = { venc: pc.venc, status: "Pendente", manualExtra: pc.manualExtra || 0 };
+    });
+    saveStore(); renderAll(); checkNotifications();
+}
+
+function exportMonthCSV() {
+    const d = store.profiles[currentProfile][currentMonth];
+    const f = v => (Number(v) || 0).toFixed(2).replace(".", ",");
+    const rows = [["Tipo", "Categoria", "Descrição", "Cartão", "Data", "Valor"]];
+    d.receitas.forEach(r => rows.push(["Entrada", "", r.nome, "", "", f(r.valor)]));
+    d.essenciais.forEach(r => rows.push(["Essencial", "", r.nome, "", "", f(r.valor)]));
+    d.naoEssenciais.forEach(r => rows.push(["Variável", "", r.nome, "", "", f(r.valor)]));
+    d.transactions.forEach(t => rows.push(["Cartão", getTxCategory(t).replace(/[\[\]]/g, ""), stripCatTag(t.desc), t.bank, t.date || "", f(t.val)]));
+    const csv = "\uFEFF" + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = `financas_${currentProfile}_${currentMonth.replace("/", "-")}.csv`;
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+
+function labelTables() {
+    ["txTableBody", "installmentsBody"].forEach(id => {
+        const el = document.getElementById(id); if (!el) return;
+        const table = el.tagName === "TBODY" ? el.closest("table") : el.querySelector("table");
+        if (!table) return;
+        table.classList.add("m-cards");
+        const heads = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
+        table.querySelectorAll("tbody tr").forEach(tr => Array.from(tr.children).forEach((td, i) => td.setAttribute("data-label", heads[i] || "")));
+    });
+}
+
+function renderEvolution() {
+    const el = document.getElementById("evolutionChart"); if (!el) return;
+    const pts = MONTHS.map(m => ({ m, ...calcMonthTotals(m) })).filter(p => p.rec > 0 || p.saidas > 0);
+    if (pts.length < 2) { el.innerHTML = '<p style="color:var(--text-muted);">Preencha ao menos 2 meses para ver a evolução.</p>'; return; }
+    const W = 640, H = 230, pl = 62, pr = 12, pt = 14, pb = 30;
+    const max = Math.max(...pts.flatMap(p => [p.rec, p.saidas]), 1);
+    const x = i => pl + i * (W - pl - pr) / (pts.length - 1), y = v => pt + (H - pt - pb) * (1 - v / max);
+    const line = (k, c) => `<polyline fill="none" stroke="${c}" stroke-width="2.5" points="${pts.map((p, i) => x(i) + "," + y(p[k])).join(" ")}"/>` +
+        pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p[k])}" r="4" fill="${c}"><title>${p.m}: ${fmtBRL(p[k])}</title></circle>`).join("");
+    let grid = "";
+    for (let t = 0; t <= 4; t++) { const v = max * t / 4; grid += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="#334155" stroke-dasharray="3 3"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#94a3b8">${Math.round(v).toLocaleString("pt-BR")}</text>`; }
+    const labels = pts.map((p, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#94a3b8">${p.m.slice(0, 3)}/${p.m.slice(-2)}</text>`).join("");
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; min-width:420px; height:auto;">${grid}${labels}${line("rec", "#22c55e")}${line("saidas", "#ef4444")}</svg>
+        <div style="font-size:.8rem; color:var(--text-muted); text-align:center;"><span style="color:#22c55e;">● Entradas</span> &nbsp; <span style="color:#ef4444;">● Saídas</span></div>`;
+}
+
+// -----------------------------------------------------
+// PIN DE ACESSO (somente neste aparelho)
+// -----------------------------------------------------
+async function hashPin(p) {
+    try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("fin:" + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); }
+    catch (e) { return btoa("fin:" + p); }
+}
+async function configurePin() {
+    const p = prompt("Defina um PIN de 4+ dígitos para este aparelho.\nDeixe vazio para remover o PIN:");
+    if (p === null) return;
+    if (!p) { localStorage.removeItem("fin_pin_hash"); return toast("PIN removido."); }
+    if (p.length < 4) return toast("Use pelo menos 4 dígitos.");
+    localStorage.setItem("fin_pin_hash", await hashPin(p));
+    toast("PIN ativado neste aparelho.");
+}
+function showLock() {
+    const h = localStorage.getItem("fin_pin_hash"); if (!h) return;
+    const o = document.createElement("div"); o.id = "lockScreen";
+    o.style.cssText = "position:fixed;inset:0;z-index:3000;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#e2e8f0";
+    o.innerHTML = '<h2>🔒 Controle Financeiro</h2><input id="pinInput" type="password" inputmode="numeric" placeholder="PIN" autocomplete="off" style="text-align:center;font-size:1.2rem;padding:10px;border-radius:10px;width:170px"><div id="pinErr" style="color:#f87171;font-size:.85rem;min-height:1.2em"></div>';
+    document.body.appendChild(o);
+    const inp = o.querySelector("#pinInput"); inp.focus();
+    const check = async (showErr) => { if (await hashPin(inp.value) === h) o.remove(); else if (showErr) { o.querySelector("#pinErr").textContent = "PIN incorreto"; inp.value = ""; } };
+    inp.addEventListener("input", () => check(false));
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") check(true); });
+}
+
+function injectToolbar() {
+    const ms = document.getElementById("monthSelect"); if (!ms || document.getElementById("toolbarExtra")) return;
+    ms.insertAdjacentHTML("afterend", `<span class="toolbar-extra" id="toolbarExtra">
+        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="copyFixedFromPrev()" title="Copia entradas e despesas do mês anterior">📋 Copiar mês anterior</button>
+        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="exportMonthCSV()">⬇️ CSV</button>
+        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="window.print()" title="Na janela de impressão escolha Salvar como PDF">🖨️ PDF</button>
+        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="configurePin()">🔒 PIN</button>
+        <button class="btn-outline" style="padding:6px 10px; font-size:.78rem;" onclick="cloudAccount()">👤 Conta</button></span>`);
+}
+injectToolbar();
+showLock();
+
 init();
 </script>
 </body>
