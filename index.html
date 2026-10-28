@@ -180,6 +180,8 @@
         /* API Key Banner inside chat */
         .api-setup { background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -203,6 +205,7 @@
             <button class="btn-outline" onclick="exportBackup()">Backup</button>
             <button class="btn-outline" onclick="document.getElementById('importFile').click()">Importar</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
+            <button class="btn-outline" style="border-color:#38bdf8; color:#38bdf8;" onclick="openFirebaseModal()">☁️ Nuvem</button>
         </div>
     </header>
 
@@ -405,6 +408,24 @@
     </div>
 </div>
 
+
+<!-- MODAL FIREBASE -->
+<div class="modal-overlay" id="firebaseModal">
+    <div class="modal" style="max-width: 500px; height: auto;">
+        <div class="modal-header">
+            <h3 style="color:#38bdf8;">☁️ Sincronização em Nuvem (Firebase)</h3>
+            <button class="btn-icon" onclick="closeFirebaseModal()">✖</button>
+        </div>
+        <div style="padding: 20px;">
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Cole abaixo o objeto <b>firebaseConfig</b> do seu projeto (formato JSON) para ativar a sincronização em tempo real entre dispositivos.</p>
+            <textarea id="firebaseConfigInput" rows="6" style="width:100%; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:monospace;" placeholder='{"apiKey": "...", "authDomain": "...", "databaseURL": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}'></textarea>
+            <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+                <button class="btn" style="background:#38bdf8; color:#0f172a;" onclick="saveFirebaseConfig()">Conectar e Sincronizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL CHAT GEMINI -->
 <div class="modal-overlay" id="chatModal">
     <div class="modal">
@@ -602,6 +623,7 @@ function sanitizeStore(rawData) {
     if (!Array.isArray(data.config.banks) || data.config.banks.length === 0) data.config.banks = ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"];
     if (!data.config.bankColors) data.config.bankColors = {};
     data.config.banks.forEach(b => { if (!data.config.bankColors[b]) data.config.bankColors[b] = DEFAULT_BANK_COLORS[b] || "#64748b"; });
+    if (!data.config.profileColors) data.config.profileColors = {};
 
     // Garante que cada perfil tem todos os meses e a estrutura interna correta
     data.config.profilesList.forEach(prof => {
@@ -632,7 +654,7 @@ let rawStore = JSON.parse(localStorage.getItem("controle_financeiro_2026_v8")) |
                JSON.parse(localStorage.getItem("controle_financeiro_2026_v5")) || {};
 let store = sanitizeStore(rawStore) || { 
     version: 8, 
-    config: { profilesList: ["Meu Perfil", "Esposa", "Casa"], banks: ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"], bankColors: { ...DEFAULT_BANK_COLORS }, geminiApiKey: "" }, 
+    config: { profilesList: ["Meu Perfil", "Esposa", "Casa"], banks: ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"], bankColors: { ...DEFAULT_BANK_COLORS }, profileColors: {}, geminiApiKey: "" }, 
     profiles: { "Meu Perfil": { futurePurchases: [] }, "Esposa": { futurePurchases: [] }, "Casa": { futurePurchases: [] } } 
 };
 store = sanitizeStore(store);
@@ -681,11 +703,86 @@ function init() {
     saveStore();
     updateBankSelects();
     if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
+    initFirebase();
     renderAll();
     checkNotifications();
 }
 
-function saveStore() { localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store)); }
+
+let isSyncing = false;
+
+function saveStore() { 
+    localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store)); 
+    if (store.config.firebaseConfig && !isSyncing && firebase.apps.length > 0) {
+        try {
+            isSyncing = true;
+            firebase.database().ref('financeStore').set(store).then(() => {
+                setTimeout(() => isSyncing = false, 800);
+            }).catch(e => {
+                console.error("Firebase save erro", e);
+                isSyncing = false;
+            });
+        } catch(e) { 
+            console.error("Firebase call erro", e); 
+            isSyncing = false; 
+        }
+    }
+}
+
+function initFirebase() {
+    const configStr = store.config.firebaseConfig;
+    if (!configStr) return;
+    try {
+        const config = JSON.parse(configStr);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        const db = firebase.database();
+        db.ref('financeStore').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && !isSyncing) {
+                isSyncing = true;
+                const localFbConfig = store.config.firebaseConfig;
+                const localGeminiKey = store.config.geminiApiKey;
+                
+                store = sanitizeStore(data);
+                
+                // Manter as chaves de API que estavam na máquina local se o Firebase sobrepôs com vazio
+                if (!store.config.firebaseConfig) store.config.firebaseConfig = localFbConfig;
+                if (!store.config.geminiApiKey && localGeminiKey) store.config.geminiApiKey = localGeminiKey;
+                
+                localStorage.setItem("controle_financeiro_2026_v8", JSON.stringify(store));
+                
+                renderAll();
+                checkNotifications();
+                updateBankSelects();
+                if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
+                
+                setTimeout(() => isSyncing = false, 800);
+            }
+        });
+    } catch (e) {
+        console.error("Erro ao iniciar Firebase:", e);
+    }
+}
+
+function openFirebaseModal() {
+    document.getElementById('firebaseConfigInput').value = store.config.firebaseConfig || "";
+    document.getElementById('firebaseModal').style.display = 'flex';
+}
+function closeFirebaseModal() {
+    document.getElementById('firebaseModal').style.display = 'none';
+}
+function saveFirebaseConfig() {
+    const val = document.getElementById('firebaseConfigInput').value.trim();
+    if(val && !val.includes("apiKey")) return alert("Formato inválido. Precisa ser o JSON de configuração.");
+    store.config.firebaseConfig = val;
+    saveStore();
+    closeFirebaseModal();
+    alert("Configuração guardada! A página será recarregada para iniciar a sincronização.");
+    location.reload();
+}
+
 
 function changeProfile() {
     currentProfile = document.getElementById("profileSelect").value;
