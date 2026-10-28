@@ -214,7 +214,7 @@
         <button class="tab-btn active" onclick="switchTab('visao', this)">1. Visão Mensal (Entradas x Saídas)</button>
         <button class="tab-btn" onclick="switchTab('cartoes', this)">2. Cartões & Faturas</button>
         <button class="tab-btn" onclick="switchTab('futuras', this)">3. Compras Futuras</button>
-        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">🔗 Conectar Open Finance</button>
+        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">📊 Relatórios & Importação (CSV)</button>
     </div>
 
     <!-- KPI SUMMARY -->
@@ -342,18 +342,43 @@
         </div>
     </div>
 
-    <!-- TAB 4: OPEN FINANCE -->
+    <!-- TAB 4: RELATÓRIOS & CSV -->
     <div id="tab-openfinance" class="tab-content">
-        <div class="panel" style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
-            <h2 style="color: #6366f1; margin-bottom: 10px;">🔗 Integração Open Finance</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Por ser uma aplicação 100% estática (segura, a correr no seu próprio navegador e sem servidor central), <strong>não é possível efetuar uma ligação OAuth direta e real aos bancos</strong>, pois o Banco Central exige que as aplicações recetoras sejam instituições regulamentadas com servidores autenticados.</p>
+        <div class="main-grid" style="grid-template-columns: 1fr;">
             
-            <div style="background: var(--bg-input); padding: 20px; border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 20px;">
-                <h3 style="margin-bottom: 10px; color: var(--accent);">Alternativa Segura: Importação de Extrato (CSV)</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 15px;">Pode descarregar o extrato do seu banco em formato Excel/CSV e colar os dados aqui para classificar automaticamente.</p>
-                <button class="btn-outline" style="cursor:not-allowed; opacity:0.5;" title="Em desenvolvimento">Importar CSV Nubank / Itaú (Em breve)</button>
+            <div class="panel">
+                <div class="panel-header">📥 IMPORTAÇÃO INTELIGENTE DE EXTRATO (CSV)</div>
+                <div style="padding: 20px;">
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Selecione o cartão e o arquivo <b>.csv</b> do seu banco (ex: Nubank, Itaú). O sistema vai ler, categorizar por palavras-chave (Ex: Ifood, Uber, Mercado) e salvar <b>automaticamente nos meses corretos</b>.</p>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <select id="csvBankSelect" style="padding: 10px; border-radius: 8px; font-weight: bold; background: var(--bg-card);"></select>
+                        <input type="file" id="csvFile" accept=".csv, .txt" style="display:none" onchange="importBankCSV(event)">
+                        <button class="btn" style="padding: 10px 20px;" onclick="document.getElementById('csvFile').click()">📂 Selecionar Arquivo CSV</button>
+                    </div>
+                </div>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);">Esta é a única forma segura de garantir que os seus dados bancários não vão parar às mãos de terceiros.</p>
+
+            <div class="panel">
+                <div class="panel-header">📊 HISTÓRICO DE MESES ANTERIORES (COMPARAÇÃO)</div>
+                <div style="padding: 20px; overflow-x: auto;">
+                    <table style="min-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>Mês / Período</th>
+                                <th class="val-col">Total Entradas</th>
+                                <th class="val-col">Despesas Fixas</th>
+                                <th class="val-col">Faturas + Variáveis</th>
+                                <th class="val-col">Total Saídas</th>
+                                <th class="val-col">Saldo Líquido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Gerado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -506,6 +531,7 @@ function init() {
     
     saveStore();
     updateBankSelects();
+    if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
     renderAll();
     checkNotifications();
 }
@@ -553,11 +579,135 @@ function getBankTotal(bank, month = currentMonth) {
     return sumTx + manual;
 }
 
+
+// -----------------------------------------------------
+// IMPORTAÇÃO CSV & HISTÓRICO
+// -----------------------------------------------------
+function updateCSVBankSelect() {
+    const csvBank = document.getElementById("csvBankSelect");
+    if(csvBank) {
+        csvBank.innerHTML = "";
+        store.config.banks.forEach(b => {
+            csvBank.innerHTML += `<option value="${b}">${b}</option>`;
+        });
+    }
+}
+
+function importBankCSV(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const text = evt.target.result;
+        const bankName = document.getElementById("csvBankSelect").value;
+        let addedCount = 0;
+        
+        const lines = text.split('\n');
+        lines.forEach(line => {
+            if(!line.trim()) return;
+            // Divide por vírgula ou ponto e vírgula, lidando com aspas de forma rudimentar
+            const cols = line.split(/[,;]/).map(c => c.replace(/"/g, '').trim());
+            if(cols.length < 2) return;
+            
+            let dateStr = "";
+            let desc = "";
+            let val = null;
+            
+            // Heurística para descobrir qual coluna é a data, o valor e a descrição
+            cols.forEach(col => {
+                if (/^\d{2}\/\d{2}\/\d{4}$/.test(col)) dateStr = col;
+                else if (/^\d{4}-\d{2}-\d{2}$/.test(col)) {
+                    let [y, m, d] = col.split('-');
+                    dateStr = `${d}/${m}/${y}`;
+                }
+                else if ((/^[-+]?\d*\.?\d+(?:,\d+)?$/.test(col) || /^[-+]?\d*\,?\d+(?:\.\d+)?$/.test(col)) && !col.includes('/')) {
+                    let num = parseFloat(col.replace('.', '').replace(',', '.'));
+                    if (!isNaN(num) && val === null) val = Math.abs(num); // Despesas e receitas pegamos o valor absoluto
+                }
+                else if (isNaN(col) && col.length > 2 && col.toUpperCase() !== "BRL" && !col.includes("COMPRA")) {
+                    desc = col; // Provavelmente é a descrição
+                }
+            });
+            
+            // Se falhou na heurística, ignora a linha (pode ser cabeçalho)
+            if (dateStr && desc && val !== null && val > 0) {
+                // Descobre o mês correto baseado na data
+                const parts = dateStr.split('/');
+                const mIdx = parseInt(parts[1], 10) - 1;
+                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                const targetMonthStr = `${monthNames[mIdx]}/${parts[2]}`;
+                
+                // Categorização por palavra-chave (Tags automáticas)
+                let category = "";
+                const upDesc = desc.toUpperCase();
+                if(upDesc.includes("UBER") || upDesc.includes("99") || upDesc.includes("POSTO") || upDesc.includes("GASOLINA")) category = "🚗 Transp/Combust.";
+                else if(upDesc.includes("IFOOD") || upDesc.includes("MCDONALDS") || upDesc.includes("BURGER") || upDesc.includes("PIZZA") || upDesc.includes("RESTAURANTE")) category = "🍔 Alimentação/Lazer";
+                else if(upDesc.includes("MERCADO") || upDesc.includes("ATACADAO") || upDesc.includes("ASSAI") || upDesc.includes("CARREFOUR") || upDesc.includes("COMPER") || upDesc.includes("BRETAS")) category = "🛒 Supermercado";
+                else if(upDesc.includes("NETFLIX") || upDesc.includes("AMAZON") || upDesc.includes("SPOTIFY") || upDesc.includes("HBO") || upDesc.includes("DISNEY")) category = "📺 Assinaturas";
+                else if(upDesc.includes("FARMACIA") || upDesc.includes("DROGASIL") || upDesc.includes("PAGUE MENOS")) category = "💊 Saúde";
+                
+                if (category) desc = `[${category}] ${desc}`;
+                
+                // Se o mês alvo não está nas abas cadastradas, joga no mês atual
+                let destMonth = MONTHS.includes(targetMonthStr) ? targetMonthStr : currentMonth;
+                
+                store.profiles[currentProfile][destMonth].transactions.push({
+                    id: Date.now() + Math.random(),
+                    date: dateStr,
+                    bank: bankName,
+                    desc: desc,
+                    parcela: "Auto (CSV)",
+                    val: val
+                });
+                addedCount++;
+            }
+        });
+        
+        saveStore();
+        renderAll();
+        alert(`✅ Sucesso! ${addedCount} transações foram lidas, categorizadas e guardadas nas faturas dos meses correspondentes.`);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+}
+
+function renderHistoryTable() {
+    const tbody = document.getElementById("historyTableBody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+    
+    // Pega os meses que têm algum dado preenchido ou os últimos 6 meses
+    MONTHS.forEach(m => {
+        const t = calcMonthTotals(m);
+        // Só renderiza se houver alguma movimentação ou se for o mês atual
+        if (t.rec > 0 || t.saidas > 0 || m === currentMonth) {
+            const isPos = t.saldo >= 0;
+            tbody.innerHTML += `
+                <tr>
+                    <td style="font-weight:700;">${m === currentMonth ? m + ' (Atual)' : m}</td>
+                    <td class="val-col" style="color:var(--success); font-weight:600;">${fmtBRL(t.rec)}</td>
+                    <td class="val-col">${fmtBRL(t.ess)}</td>
+                    <td class="val-col">${fmtBRL(t.cards + t.out)}</td>
+                    <td class="val-col" style="color:var(--danger); font-weight:600;">${fmtBRL(t.saidas)}</td>
+                    <td class="val-col">
+                        <span style="background: ${isPos ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}; color: ${isPos ? 'var(--success)' : 'var(--danger)'}; padding: 4px 8px; border-radius: 6px; font-weight: 700;">
+                            ${fmtBRL(t.saldo)}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+}
+
 function updateBankSelects() {
     const txBank = document.getElementById("txBank"); const filterBank = document.getElementById("filterBank"); const futureBank = document.getElementById("futureBank");
     txBank.innerHTML = ""; filterBank.innerHTML = '<option value="TODOS">Todos os Cartões</option>'; futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>';
     store.config.banks.forEach(b => {
         txBank.innerHTML += `<option value="${b}">${b}</option>`; filterBank.innerHTML += `<option value="${b}">${b}</option>`; futureBank.innerHTML += `<option value="${b}">${b}</option>`;
+    });
+    updateCSVBankSelect();
+    // Hack to terminate existing loop since I injected inside
     });
 }
 
@@ -567,7 +717,8 @@ function promptNewBank() {
         const clean = name.trim();
         store.config.banks.push(clean); store.config.bankColors[clean] = "#3b82f6";
         store = sanitizeStore(store);
-        saveStore(); updateBankSelects(); renderAll();
+        saveStore(); updateBankSelects();
+    if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect(); renderAll();
     }
 }
 function updateBankColor(bank, colorHex) { store.config.bankColors[bank] = colorHex; saveStore(); renderAll(); }
@@ -657,6 +808,7 @@ function renderAll() {
     else list.forEach(t => { txBody.innerHTML += `<tr><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${t.desc}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx(${t.id})">✖</button></td></tr>`; });
 
     renderFuturePurchases();
+    if(typeof renderHistoryTable === 'function') renderHistoryTable();
     
     // Updates
     const curTot = calcMonthTotals(currentMonth);
@@ -770,8 +922,7 @@ function appendMessage(sender, text) {
     
     let htmlText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    htmlText = htmlText.replace(/
-/g, '<br>');
+    htmlText = htmlText.replace(/\n/g, '<br>');
     
     div.innerHTML = htmlText;
     chatContainer.appendChild(div);
