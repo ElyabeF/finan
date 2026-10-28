@@ -205,6 +205,7 @@
             <button class="btn-outline" onclick="exportBackup()">Backup</button>
             <button class="btn-outline" onclick="document.getElementById('importFile').click()">Importar</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
+            <button class="btn-outline" onclick="manualRefresh()" title="Recarregar e atualizar todos os dados">🔄 Atualizar</button>
             <button class="btn-outline" style="border-color:#38bdf8; color:#38bdf8;" onclick="openFirebaseModal()">☁️ Nuvem</button>
         </div>
     </header>
@@ -318,11 +319,15 @@
 
         <div class="panel">
             <div class="panel-header">
-                <div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <span>LANÇAMENTOS DO MÊS</span>
-                    <button class="btn-danger" id="btnDelBulkTx" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkTx()">🗑 Excluir Selecionados</button>
+                    <button class="btn-danger" id="btnDelBulkTx" style="display:none; padding:4px 8px; font-size:0.75rem;" onclick="deleteBulkTx()">🗑 Excluir Selecionados (<span id="countSelectedTx">0</span>)</button>
+                    <button class="btn-outline" style="padding:2px 8px; font-size:0.75rem;" onclick="clearCurrentMonthTransactions()">🧹 Limpar Filtro / Mês</button>
                 </div>
-                <select id="filterBank" onchange="renderAll()" style="padding:3px 6px; font-size:0.8rem;"></select>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <select id="filterBank" onchange="renderAll()" style="padding:3px 6px; font-size:0.8rem;"></select>
+                    <button class="btn-outline" style="padding:3px 8px; font-size:0.8rem;" onclick="renderAll()" title="Atualizar visualização">🔄</button>
+                </div>
             </div>
             <table>
                 <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllTx" onchange="toggleAllTx(this)"></th><th>Data</th><th>Cartão</th><th>Descrição</th><th>Parcela</th><th class="val-col">Valor</th><th style="width:60px; text-align:center;">Ação</th></tr></thead>
@@ -363,13 +368,32 @@
         <div class="main-grid" style="grid-template-columns: 1fr;">
             
             <div class="panel">
-                <div class="panel-header">📥 IMPORTAÇÃO INTELIGENTE DE EXTRATO (CSV)</div>
+                <div class="panel-header">
+                    <span>📥 IMPORTAÇÃO INTELIGENTE DE EXTRATO (CSV)</span>
+                    <button class="btn-outline" style="padding:2px 8px; font-size:0.75rem;" onclick="renderAll()">🔄 Atualizar Relatórios</button>
+                </div>
                 <div style="padding: 20px;">
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Selecione o cartão e o arquivo <b>.csv</b> do seu banco (ex: Nubank, Itaú). O sistema vai ler, categorizar por palavras-chave (Ex: Ifood, Uber, Mercado) e salvar <b>automaticamente nos meses corretos</b>.</p>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <select id="csvBankSelect" style="padding: 10px; border-radius: 8px; font-weight: bold; background: var(--bg-card);"></select>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Selecione o cartão e o arquivo <b>.csv</b> do seu banco (ex: Nubank, Itaú). O sistema categoriza as despesas por palavras-chave e armazena os lançamentos nas faturas correspondentes.</p>
+                    
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                        <select id="csvBankSelect" style="padding: 9px 12px; border-radius: 8px; font-weight: bold; background: var(--bg-card);"></select>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="checkbox" id="csvReplaceOption" style="cursor:pointer;">
+                            Substituir fatura existente deste cartão (evita duplicar)
+                        </label>
                         <input type="file" id="csvFile" accept=".csv, .txt" style="display:none" onchange="importBankCSV(event)">
-                        <button class="btn" style="padding: 10px 20px;" onclick="document.getElementById('csvFile').click()">📂 Selecionar Arquivo CSV</button>
+                        <button class="btn" style="padding: 9px 18px;" onclick="document.getElementById('csvFile').click()">📂 Escolher Arquivo CSV</button>
+                    </div>
+
+                    <!-- Gestor de Faturas Importadas -->
+                    <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <strong style="font-size:0.85rem; color:var(--accent);">Extratos Armazenados Neste Perfil:</strong>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Você pode apagar um extrato duplicado com 1 clique</span>
+                        </div>
+                        <div id="importedBatchesList" style="display:flex; flex-direction:column; gap:8px;">
+                            <p style="font-size:0.8rem; color:var(--text-muted);">Nenhum extrato registrado ainda.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -562,18 +586,49 @@ function toggleAllTx(el) {
     toggleTxBtn();
 }
 function toggleTxBtn() {
-    const anyChecked = document.querySelectorAll('.cb-tx:checked').length > 0;
-    document.getElementById('btnDelBulkTx').style.display = anyChecked ? 'inline-block' : 'none';
+    const checked = document.querySelectorAll('.cb-tx:checked');
+    const btn = document.getElementById('btnDelBulkTx');
+    const counter = document.getElementById('countSelectedTx');
+    if (counter) counter.textContent = checked.length;
+    if (btn) btn.style.display = checked.length > 0 ? 'inline-block' : 'none';
 }
 function deleteBulkTx() {
-    const ids = Array.from(document.querySelectorAll('.cb-tx:checked')).map(cb => parseInt(cb.value));
-    if(ids.length === 0) return;
-    if(!confirm(`Excluir os ${ids.length} lançamentos selecionados?`)) return;
+    const checkedEls = document.querySelectorAll('.cb-tx:checked');
+    if (checkedEls.length === 0) return;
+    const ids = Array.from(checkedEls).map(cb => String(cb.value));
+    if (!confirm(`Excluir ${ids.length} lançamento(s) selecionado(s)?`)) return;
     
-    store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => !ids.includes(t.id));
+    // Filtro usando comparação segura de String para não falhar com números decimais ou inteiros
+    store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => !ids.includes(String(t.id)));
     saveStore(); 
     renderAll(); 
     checkNotifications();
+}
+
+function clearCurrentMonthTransactions() {
+    const filter = document.getElementById("filterBank") ? document.getElementById("filterBank").value : "TODOS";
+    const msg = filter === "TODOS" 
+        ? `Deseja realmente limpar TODOS os lançamentos do mês de ${currentMonth}?`
+        : `Deseja limpar todos os lançamentos do cartão "${filter}" no mês de ${currentMonth}?`;
+        
+    if (!confirm(msg)) return;
+    
+    if (filter === "TODOS") {
+        store.profiles[currentProfile][currentMonth].transactions = [];
+    } else {
+        store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => t.bank !== filter);
+    }
+    saveStore();
+    renderAll();
+    checkNotifications();
+}
+
+function manualRefresh() {
+    renderAll();
+    checkNotifications();
+    if (store.config.firebaseConfig && typeof initFirebase === 'function') {
+        initFirebase();
+    }
 }
 
 function toggleAllFut(el) {
@@ -581,15 +636,17 @@ function toggleAllFut(el) {
     toggleFutBtn();
 }
 function toggleFutBtn() {
-    const anyChecked = document.querySelectorAll('.cb-fut:checked').length > 0;
-    document.getElementById('btnDelBulkFut').style.display = anyChecked ? 'inline-block' : 'none';
+    const checked = document.querySelectorAll('.cb-fut:checked');
+    const btn = document.getElementById('btnDelBulkFut');
+    if (btn) btn.style.display = checked.length > 0 ? 'inline-block' : 'none';
 }
 function deleteBulkFut() {
-    const ids = Array.from(document.querySelectorAll('.cb-fut:checked')).map(cb => parseInt(cb.value));
-    if(ids.length === 0) return;
-    if(!confirm(`Excluir as ${ids.length} compras futuras selecionadas?`)) return;
+    const checkedEls = document.querySelectorAll('.cb-fut:checked');
+    if (checkedEls.length === 0) return;
+    const ids = Array.from(checkedEls).map(cb => String(cb.value));
+    if (!confirm(`Excluir as ${ids.length} compras futuras selecionadas?`)) return;
     
-    store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => !ids.includes(f.id));
+    store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => !ids.includes(String(f.id)));
     saveStore(); 
     renderAll();
 }
@@ -628,8 +685,9 @@ function sanitizeStore(rawData) {
     // Garante que cada perfil tem todos os meses e a estrutura interna correta
     data.config.profilesList.forEach(prof => {
         if (!data.config.profileColors[prof]) data.config.profileColors[prof] = "#6366f1";
-        if (!data.profiles[prof]) data.profiles[prof] = { futurePurchases: [] };
+        if (!data.profiles[prof]) data.profiles[prof] = { futurePurchases: [], importedBatches: [] };
         if (!data.profiles[prof].futurePurchases) data.profiles[prof].futurePurchases = [];
+        if (!Array.isArray(data.profiles[prof].importedBatches)) data.profiles[prof].importedBatches = [];
         
         MONTHS.forEach(m => {
             if (!data.profiles[prof][m] || typeof data.profiles[prof][m] !== "object") data.profiles[prof][m] = getDefaultMonthData();
@@ -839,6 +897,49 @@ function updateCSVBankSelect() {
     }
 }
 
+function renderImportedBatches() {
+    const listEl = document.getElementById("importedBatchesList");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+    
+    const batches = store.profiles[currentProfile].importedBatches || [];
+    if (batches.length === 0) {
+        listEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">Nenhum extrato registrado ainda neste perfil.</p>';
+        return;
+    }
+    
+    batches.forEach(b => {
+        listEl.innerHTML += `
+            <div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                    <span style="font-weight:bold; font-size:0.85rem; color:var(--text-main);">${b.fileName}</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${b.bank} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Importado em: ${b.importDate}</div>
+                </div>
+                <button class="btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="deleteImportedBatch('${b.id}')">🗑️ Excluir Extrato e Despesas</button>
+            </div>
+        `;
+    });
+}
+
+function deleteImportedBatch(batchId) {
+    if (!confirm("Deseja apagar este extrato e remover todos os lançamentos que vieram dele?")) return;
+    
+    // Remover todas as transações com esse batchId de todos os meses do perfil atual
+    MONTHS.forEach(m => {
+        if (store.profiles[currentProfile][m] && store.profiles[currentProfile][m].transactions) {
+            store.profiles[currentProfile][m].transactions = store.profiles[currentProfile][m].transactions.filter(t => t.batchId !== batchId);
+        }
+    });
+    
+    // Remover da lista de extratos
+    store.profiles[currentProfile].importedBatches = (store.profiles[currentProfile].importedBatches || []).filter(b => b.id !== batchId);
+    
+    saveStore();
+    renderAll();
+    alert("Extrato e transações associadas removidos com sucesso!");
+}
+
 function importBankCSV(e) {
     const file = e.target.files[0];
     if(!file) return;
@@ -846,8 +947,17 @@ function importBankCSV(e) {
     reader.onload = function(evt) {
         const text = evt.target.result;
         const bankName = document.getElementById("csvBankSelect").value;
+        const replaceOption = document.getElementById("csvReplaceOption") && document.getElementById("csvReplaceOption").checked;
+        
+        // Se a opção de substituir estiver marcada, limpa as transações do banco no mês antes de importar
+        if (replaceOption) {
+            store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => t.bank !== bankName);
+        }
+        
         let addedCount = 0;
         let ignoredCount = 0;
+        let batchTotal = 0;
+        const batchId = "batch_" + Date.now();
         
         const lines = text.split('\n');
         lines.forEach(line => {
@@ -866,7 +976,6 @@ function importBankCSV(e) {
                     dateStr = `${d}/${m}/${y}`;
                 }
                 else if ((/^[-+]?\d*\.?\d+(?:,\d+)?$/.test(col) || /^[-+]?\d*\,?\d+(?:\.\d+)?$/.test(col)) && !col.includes('/')) {
-                    // Limpeza de milhares e decimais
                     let numStr = col;
                     if (numStr.includes(',') && numStr.includes('.')) {
                         if (numStr.lastIndexOf(',') > numStr.lastIndexOf('.')) {
@@ -878,7 +987,7 @@ function importBankCSV(e) {
                         numStr = numStr.replace(',', '.');
                     }
                     let num = parseFloat(numStr);
-                    if (!isNaN(num) && val === null) val = num; // Mantém o sinal original para verificar depois
+                    if (!isNaN(num) && val === null) val = num;
                 }
                 else if (isNaN(col) && col.length > 2 && col.toUpperCase() !== "BRL" && !col.includes("COMPRA") && !dateStr.includes(col)) {
                     if(!desc) desc = col;
@@ -887,16 +996,12 @@ function importBankCSV(e) {
             
             if (dateStr && desc && val !== null) {
                 const upDesc = desc.toUpperCase();
-                // Ignorar pagamentos, estornos, e transações de ajuste do banco
+                // Ignorar pagamentos, estornos e créditos que não são compras
                 if (upDesc.includes("PAGAMENTO") || upDesc.includes("PAGTO") || upDesc.includes("ESTORNO") || upDesc.includes("CRÉDITO") || upDesc.includes("CREDITO") || upDesc.includes("SALDO")) {
                     ignoredCount++;
                     return;
                 }
                 
-                // Ignorar valores negativos se o banco exportar pagamentos/estornos como negativo (ex: Nubank)
-                // Se for um banco onde a despesa é negativa (ex: Itaú), pegamos o abs()
-                // A maioria das despesas vêm sem sinal ou com sinal específico. Vamos usar o valor absoluto, 
-                // assumindo que os estornos já foram filtrados pelo nome.
                 val = Math.abs(val);
 
                 if (val > 0) {
@@ -917,21 +1022,36 @@ function importBankCSV(e) {
                     let destMonth = MONTHS.includes(targetMonthStr) ? targetMonthStr : currentMonth;
                     
                     store.profiles[currentProfile][destMonth].transactions.push({
-                        id: Date.now() + Math.random(),
+                        id: String(Date.now()) + "_" + Math.floor(Math.random()*10000),
                         date: dateStr,
                         bank: bankName,
                         desc: desc,
                         parcela: "Auto (CSV)",
-                        val: val
+                        val: val,
+                        batchId: batchId
                     });
                     addedCount++;
+                    batchTotal += val;
                 }
             }
         });
         
+        // Registrar extrato importado para poder excluir ou substituir facilmente
+        if (addedCount > 0) {
+            if (!store.profiles[currentProfile].importedBatches) store.profiles[currentProfile].importedBatches = [];
+            store.profiles[currentProfile].importedBatches.unshift({
+                id: batchId,
+                fileName: file.name,
+                bank: bankName,
+                importDate: new Date().toLocaleString("pt-BR"),
+                count: addedCount,
+                totalVal: batchTotal
+            });
+        }
+        
         saveStore();
         renderAll();
-        alert(`✅ Sucesso! ${addedCount} despesas foram importadas.\n⚠️ ${ignoredCount} itens ignorados (Pagamentos da fatura ou Estornos).`);
+        alert(`✅ Sucesso! ${addedCount} despesas importadas (${fmtBRL(batchTotal)}).\n⚠️ ${ignoredCount} pagamentos/estornos ignorados.`);
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -1147,6 +1267,7 @@ function renderAll() {
     renderFuturePurchases();
     if(typeof renderHistoryTable === 'function') renderHistoryTable();
     if(typeof renderCategoryReport === 'function') renderCategoryReport();
+    if(typeof renderImportedBatches === 'function') renderImportedBatches();
     
     // Updates
     const curTot = calcMonthTotals(currentMonth);
@@ -1286,7 +1407,7 @@ async function sendChatMessage() {
     
     const loadingDiv = document.createElement("div");
     loadingDiv.className = "chat-bubble chat-ai loading-dots";
-    loadingDiv.textContent = "A pensar";
+    loadingDiv.textContent = "Consultando IA Gemini";
     document.getElementById("chatContainer").appendChild(loadingDiv);
 
     const curTot = calcMonthTotals(currentMonth);
@@ -1300,47 +1421,66 @@ async function sendChatMessage() {
     chatHistory.push({ role: "user", parts: [{ text: contexto + "Pergunta do usuário: " + text }] });
 
     try {
-        let targetEndpoint = null;
+        // 1. Chamar dinamicamente a lista de modelos autorizados na Google Cloud para esta chave
+        let modelCandidates = [];
+        let listError = null;
+
         try {
             const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             const listData = await listRes.json();
+            
             if (listData.models && Array.isArray(listData.models)) {
-                const validModels = listData.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
-                const preferred = validModels.find(m => m.name.includes("3.8-flash")) ||
-                                  validModels.find(m => m.name.includes("2.0-flash")) ||
-                                  validModels.find(m => m.name.includes("1.5-flash") && !m.name.includes("latest")) ||
-                                  validModels[0];
-                if (preferred) targetEndpoint = `https://generativelanguage.googleapis.com/v1beta/${preferred.name}:generateContent`;
+                // Pegar todos os modelos que suportam geração de texto
+                const valid = listData.models.filter(m => 
+                    m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")
+                );
+                
+                // Ordenar dando prioridade para flash e versões 2.0 / 1.5
+                valid.sort((a, b) => {
+                    const aFlash = a.name.includes("flash") ? 1 : 0;
+                    const bFlash = b.name.includes("flash") ? 1 : 0;
+                    return bFlash - aFlash;
+                });
+                
+                modelCandidates = valid.map(m => `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent`);
+            } else if (listData.error) {
+                listError = listData.error;
             }
-        } catch (e) { console.warn("ListModels error", e); }
+        } catch (eList) {
+            console.warn("Erro ao listar modelos:", eList);
+        }
 
-        // Ampliada a lista de modelos de fallback
-        const fallbacks = [
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
-        ];
-        
-        const candidateEndpoints = targetEndpoint ? [targetEndpoint, ...fallbacks] : fallbacks;
-        const uniqueEndpoints = [...new Set(candidateEndpoints)];
+        // Se ListModels não retornou nada ou falhou, usar fallback amplo
+        if (modelCandidates.length === 0) {
+            modelCandidates = [
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent"
+            ];
+        }
 
         let success = false;
-        let lastError = null;
+        let lastError = listError;
         let replyText = "";
 
-        for (const ep of uniqueEndpoints) {
+        const payload = JSON.stringify({
+            contents: chatHistory,
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1000
+            }
+        });
+
+        for (const ep of modelCandidates) {
             try {
                 const response = await fetch(`${ep}?key=${apiKey}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        systemInstruction: { parts: [{ text: "Você é um consultor financeiro pessoal direto e amigável. Analise os dados que o usuário enviou e responda à pergunta dele. Seja objetivo, fale em português do Brasil de forma clara, use listas bullet-points se citar várias coisas, e ajude-o a economizar considerando o perfil atual dele. Não forneça introduções muito longas." }]},
-                        contents: chatHistory
-                    })
+                    body: payload
                 });
+
                 const json = await response.json();
                 if (response.ok && json.candidates && json.candidates[0]?.content) {
                     replyText = json.candidates[0].content.parts[0].text;
@@ -1348,9 +1488,14 @@ async function sendChatMessage() {
                     break;
                 } else {
                     lastError = json.error || json;
-                    if (response.status === 400 && lastError?.message?.includes("API key not valid")) break;
+                    // Se for erro de chave inválida, não adianta tentar os outros
+                    if (response.status === 400 && lastError?.message?.toLowerCase().includes("api key not valid")) {
+                        break;
+                    }
                 }
-            } catch (err) { lastError = err; }
+            } catch (err) {
+                lastError = err;
+            }
         }
 
         loadingDiv.remove();
@@ -1358,16 +1503,16 @@ async function sendChatMessage() {
             chatHistory.push({ role: "model", parts: [{ text: replyText }] });
             appendMessage('model', replyText);
         } else {
-            appendMessage('model', `⚠️ Erro da API: ${lastError?.message || JSON.stringify(lastError)}`);
+            const errDetail = lastError?.message || JSON.stringify(lastError);
+            appendMessage('model', `⚠️ Não foi possível obter resposta: ${errDetail}\n\nDica: Clique em "🔑 Chave API" no topo para verificar se a sua chave do Google AI Studio está correta.`);
             chatHistory.pop();
         }
     } catch (err) {
         loadingDiv.remove();
-        appendMessage('model', `⚠️ Erro de rede: ${err.message}`);
+        appendMessage('model', `⚠️ Erro de conexão: ${err.message}`);
         chatHistory.pop();
     }
 }
-
 init();
 </script>
 </body>
