@@ -191,7 +191,8 @@
         <div class="controls">
             <!-- Novo Seletor de Perfis -->
             <div class="profile-badge">
-                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:#c7d2fe; font-weight:bold; padding:0; outline:none; cursor:pointer;"></select>
+                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:var(--profile-color); font-weight:bold; padding:0; outline:none; cursor:pointer; filter: brightness(1.5);"></select>
+                <button class="btn-icon" style="color:var(--profile-color); filter: brightness(1.5); margin-left:-2px; padding:0 4px;" onclick="openProfileModal()" title="Editar Perfil">⚙️</button>
             </div>
             <button class="btn-outline" style="border-color:var(--profile-color); color:#a855f7;" onclick="promptNewProfile()">+ Novo Perfil</button>
             
@@ -313,9 +314,15 @@
         </div>
 
         <div class="panel">
-            <div class="panel-header"><span>LANÇAMENTOS DO MÊS</span><select id="filterBank" onchange="renderAll()" style="padding:3px 6px; font-size:0.8rem;"></select></div>
+            <div class="panel-header">
+                <div>
+                    <span>LANÇAMENTOS DO MÊS</span>
+                    <button class="btn-danger" id="btnDelBulkTx" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkTx()">🗑 Excluir Selecionados</button>
+                </div>
+                <select id="filterBank" onchange="renderAll()" style="padding:3px 6px; font-size:0.8rem;"></select>
+            </div>
             <table>
-                <thead><tr><th>Data</th><th>Cartão</th><th>Descrição</th><th>Parcela</th><th class="val-col">Valor</th><th style="width:60px; text-align:center;">Ação</th></tr></thead>
+                <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllTx" onchange="toggleAllTx(this)"></th><th>Data</th><th>Cartão</th><th>Descrição</th><th>Parcela</th><th class="val-col">Valor</th><th style="width:60px; text-align:center;">Ação</th></tr></thead>
                 <tbody id="txTableBody"></tbody>
             </table>
         </div>
@@ -334,9 +341,15 @@
             </div>
         </div>
         <div class="panel">
-            <div class="panel-header"><span>ITENS PLANEJADOS</span><span id="futureTotalBadge" style="font-size:0.85rem; color:var(--accent); font-weight:700;">Total: R$ 0,00</span></div>
+            <div class="panel-header">
+                <div>
+                    <span>ITENS PLANEJADOS</span>
+                    <button class="btn-danger" id="btnDelBulkFut" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkFut()">🗑 Excluir Selecionados</button>
+                </div>
+                <span id="futureTotalBadge" style="font-size:0.85rem; color:var(--accent); font-weight:700;">Total: R$ 0,00</span>
+            </div>
             <table>
-                <thead><tr><th>Status</th><th>Item / Descrição</th><th>Cartão</th><th>Prioridade</th><th class="val-col">Valor Estimado</th><th style="width:130px; text-align:center;">Ações</th></tr></thead>
+                <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllFut" onchange="toggleAllFut(this)"></th><th>Status</th><th>Item / Descrição</th><th>Cartão</th><th>Prioridade</th><th class="val-col">Valor Estimado</th><th style="width:130px; text-align:center;">Ações</th></tr></thead>
                 <tbody id="futureTableBody"></tbody>
             </table>
         </div>
@@ -355,6 +368,15 @@
                         <input type="file" id="csvFile" accept=".csv, .txt" style="display:none" onchange="importBankCSV(event)">
                         <button class="btn" style="padding: 10px 20px;" onclick="document.getElementById('csvFile').click()">📂 Selecionar Arquivo CSV</button>
                     </div>
+                </div>
+            </div>
+
+            
+            <div class="panel">
+                <div class="panel-header">📊 GASTOS POR CATEGORIA (MÊS ATUAL)</div>
+                <div class="chart-box" id="categoryReportBody">
+                    <!-- Categorias preenchidas via JS -->
+                    <p style="color:var(--text-muted); text-align:center;">Nenhum gasto para exibir.</p>
                 </div>
             </div>
 
@@ -387,8 +409,11 @@
 <div class="modal-overlay" id="chatModal">
     <div class="modal">
         <div class="modal-header">
-            <h3 style="color:var(--accent);">✨ Consultor Financeiro IA (Gemini)</h3>
-            <button class="btn-icon" onclick="closeChat()">✖</button>
+            <h3 style="color:var(--accent); font-size:1.1rem;">✨ Consultor IA</h3>
+            <div>
+                <button class="btn-icon" style="color:var(--text-muted); font-size:0.9rem; margin-right:10px;" onclick="toggleApiKeyBox()">🔑 Chave API</button>
+                <button class="btn-icon" onclick="closeChat()">✖</button>
+            </div>
         </div>
         <div class="chat-container" id="chatContainer">
             <div class="api-setup" id="apiSetupBox">
@@ -400,6 +425,32 @@
         <div class="modal-footer">
             <input type="text" id="chatInput" placeholder="Pergunte algo sobre as suas finanças..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
             <button class="btn-ai" onclick="sendChatMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL PERFIL -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal" style="max-width: 400px; height: auto;">
+        <div class="modal-header">
+            <h3 style="color:var(--accent);">⚙️ Configurações do Perfil</h3>
+            <button class="btn-icon" onclick="closeProfileModal()">✖</button>
+        </div>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="font-size:0.85rem; color:var(--text-muted);">Nome do Perfil:</label>
+                <input type="text" id="editProfileName" style="width:100%; margin-top:5px; font-weight:bold;">
+            </div>
+            <div>
+                <label style="font-size:0.85rem; color:var(--text-muted);">Cor de Destaque:</label>
+                <input type="color" id="editProfileColor" style="width:100%; height: 40px; margin-top:5px; cursor:pointer; border:none; background:transparent;">
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-top: 10px;">
+                <button class="btn-danger" style="padding: 10px 15px;" onclick="deleteCurrentProfile()">🗑 Excluir Perfil</button>
+                <button class="btn" style="padding: 10px 20px;" onclick="saveProfileSettings()">Salvar Alterações</button>
+            </div>
         </div>
     </div>
 </div>
@@ -423,6 +474,103 @@ function getDefaultMonthData() {
     };
     ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"].forEach(b => { defaultData.cardStatus[b] = { venc: "Dia 10", status: "Pendente", manualExtra: 0 }; });
     return defaultData;
+}
+
+
+// -----------------------------------------------------
+// FUNÇÕES DE PERFIL (Edição, Cor e Exclusão)
+// -----------------------------------------------------
+function openProfileModal() {
+    document.getElementById("editProfileName").value = currentProfile;
+    document.getElementById("editProfileColor").value = store.config.profileColors[currentProfile] || "#6366f1";
+    document.getElementById("profileModal").style.display = "flex";
+}
+function closeProfileModal() {
+    document.getElementById("profileModal").style.display = "none";
+}
+function saveProfileSettings() {
+    const newName = document.getElementById("editProfileName").value.trim();
+    const newColor = document.getElementById("editProfileColor").value;
+    if (!newName) return alert("O nome não pode ser vazio.");
+    
+    if (newName !== currentProfile) {
+        if (store.config.profilesList.includes(newName)) return alert("Já existe um perfil com esse nome.");
+        
+        const idx = store.config.profilesList.indexOf(currentProfile);
+        store.config.profilesList[idx] = newName;
+        
+        store.profiles[newName] = store.profiles[currentProfile];
+        delete store.profiles[currentProfile];
+        
+        store.config.profileColors[newName] = newColor;
+        delete store.config.profileColors[currentProfile];
+        
+        currentProfile = newName;
+    } else {
+        store.config.profileColors[currentProfile] = newColor;
+    }
+    
+    
+    document.documentElement.style.setProperty('--profile-color', store.config.profileColors[currentProfile] || '#6366f1');
+    saveStore();
+    closeProfileModal();
+    init(); 
+}
+function deleteCurrentProfile() {
+    if (store.config.profilesList.length <= 1) {
+        return alert("Você precisa ter pelo menos um perfil. Não é possível excluir o único existente.");
+    }
+    if (confirm(`Tem certeza que deseja excluir DE VEZ o perfil "${currentProfile}" e TODOS os seus dados? Esta ação não pode ser desfeita!`)) {
+        const idx = store.config.profilesList.indexOf(currentProfile);
+        store.config.profilesList.splice(idx, 1);
+        delete store.profiles[currentProfile];
+        delete store.config.profileColors[currentProfile];
+        
+        currentProfile = store.config.profilesList[0];
+        saveStore();
+        closeProfileModal();
+        init();
+    }
+}
+
+// -----------------------------------------------------
+// EXCLUSÃO EM MASSA (Marcadores)
+// -----------------------------------------------------
+function toggleAllTx(el) {
+    document.querySelectorAll('.cb-tx').forEach(cb => cb.checked = el.checked);
+    toggleTxBtn();
+}
+function toggleTxBtn() {
+    const anyChecked = document.querySelectorAll('.cb-tx:checked').length > 0;
+    document.getElementById('btnDelBulkTx').style.display = anyChecked ? 'inline-block' : 'none';
+}
+function deleteBulkTx() {
+    const ids = Array.from(document.querySelectorAll('.cb-tx:checked')).map(cb => parseInt(cb.value));
+    if(ids.length === 0) return;
+    if(!confirm(`Excluir os ${ids.length} lançamentos selecionados?`)) return;
+    
+    store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => !ids.includes(t.id));
+    saveStore(); 
+    renderAll(); 
+    checkNotifications();
+}
+
+function toggleAllFut(el) {
+    document.querySelectorAll('.cb-fut').forEach(cb => cb.checked = el.checked);
+    toggleFutBtn();
+}
+function toggleFutBtn() {
+    const anyChecked = document.querySelectorAll('.cb-fut:checked').length > 0;
+    document.getElementById('btnDelBulkFut').style.display = anyChecked ? 'inline-block' : 'none';
+}
+function deleteBulkFut() {
+    const ids = Array.from(document.querySelectorAll('.cb-fut:checked')).map(cb => parseInt(cb.value));
+    if(ids.length === 0) return;
+    if(!confirm(`Excluir as ${ids.length} compras futuras selecionadas?`)) return;
+    
+    store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => !ids.includes(f.id));
+    saveStore(); 
+    renderAll();
 }
 
 function sanitizeStore(rawData) {
@@ -457,6 +605,7 @@ function sanitizeStore(rawData) {
 
     // Garante que cada perfil tem todos os meses e a estrutura interna correta
     data.config.profilesList.forEach(prof => {
+        if (!data.config.profileColors[prof]) data.config.profileColors[prof] = "#6366f1";
         if (!data.profiles[prof]) data.profiles[prof] = { futurePurchases: [] };
         if (!data.profiles[prof].futurePurchases) data.profiles[prof].futurePurchases = [];
         
@@ -601,19 +750,18 @@ function importBankCSV(e) {
         const text = evt.target.result;
         const bankName = document.getElementById("csvBankSelect").value;
         let addedCount = 0;
+        let ignoredCount = 0;
         
         const lines = text.split('\n');
         lines.forEach(line => {
             if(!line.trim()) return;
-            // Divide por vírgula ou ponto e vírgula, lidando com aspas de forma rudimentar
-            const cols = line.split(/[,;]/).map(c => c.replace(/"/g, '').trim());
+            const cols = line.split(/[,;\t]/).map(c => c.replace(/"/g, '').trim());
             if(cols.length < 2) return;
             
             let dateStr = "";
             let desc = "";
             let val = null;
             
-            // Heurística para descobrir qual coluna é a data, o valor e a descrição
             cols.forEach(col => {
                 if (/^\d{2}\/\d{2}\/\d{4}$/.test(col)) dateStr = col;
                 else if (/^\d{4}-\d{2}-\d{2}$/.test(col)) {
@@ -621,51 +769,72 @@ function importBankCSV(e) {
                     dateStr = `${d}/${m}/${y}`;
                 }
                 else if ((/^[-+]?\d*\.?\d+(?:,\d+)?$/.test(col) || /^[-+]?\d*\,?\d+(?:\.\d+)?$/.test(col)) && !col.includes('/')) {
-                    let num = parseFloat(col.replace('.', '').replace(',', '.'));
-                    if (!isNaN(num) && val === null) val = Math.abs(num); // Despesas e receitas pegamos o valor absoluto
+                    // Limpeza de milhares e decimais
+                    let numStr = col;
+                    if (numStr.includes(',') && numStr.includes('.')) {
+                        if (numStr.lastIndexOf(',') > numStr.lastIndexOf('.')) {
+                            numStr = numStr.replace(/\./g, '').replace(',', '.');
+                        } else {
+                            numStr = numStr.replace(/,/g, '');
+                        }
+                    } else if (numStr.includes(',')) {
+                        numStr = numStr.replace(',', '.');
+                    }
+                    let num = parseFloat(numStr);
+                    if (!isNaN(num) && val === null) val = num; // Mantém o sinal original para verificar depois
                 }
-                else if (isNaN(col) && col.length > 2 && col.toUpperCase() !== "BRL" && !col.includes("COMPRA")) {
-                    desc = col; // Provavelmente é a descrição
+                else if (isNaN(col) && col.length > 2 && col.toUpperCase() !== "BRL" && !col.includes("COMPRA") && !dateStr.includes(col)) {
+                    if(!desc) desc = col;
                 }
             });
             
-            // Se falhou na heurística, ignora a linha (pode ser cabeçalho)
-            if (dateStr && desc && val !== null && val > 0) {
-                // Descobre o mês correto baseado na data
-                const parts = dateStr.split('/');
-                const mIdx = parseInt(parts[1], 10) - 1;
-                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                const targetMonthStr = `${monthNames[mIdx]}/${parts[2]}`;
-                
-                // Categorização por palavra-chave (Tags automáticas)
-                let category = "";
+            if (dateStr && desc && val !== null) {
                 const upDesc = desc.toUpperCase();
-                if(upDesc.includes("UBER") || upDesc.includes("99") || upDesc.includes("POSTO") || upDesc.includes("GASOLINA")) category = "🚗 Transp/Combust.";
-                else if(upDesc.includes("IFOOD") || upDesc.includes("MCDONALDS") || upDesc.includes("BURGER") || upDesc.includes("PIZZA") || upDesc.includes("RESTAURANTE")) category = "🍔 Alimentação/Lazer";
-                else if(upDesc.includes("MERCADO") || upDesc.includes("ATACADAO") || upDesc.includes("ASSAI") || upDesc.includes("CARREFOUR") || upDesc.includes("COMPER") || upDesc.includes("BRETAS")) category = "🛒 Supermercado";
-                else if(upDesc.includes("NETFLIX") || upDesc.includes("AMAZON") || upDesc.includes("SPOTIFY") || upDesc.includes("HBO") || upDesc.includes("DISNEY")) category = "📺 Assinaturas";
-                else if(upDesc.includes("FARMACIA") || upDesc.includes("DROGASIL") || upDesc.includes("PAGUE MENOS")) category = "💊 Saúde";
+                // Ignorar pagamentos, estornos, e transações de ajuste do banco
+                if (upDesc.includes("PAGAMENTO") || upDesc.includes("PAGTO") || upDesc.includes("ESTORNO") || upDesc.includes("CRÉDITO") || upDesc.includes("CREDITO") || upDesc.includes("SALDO")) {
+                    ignoredCount++;
+                    return;
+                }
                 
-                if (category) desc = `[${category}] ${desc}`;
-                
-                // Se o mês alvo não está nas abas cadastradas, joga no mês atual
-                let destMonth = MONTHS.includes(targetMonthStr) ? targetMonthStr : currentMonth;
-                
-                store.profiles[currentProfile][destMonth].transactions.push({
-                    id: Date.now() + Math.random(),
-                    date: dateStr,
-                    bank: bankName,
-                    desc: desc,
-                    parcela: "Auto (CSV)",
-                    val: val
-                });
-                addedCount++;
+                // Ignorar valores negativos se o banco exportar pagamentos/estornos como negativo (ex: Nubank)
+                // Se for um banco onde a despesa é negativa (ex: Itaú), pegamos o abs()
+                // A maioria das despesas vêm sem sinal ou com sinal específico. Vamos usar o valor absoluto, 
+                // assumindo que os estornos já foram filtrados pelo nome.
+                val = Math.abs(val);
+
+                if (val > 0) {
+                    const parts = dateStr.split('/');
+                    const mIdx = parseInt(parts[1], 10) - 1;
+                    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                    const targetMonthStr = `${monthNames[mIdx]}/${parts[2]}`;
+                    
+                    let category = "";
+                    if(upDesc.includes("UBER") || upDesc.includes("99") || upDesc.includes("POSTO") || upDesc.includes("GASOLINA")) category = "🚗 Transp/Combust.";
+                    else if(upDesc.includes("IFOOD") || upDesc.includes("MCDONALDS") || upDesc.includes("BURGER") || upDesc.includes("PIZZA") || upDesc.includes("RESTAURANTE")) category = "🍔 Alimentação/Lazer";
+                    else if(upDesc.includes("MERCADO") || upDesc.includes("ATACADAO") || upDesc.includes("ASSAI") || upDesc.includes("CARREFOUR") || upDesc.includes("COMPER") || upDesc.includes("BRETAS")) category = "🛒 Supermercado";
+                    else if(upDesc.includes("NETFLIX") || upDesc.includes("AMAZON") || upDesc.includes("SPOTIFY") || upDesc.includes("HBO") || upDesc.includes("DISNEY")) category = "📺 Assinaturas";
+                    else if(upDesc.includes("FARMACIA") || upDesc.includes("DROGASIL") || upDesc.includes("PAGUE MENOS") || upDesc.includes("RAIA")) category = "💊 Saúde";
+                    
+                    if (category) desc = `[${category}] ${desc}`;
+                    
+                    let destMonth = MONTHS.includes(targetMonthStr) ? targetMonthStr : currentMonth;
+                    
+                    store.profiles[currentProfile][destMonth].transactions.push({
+                        id: Date.now() + Math.random(),
+                        date: dateStr,
+                        bank: bankName,
+                        desc: desc,
+                        parcela: "Auto (CSV)",
+                        val: val
+                    });
+                    addedCount++;
+                }
             }
         });
         
         saveStore();
         renderAll();
-        alert(`✅ Sucesso! ${addedCount} transações foram lidas, categorizadas e guardadas nas faturas dos meses correspondentes.`);
+        alert(`✅ Sucesso! ${addedCount} despesas foram importadas.\n⚠️ ${ignoredCount} itens ignorados (Pagamentos da fatura ou Estornos).`);
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -749,13 +918,13 @@ function moveFutureToCurrentMonth(id) {
 function renderFuturePurchases() {
     const tbody = document.getElementById("futureTableBody"); tbody.innerHTML = "";
     const list = store.profiles[currentProfile].futurePurchases;
-    if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhuma compra futura cadastrada neste perfil.</td></tr>`; document.getElementById("futureTotalBadge").textContent = "Total: R$ 0,00"; return; }
+    if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhuma compra futura cadastrada neste perfil.</td></tr>`; document.getElementById("futureTotalBadge").textContent = "Total: R$ 0,00"; return; }
     let totFut = 0;
     list.forEach(item => {
         if (item.status === "Pendente") totFut += Number(item.val) || 0;
         const prioCls = item.priority === "Alta" ? "prio-alta" : (item.priority === "Média" ? "prio-media" : "prio-baixa");
         const isDone = item.status === "Comprado";
-        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td style="width:100px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? '✅ Comprado' : '⏳ Pendente'}</button></td><td style="font-weight:600;">${item.desc}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : item.bank}</td><td class="${prioCls}">${item.priority}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;"><button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="moveFutureToCurrentMonth(${item.id})">➔ Lançar</button> <button class="btn-danger" onclick="deleteFuturePurchase(${item.id})">✖</button></td></tr>`;
+        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td><input type="checkbox" class="cb-fut" value="${item.id}" onchange="toggleFutBtn()"></td><td style="width:100px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? '✅ Comprado' : '⏳ Pendente'}</button></td><td style="font-weight:600;">${item.desc}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : item.bank}</td><td class="${prioCls}">${item.priority}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;"><button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="moveFutureToCurrentMonth(${item.id})">➔ Lançar</button> <button class="btn-danger" onclick="deleteFuturePurchase(${item.id})">✖</button></td></tr>`;
     });
     document.getElementById("futureTotalBadge").textContent = "Total Pendente: " + fmtBRL(totFut);
 }
@@ -787,7 +956,80 @@ function renderCompareBadge(curr, prev, elemId, invert = false) {
     el.textContent = `${diff > 0 ? '▲' : '▼'} ${pct} vs mês ant.`;
 }
 
+
+function renderCategoryReport() {
+    const data = store.profiles[currentProfile][currentMonth];
+    let categories = {};
+    let totalVal = 0;
+
+    // 1. Extrair dos cartões (Transações)
+    data.transactions.forEach(t => {
+        let cat = "💳 Outros Cartão / Não Categorizado";
+        const match = t.desc.match(/^\[(.*?)\]/);
+        if (match) {
+            cat = match[0]; // ex: [🛒 Supermercado]
+        }
+        
+        if (!categories[cat]) categories[cat] = 0;
+        categories[cat] += Number(t.val) || 0;
+        totalVal += Number(t.val) || 0;
+    });
+
+    // 2. Extrair das Despesas Essenciais
+    data.essenciais.forEach(e => {
+        if(Number(e.valor) > 0) {
+            let cat = "🏠 Fixo: " + e.nome;
+            if (!categories[cat]) categories[cat] = 0;
+            categories[cat] += Number(e.valor) || 0;
+            totalVal += Number(e.valor) || 0;
+        }
+    });
+
+    // 3. Extrair das Despesas Variáveis Manuais
+    data.naoEssenciais.forEach(e => {
+        if(Number(e.valor) > 0) {
+            let cat = "💸 Variável: " + e.nome;
+            if (!categories[cat]) categories[cat] = 0;
+            categories[cat] += Number(e.valor) || 0;
+            totalVal += Number(e.valor) || 0;
+        }
+    });
+
+    const catContainer = document.getElementById("categoryReportBody");
+    if (!catContainer) return;
+    catContainer.innerHTML = "";
+
+    if (totalVal === 0) {
+        catContainer.innerHTML = "<p style='color:var(--text-muted); text-align:center; padding: 20px;'>Nenhum gasto registrado neste mês.</p>";
+        return;
+    }
+
+    // Ordenar do maior para o menor
+    const sorted = Object.keys(categories).map(k => ({ name: k, val: categories[k] })).sort((a, b) => b.val - a.val);
+
+    sorted.forEach((item, idx) => {
+        if (item.val <= 0) return;
+        const pct = ((item.val / totalVal) * 100).toFixed(1);
+        
+        // Cores vibrantes alternadas para o gráfico
+        const colors = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
+        const color = colors[idx % colors.length];
+
+        catContainer.innerHTML += `
+            <div class="bar-group" style="margin-bottom: 12px;">
+                <div class="bar-label" style="font-size:0.85rem;"><span>${item.name}</span><span style="color:${color};">${fmtBRL(item.val)} (${pct}%)</span></div>
+                <div class="bar-track" style="height:8px; background:rgba(255,255,255,0.05);"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            </div>
+        `;
+    });
+}
+
 function renderAll() {
+    document.getElementById("btnDelBulkTx").style.display = "none";
+    document.getElementById("btnDelBulkFut").style.display = "none";
+    if(document.getElementById("selectAllTx")) document.getElementById("selectAllTx").checked = false;
+    if(document.getElementById("selectAllFut")) document.getElementById("selectAllFut").checked = false;
+
     renderTableRows('receitas', 'receitasBody'); renderTableRows('essenciais', 'essenciaisBody'); renderTableRows('naoEssenciais', 'naoEssenciaisBody');
     const data = store.profiles[currentProfile][currentMonth];
     
@@ -802,11 +1044,12 @@ function renderAll() {
 
     const txBody = document.getElementById("txTableBody"); const filter = document.getElementById("filterBank").value; txBody.innerHTML = "";
     const list = data.transactions.filter(t => filter === "TODOS" || t.bank === filter);
-    if (list.length === 0) txBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px;">Sem lançamentos neste mês.</td></tr>`;
-    else list.forEach(t => { txBody.innerHTML += `<tr><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${t.desc}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx(${t.id})">✖</button></td></tr>`; });
+    if (list.length === 0) txBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:16px;">Sem lançamentos neste mês.</td></tr>`;
+    else list.forEach(t => { txBody.innerHTML += `<tr><td><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td><td>${t.date || "-"}</td><td>${createBankBadgeHTML(t.bank, true)}</td><td>${t.desc}</td><td>${t.parcela || "À vista"}</td><td class="val-col" style="font-weight:600;">${fmtBRL(t.val)}</td><td style="text-align:center;"><button class="btn-danger" onclick="deleteTx(${t.id})">✖</button></td></tr>`; });
 
     renderFuturePurchases();
     if(typeof renderHistoryTable === 'function') renderHistoryTable();
+    if(typeof renderCategoryReport === 'function') renderCategoryReport();
     
     // Updates
     const curTot = calcMonthTotals(currentMonth);
@@ -907,6 +1150,12 @@ function importBackup(e) {
 // -----------------------------------------------------
 function openChat() { document.getElementById("chatModal").style.display = "flex"; }
 function closeChat() { document.getElementById("chatModal").style.display = "none"; }
+
+function toggleApiKeyBox() {
+    const box = document.getElementById("apiSetupBox");
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
 function saveApiKey(key) { 
     store.config.geminiApiKey = key.trim(); 
     saveStore(); 
@@ -968,9 +1217,13 @@ async function sendChatMessage() {
             }
         } catch (e) { console.warn("ListModels error", e); }
 
+        // Ampliada a lista de modelos de fallback
         const fallbacks = [
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
             "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
         ];
         
