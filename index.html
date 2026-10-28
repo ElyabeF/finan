@@ -706,9 +706,7 @@ function updateBankSelects() {
     store.config.banks.forEach(b => {
         txBank.innerHTML += `<option value="${b}">${b}</option>`; filterBank.innerHTML += `<option value="${b}">${b}</option>`; futureBank.innerHTML += `<option value="${b}">${b}</option>`;
     });
-    updateCSVBankSelect();
-    // Hack to terminate existing loop since I injected inside
-    });
+    if(typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
 }
 
 function promptNewBank() {
