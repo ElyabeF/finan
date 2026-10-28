@@ -915,9 +915,10 @@ function normText(s) {
 const CSV_IGNORE_KEYWORDS = [
     "PAGAMENTO RECEBIDO", "PAGAMENTO DE FATURA", "PAGTO", "PGTO FATURA",
     "ESTORNO",
-    "LIMITE CONVERTIDO EM SALDO",
-    "RENEGOCIACAO DE PENDENCIAS",
-    "CREDITO DE PARCELAMENTO"
+    "LIMITE CONVERTIDO EM SALDO"
+    // "Renegociação de pendências" NÃO é ignorada: a parcela do acordo é cobrada na fatura do cartão.
+    // "Crédito de parcelamento de compra" NÃO é ignorado: ele (valor negativo) anula a compra original
+    // que foi parcelada. Ignorar só o crédito deixa a compra original contando em dobro.
 ];
 
 function splitCSVLine(line, delim) {
