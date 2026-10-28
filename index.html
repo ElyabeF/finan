@@ -906,19 +906,34 @@ async function getEncKey() {
 }
 async function encodeCloud(obj) {
     const key = await getEncKey();
-    if (!key) return obj;
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
-    return { enc: 1, iv: b64(iv), data: b64(ct), updatedAt: Date.now() };
+    if (key) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+        return { enc: 1, iv: b64(iv), data: b64(ct), updatedAt: Date.now() };
+    }
+    // Quando não usa criptografia por senha, salva como string JSON envelopada
+    // para o Firebase nunca rejeitar barras '/', pontos ou colchetes dos meses (ex: Agosto/2026)
+    return { rawJson: JSON.stringify(obj), updatedAt: Date.now() };
 }
 async function decodeCloud(raw) {
-    if (!raw || !raw.enc) return raw;
-    const key = await getEncKey();
-    if (!key) throw new Error("NEEDKEY");
-    try {
-        const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(raw.iv) }, key, unb64(raw.data));
-        return JSON.parse(new TextDecoder().decode(pt));
-    } catch (e) { throw new Error("BADKEY"); }
+    if (!raw) return null;
+    if (raw.enc) {
+        const key = await getEncKey();
+        if (!key) throw new Error("NEEDKEY");
+        try {
+            const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(raw.iv) }, key, unb64(raw.data));
+            return JSON.parse(new TextDecoder().decode(pt));
+        } catch (e) { throw new Error("BADKEY"); }
+    }
+    if (raw.rawJson) {
+        try {
+            return JSON.parse(raw.rawJson);
+        } catch (e) {
+            console.error("Erro ao ler rawJson", e);
+            return null;
+        }
+    }
+    return raw;
 }
 
 function saveStore() {
