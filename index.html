@@ -189,7 +189,7 @@
             <p>Multiperfil • Comparações Mensais • Chatbot IA</p>
         </div>
         <div class="controls">
-            <!-- Seletor de Perfis -->
+            <!-- Novo Seletor de Perfis -->
             <div class="profile-badge">
                 👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:#c7d2fe; font-weight:bold; padding:0; outline:none; cursor:pointer;"></select>
             </div>
@@ -346,14 +346,14 @@
     <div id="tab-openfinance" class="tab-content">
         <div class="panel" style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
             <h2 style="color: #6366f1; margin-bottom: 10px;">🔗 Integração Open Finance</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Por ser uma aplicação 100% estática (segura, executando diretamente no navegador sem servidor central), <strong>não é possível efetuar uma ligação OAuth direta e em tempo real com as instituições financeiras</strong>, dado que o Banco Central exige que as entidades recetoras sejam devidamente homologadas com servidores autenticados.</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Por ser uma aplicação 100% estática (segura, a correr no seu próprio navegador e sem servidor central), <strong>não é possível efetuar uma ligação OAuth direta e real aos bancos</strong>, pois o Banco Central exige que as aplicações recetoras sejam instituições regulamentadas com servidores autenticados.</p>
             
             <div style="background: var(--bg-input); padding: 20px; border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 20px;">
                 <h3 style="margin-bottom: 10px; color: var(--accent);">Alternativa Segura: Importação de Extrato (CSV)</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 15px;">É possível descarregar o extrato bancário em formato CSV ou Excel para classificar as despesas no painel.</p>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Pode descarregar o extrato do seu banco em formato Excel/CSV e colar os dados aqui para classificar automaticamente.</p>
                 <button class="btn-outline" style="cursor:not-allowed; opacity:0.5;" title="Em desenvolvimento">Importar CSV Nubank / Itaú (Em breve)</button>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);">Desta forma, os seus registos financeiros permanecem armazenados unicamente no seu dispositivo.</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Esta é a única forma segura de garantir que os seus dados bancários não vão parar às mãos de terceiros.</p>
         </div>
     </div>
 </div>
@@ -370,7 +370,7 @@
                 <strong>Para começar, insira a sua chave Google Gemini API (gratuita):</strong>
                 <input type="password" id="chatApiKey" placeholder="AIzaSy..." style="width:100%; margin-top:8px; padding:8px; border-radius:6px; background:#0f172a; border:1px solid #6366f1; color:#fff;" onchange="saveApiKey(this.value)">
             </div>
-            <div class="chat-bubble chat-ai">Olá! Eu sou o seu assistente financeiro. Como posso ajudar com o seu orçamento deste mês? (Pode pedir sugestões, análise de despesas ou comparações com meses anteriores).</div>
+            <div class="chat-bubble chat-ai">Olá! Eu sou o seu assistente financeiro. Como posso ajudar com o seu orçamento deste mês? (Pode pedir dicas, para analisar onde cortamos gastos, ou comparar com meses anteriores).</div>
         </div>
         <div class="modal-footer">
             <input type="text" id="chatInput" placeholder="Pergunte algo sobre as suas finanças..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
@@ -523,7 +523,7 @@ function promptNewProfile() {
     if (name && name.trim() && !store.config.profilesList.includes(name.trim())) {
         const clean = name.trim();
         store.config.profilesList.push(clean);
-        store = sanitizeStore(store);
+        store = sanitizeStore(store); // Auto constrói a estrutura
         currentProfile = clean;
         init();
     }
@@ -753,7 +753,7 @@ function importBackup(e) {
 }
 
 // -----------------------------------------------------
-// IA GEMINI - CHAT INTERATIVO
+// IA GEMINI - CHAT INTERATIVO (Fix 1.5 Stable)
 // -----------------------------------------------------
 function openChat() { document.getElementById("chatModal").style.display = "flex"; }
 function closeChat() { document.getElementById("chatModal").style.display = "none"; }
@@ -770,7 +770,8 @@ function appendMessage(sender, text) {
     
     let htmlText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    htmlText = htmlText.replace(/\n/g, '<br>');
+    htmlText = htmlText.replace(/
+/g, '<br>');
     
     div.innerHTML = htmlText;
     chatContainer.appendChild(div);
@@ -793,7 +794,6 @@ async function sendChatMessage() {
     loadingDiv.textContent = "A pensar";
     document.getElementById("chatContainer").appendChild(loadingDiv);
 
-    // Preparar contexto completo do PERFIL ATUAL
     const curTot = calcMonthTotals(currentMonth);
     const prevTot = prevMonthStr ? calcMonthTotals(prevMonthStr) : null;
     let contexto = `PERFIL ATUAL: ${currentProfile}\nCONTEXTO FINANCEIRO:\nMês Atual (${currentMonth}):\n- Entradas: R$ ${curTot.rec.toFixed(2)}\n- Despesas Essenciais: R$ ${curTot.ess.toFixed(2)}\n- Cartões: R$ ${curTot.cards.toFixed(2)} (Bancos: ${store.config.banks.map(b => `${b} R$ ${getBankTotal(b).toFixed(2)}`).join(", ")})\n- Outras Variáveis: R$ ${curTot.out.toFixed(2)}\n- Sobra: R$ ${curTot.saldo.toFixed(2)}\n\n`;
@@ -805,31 +805,66 @@ async function sendChatMessage() {
     chatHistory.push({ role: "user", parts: [{ text: contexto + "Pergunta do usuário: " + text }] });
 
     try {
-        const ep = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
-        const response = await fetch(`${ep}?key=${apiKey}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                systemInstruction: { parts: [{ text: "Você é um consultor financeiro pessoal direto e amigável. Analise os dados que o usuário enviou e responda à pergunta dele. Seja objetivo, fale em português de forma clara, use listas bullet-points se citar várias coisas, e ajude-o a economizar considerando o perfil atual dele. Não forneça introduções muito longas." }]},
-                contents: chatHistory
-            })
-        });
+        let targetEndpoint = null;
+        try {
+            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const listData = await listRes.json();
+            if (listData.models && Array.isArray(listData.models)) {
+                const validModels = listData.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
+                const preferred = validModels.find(m => m.name.includes("3.8-flash")) ||
+                                  validModels.find(m => m.name.includes("2.0-flash")) ||
+                                  validModels.find(m => m.name.includes("1.5-flash") && !m.name.includes("latest")) ||
+                                  validModels[0];
+                if (preferred) targetEndpoint = `https://generativelanguage.googleapis.com/v1beta/${preferred.name}:generateContent`;
+            }
+        } catch (e) { console.warn("ListModels error", e); }
 
-        const json = await response.json();
+        const fallbacks = [
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+        ];
+        
+        const candidateEndpoints = targetEndpoint ? [targetEndpoint, ...fallbacks] : fallbacks;
+        const uniqueEndpoints = [...new Set(candidateEndpoints)];
+
+        let success = false;
+        let lastError = null;
+        let replyText = "";
+
+        for (const ep of uniqueEndpoints) {
+            try {
+                const response = await fetch(`${ep}?key=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        systemInstruction: { parts: [{ text: "Você é um consultor financeiro pessoal direto e amigável. Analise os dados que o usuário enviou e responda à pergunta dele. Seja objetivo, fale em português do Brasil de forma clara, use listas bullet-points se citar várias coisas, e ajude-o a economizar considerando o perfil atual dele. Não forneça introduções muito longas." }]},
+                        contents: chatHistory
+                    })
+                });
+                const json = await response.json();
+                if (response.ok && json.candidates && json.candidates[0]?.content) {
+                    replyText = json.candidates[0].content.parts[0].text;
+                    success = true;
+                    break;
+                } else {
+                    lastError = json.error || json;
+                    if (response.status === 400 && lastError?.message?.includes("API key not valid")) break;
+                }
+            } catch (err) { lastError = err; }
+        }
+
         loadingDiv.remove();
-
-        if (response.ok && json.candidates && json.candidates[0]?.content) {
-            const reply = json.candidates[0].content.parts[0].text;
-            chatHistory.push({ role: "model", parts: [{ text: reply }] });
-            appendMessage('model', reply);
+        if (success) {
+            chatHistory.push({ role: "model", parts: [{ text: replyText }] });
+            appendMessage('model', replyText);
         } else {
-            console.error("Erro da API:", json);
-            appendMessage('model', `⚠️ Erro da API: ${json.error?.message || "Ocorreu um erro ao comunicar com a inteligência artificial."}`);
+            appendMessage('model', `⚠️ Erro da API: ${lastError?.message || JSON.stringify(lastError)}`);
             chatHistory.pop();
         }
     } catch (err) {
         loadingDiv.remove();
-        appendMessage('model', `⚠️ Erro de rede: ${err.message}. Verifique a sua conexão.`);
+        appendMessage('model', `⚠️ Erro de rede: ${err.message}`);
         chatHistory.pop();
     }
 }
