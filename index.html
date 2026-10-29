@@ -965,7 +965,12 @@ function pushCloud() {
             await firebase.database().ref('financeStore').set(payload);
         } catch (e) {
             console.error("Firebase save erro", e);
-            toast("⚠️ Falha ao sincronizar com a nuvem: " + (e.message || e));
+            if (e.message && e.message.includes("Permission denied")) {
+                toast("⚠️ Nuvem Bloqueada: Faça login no Menu (☰) > Conta da Nuvem.");
+                cloudBlocked = true; // Para de tentar até logar
+            } else {
+                toast("⚠️ Falha ao sincronizar com a nuvem: " + (e.message || e));
+            }
         } finally {
             setTimeout(() => isSyncing = false, 350);
         }
@@ -1008,14 +1013,28 @@ function attachCloud() {
 
 function initFirebase() {
     const configStr = store.config.firebaseConfig;
-    if (!configStr) return;
+    if (!configStr || fbListening) return;
     try {
         const config = JSON.parse(configStr);
         if (!firebase.apps.length) firebase.initializeApp(config);
         fbListening = true;
-        cloudUser = { email: "Conectado via Chave Firebase" };
-        const l = document.getElementById("cloudLogin"); if (l) l.remove();
-        attachCloud();
+        
+        firebase.auth().onAuthStateChanged(user => {
+            cloudUser = user;
+            if (user) { 
+                const l = document.getElementById("cloudLogin"); if (l) l.remove(); 
+                cloudBlocked = false;
+                attachCloud(); 
+            } else { 
+                try { firebase.database().ref('financeStore').off('value'); } catch (e) {} 
+                cloudBlocked = true; // Pausa envio para evitar Permission Denied
+                // Só mostra a tela de login automaticamente se já houver email salvo (tentativa de relogar)
+                // Caso contrário, aguarda o usuário clicar em "Conta da nuvem" no menu.
+                if (localStorage.getItem("fin_email")) {
+                    showCloudLogin("Sua sessão expirou. Faça login novamente.");
+                }
+            }
+        });
     } catch (e) { console.error("Erro ao iniciar Firebase:", e); }
 }
 
