@@ -260,20 +260,23 @@
         header.appbar { flex-wrap: wrap; width: 100%; }
         .ab-right { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
         @media (max-width: 560px) {
-            body { padding: 8px; }
-            header.appbar { padding: 8px 10px; gap: 8px; }
-            .ab-left { width: 100%; justify-content: flex-start; }
-            .ab-right { width: 100%; justify-content: space-between; gap: 6px; }
-            .ab-right .profile-badge { flex: 1 1 auto; min-width: 0; max-width: 42%; }
-            .ab-right .profile-badge select { width: 100%; text-overflow: ellipsis; overflow: hidden; }
-            .ab-right #monthSelect { flex: 1 1 auto; max-width: 34%; padding: 6px; font-size: .78rem; }
-            .icon-btn { width: 34px; height: 34px; font-size: .95rem; flex-shrink: 0; }
-            .val-col { width: 126px; min-width: 122px; }
-            .val-col input { font-size: 0.82rem; padding: 5px 4px; }
-            .action-col { width: 30px; }
-            th, td { padding: 6px 5px; font-size: 0.84rem; }
-            td input { padding: 5px 6px; font-size: 0.84rem; }
-            #notifPanel { top: 60px; }
+            body { padding: 6px; }
+            /* Melhoria na distribuição da barra superior */
+            header.appbar { padding: 12px 10px; gap: 12px; flex-direction: column; align-items: stretch; border-radius: 0 0 16px 16px; }
+            .ab-left { width: 100%; justify-content: center; text-align: center; }
+            .ab-right { width: 100%; display: grid; grid-template-columns: 1fr 1fr auto auto auto; gap: 8px; align-items: center; }
+            .ab-right .profile-badge { width: 100%; max-width: none; min-width: 0; padding: 6px; justify-content: center; }
+            .ab-right .profile-badge select { width: 100%; text-overflow: ellipsis; overflow: hidden; font-size: 0.8rem; text-align: center; }
+            .ab-right #monthSelect { width: 100%; max-width: none; min-width: 0; padding: 6px; font-size: 0.8rem; text-align: center; }
+            .icon-btn { width: 38px; height: 38px; font-size: 1.1rem; flex-shrink: 0; }
+            
+            /* Correção definitiva dos números cortados na tabela */
+            .val-col { width: 145px; min-width: 140px; }
+            .val-col input { font-size: 0.9rem; padding: 6px 4px; text-align: right; letter-spacing: -0.3px; }
+            .action-col { width: 32px; }
+            th, td { padding: 5px 4px; font-size: 0.85rem; }
+            td input { padding: 6px 6px; font-size: 0.85rem; }
+            #notifPanel { top: 110px; }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
