@@ -1,4 +1,4 @@
-// Service Worker: notificações de vencimento (melhor esforço)
+// FinEly Service Worker: notificações inteligentes de vencimento
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 
@@ -13,8 +13,10 @@ async function checkDue() {
     const diff = Math.round((new Date(y, m - 1, d) - now) / 86400000);
     if (diff > 3 || diff < -5) continue;
     const when = diff < 0 ? `venceu há ${-diff} dia(s)` : diff === 0 ? "vence hoje" : diff === 1 ? "vence amanhã" : `vence em ${diff} dias`;
-    await self.registration.showNotification(`💳 ${x.bank}: ${when}`, {
-      body: `Fatura de ${x.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} pendente.`,
+    const prefix = x.kind === "fixa" ? "🏠" : x.kind === "variavel" ? "💸" : x.kind === "avulsa" ? "📌" : "💳";
+    const label = x.subtitle ? `${x.subtitle} (${x.bank})` : x.bank;
+    await self.registration.showNotification(`${prefix} FinEly · ${x.bank}: ${when}`, {
+      body: `${label} no valor de ${Number(x.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} está pendente.`,
       tag: `due_${x.bank}_${x.iso}`, icon: "icon-192.png", badge: "icon-192.png"
     });
   }

@@ -1,11 +1,12 @@
 {
-  "name": "Controle Financeiro & Cartões",
-  "short_name": "Finanças",
+  "name": "FinEly — Gestão Financeira",
+  "short_name": "FinEly",
+  "description": "Gestão financeira inteligente, controle de cartões, faturas e planejamento pessoal.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0a0c16",
+  "theme_color": "#0a0c16",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
