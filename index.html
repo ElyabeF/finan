@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Controle Financeiro & Cartões</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-main: #0f172a; --bg-card: #1e293b; --bg-input: #0f172a;
@@ -489,6 +492,223 @@
         .type-opt { padding: 12px 6px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-muted); font-size: .8rem; font-weight: 600; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .type-opt.sel { border-color: var(--accent); color: var(--accent); background: rgba(250,204,21,.08); }
         .np-clear { display: flex; gap: 8px; }
+
+        /* ============ VISUAL MAIS LIMPO ============ */
+        #appbarSpacer { height: 78px; margin-bottom: 10px; }
+        #toastBox { z-index: 2300; }
+        @media (max-width: 700px) {
+            header.appbar { flex-direction: row; flex-wrap: nowrap; padding: 8px 10px; gap: 8px; align-items: center; border-radius: 0 0 16px 16px; }
+            .ab-left { display: none; }
+            .ab-right { width: 100%; flex: 1; }
+            #appbarSpacer { height: 62px; margin-bottom: 8px; }
+            #notifPanel { top: 62px; }
+        }
+        #greetCard { min-height: 0 !important; padding: 18px !important; }
+        #greetDue { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+        #greetDue:empty { display: none; }
+        .due-chip { display: inline-flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 9px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.1); color: #fff; font-size: .84rem; font-weight: 500; cursor: pointer; }
+        .due-chip b { font-weight: 700; }
+        .due-chip .due-go { margin-left: auto; font-size: .76rem; font-weight: 700; white-space: nowrap; opacity: .9; }
+        .due-chip.danger { background: rgba(239,68,68,.22); border-color: rgba(248,113,113,.65); color: #fecaca; font-weight: 700; }
+        .fix-box { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 4px; }
+        .fix-box summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px 2px; font-weight: 700; font-size: .9rem; list-style: none; }
+        .fix-box summary::-webkit-details-marker { display: none; }
+        .fix-box summary::after { content: "▸"; color: var(--text-muted); margin-left: 8px; transition: transform .2s; }
+        .fix-box[open] summary::after { transform: rotate(90deg); }
+        .fix-box summary .fix-count { margin-left: auto; font-size: .76rem; font-weight: 600; color: var(--text-muted); }
+        #kpiPanel .kpi-grid { margin: 0; }
+        .bank-due { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+        .bank-more { font-size: .72rem; color: var(--text-muted); margin-top: 8px; opacity: .8; }
+        .bank-card.expanded .bank-more { display: none; }
+        .bank-set { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+        .bank-set .bank-meta { justify-content: space-between; }
+        .bank-card.flash { animation: dueFlash 1.8s ease; }
+        @keyframes dueFlash { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } 25%, 70% { box-shadow: 0 0 0 3px rgba(239,68,68,.65); } }
+        .tx-entry-month { max-width: none !important; white-space: nowrap !important; }
+        .due-row { padding: 12px 0; border-top: 1px solid var(--border); }
+        .due-row.late .due-when { color: #f87171; }
+        .due-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .due-val { font-size: 1.05rem; white-space: nowrap; }
+        .due-when { font-size: .8rem; color: var(--text-muted); margin-top: 6px; }
+        .due-ref { display: block; font-size: .72rem; opacity: .8; margin-top: 2px; }
+        .due-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .due-actions button { flex: 1; padding: 10px; border-radius: 12px; }
+        .panel.acc > .acc-head .acc-chev { margin-left: 4px; }
+        #finishedPanel.acc .acc-head { border-bottom: 0; }
+        #finishedPanel.acc.open .acc-head { border-bottom: 1px solid var(--border); }
+
+        /* ======================================================================
+           DESIGN SYSTEM v2 — minimalista, degradê de marca, cartões sem borda
+           ====================================================================== */
+        :root {
+            --bg-main: #0a0c16; --bg-card: #131727; --bg-input: #1a2033;
+            --border: rgba(255,255,255,.07); --text-main: #f3f4fa; --text-muted: #8a93ad;
+            --accent: #8b7cf6; --accent-hover: #7c6cf0;
+            --success: #34d399; --danger: #fb7185; --warning: #fbbf24;
+            --brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #d946ef 100%);
+            --brand-soft: rgba(139,124,246,.14);
+        }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        html { background: var(--bg-main); }
+        body { background: var(--bg-main); letter-spacing: -.005em; }
+        body::before { background: radial-gradient(ellipse at 50% 0, rgba(124,92,246,.24), transparent 70%); }
+        .kpi-value, .tx-val, .bank-total, #greetSaldo, .val-col, .hv, .due-val, .hero-stats b { font-variant-numeric: tabular-nums; }
+
+        /* Cabeçalho */
+        header.appbar { background: rgba(10,12,22,.95); border-bottom: 1px solid var(--border); box-shadow: none; border-radius: 0 0 22px 22px; padding: 10px 14px; flex-wrap: nowrap !important; flex-direction: row !important; align-items: center; }
+        .container, header.appbar { max-width: 1120px; }
+        #appbarSpacer { height: 72px; margin-bottom: 8px; }
+        .ab-right { display: flex !important; flex: 1; width: auto !important; align-items: center; gap: 8px; flex-wrap: nowrap; justify-content: flex-start !important; }
+        .ab-left { margin-right: 10px; }
+        .ab-spacer { flex: 1; }
+        .avatar { position: relative; width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700; font-size: .95rem; color: #fff; cursor: pointer; background: linear-gradient(135deg, var(--profile-color, #6366f1), #a855f7); box-shadow: 0 6px 16px -6px rgba(139,92,246,.8); }
+        .avatar select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; padding: 0; }
+        .month-nav { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 3px; min-width: 0; }
+        .mn-btn { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--text-muted); font-size: 1.3rem; line-height: 1; display: grid; place-items: center; padding: 0; cursor: pointer; flex: none; }
+        .mn-btn:active { background: rgba(255,255,255,.08); color: #fff; }
+        .mn-label { position: relative; min-width: 108px; text-align: center; font-weight: 650; font-size: .88rem; padding: 0 4px; cursor: pointer; white-space: nowrap; }
+        .mn-label select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; padding: 0; cursor: pointer; }
+        .icon-btn { background: transparent; border: 0; color: var(--text-muted); border-radius: 50%; width: 38px; height: 38px; }
+        .icon-btn:hover, .icon-btn:active { background: rgba(255,255,255,.07); color: #fff; }
+        .badge-dot { background: linear-gradient(135deg, #f43f5e, #fb7185); top: 0; right: 0; box-shadow: 0 0 0 2px var(--bg-main); }
+        #notifPanel, #drawer { background: var(--bg-card); border-color: var(--border); border-radius: 22px; }
+        #drawer { border-radius: 24px 0 0 24px; }
+        .dr-ico { border-radius: 12px; background: var(--brand-soft); color: #c4b5fd; }
+        @media (max-width: 700px) {
+            .ab-right .icon-btn { width: 36px; height: 36px; }
+            .mn-label { min-width: 96px; }
+            #appbarSpacer { height: 68px; margin-bottom: 8px; }
+            #notifPanel { top: 66px; }
+        }
+
+        /* Navegação superior (desktop) */
+        .tabs { background: var(--bg-card); border: 1px solid var(--border); padding: 4px; border-radius: 999px; gap: 4px !important; max-width: 620px; margin: 0 auto 20px; }
+        .tab-btn { background: transparent; border: 0; color: var(--text-muted); padding: 10px 18px; font-weight: 600; }
+        .tab-btn.active { background: var(--brand); color: #fff; border: 0; box-shadow: 0 8px 18px -8px rgba(139,92,246,.9); }
+
+        /* Painéis */
+        .panel, #homeSpend, .panel.acc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 22px !important; margin-bottom: 14px; }
+        .panel-header { background: transparent; color: var(--text-main); font-size: .96rem; font-weight: 650; letter-spacing: 0; padding: 16px 18px 12px; border-bottom: 0; }
+        .panel.acc .acc-head { padding: 17px 18px; }
+        .panel.acc.open .acc-head { padding-bottom: 8px; }
+        .acc-chev { color: var(--text-muted); }
+        #tab-cartoes > .panel-header { padding: 4px 4px 14px; font-size: 1.35rem; font-weight: 750; letter-spacing: -.02em; border-radius: 0 !important; }
+        #tab-cartoes > .panel-header .btn { padding: 8px 14px !important; font-size: .82rem !important; border-radius: 999px; }
+
+        /* Hero (saldo) */
+        #greetCard, #greetCard[data-t] { background: linear-gradient(135deg, #4338ca 0%, #7c3aed 52%, #c026d3 100%) !important; border-radius: 28px !important; padding: 22px !important; box-shadow: 0 22px 44px -22px rgba(124,58,237,.8); margin-bottom: 14px !important; }
+        #greetCard::before { inset: 0 !important; animation: none !important; filter: blur(30px); opacity: .6; background: radial-gradient(circle at 90% 0%, rgba(255,255,255,.35), transparent 45%), radial-gradient(circle at 0% 100%, rgba(244,114,182,.55), transparent 50%); }
+        #greetCard::after { background: linear-gradient(180deg, rgba(10,12,22,0) 35%, rgba(10,12,22,.3) 100%); }
+        #greetHello { font-size: .9rem !important; font-weight: 500; color: rgba(255,255,255,.85) !important; }
+        #greetSaldo { font-size: 2.4rem !important; font-weight: 800; letter-spacing: -.03em; margin-top: 2px; }
+        #greetBar { background: linear-gradient(90deg, #a7f3d0, #fde68a, #fda4af) !important; }
+        #greetSub { font-size: .76rem !important; }
+        .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+        .hero-stats > div { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; padding: 11px 13px; min-width: 0; }
+        .hero-stats small { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: rgba(255,255,255,.78); }
+        .hero-stats small::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #6ee7b7; }
+        .hero-stats small.o::before { background: #f9a8d4; }
+        .hero-stats b { display: block; margin-top: 3px; font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+        body.hide-values :is(#heroRec, #heroOut) { filter: blur(7px); }
+        .due-chip { border-radius: 14px; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.16); }
+        .due-chip.danger { background: rgba(251,113,133,.22); border-color: rgba(253,164,175,.55); color: #ffe4e6; }
+        #greetCard #eyeBtn { border-radius: 50%; }
+
+        /* KPIs */
+        .kpi-card { background: var(--bg-input); border: 1px solid var(--border); border-left: 1px solid var(--border); border-radius: 18px; background-image: none; }
+        .kpi-card.positive .kpi-value { color: var(--success); } .kpi-card.negative .kpi-value { color: var(--danger); }
+        .kpi-title { text-transform: none; font-size: .76rem; font-weight: 500; }
+        .kpi-value { font-weight: 750; }
+
+        /* Botões e campos */
+        .btn { background: var(--brand); color: #fff; border-radius: 14px; font-weight: 650; box-shadow: 0 10px 22px -12px rgba(139,92,246,.9); }
+        .btn:hover { background: var(--brand); filter: brightness(1.08); }
+        .btn-outline { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); }
+        .btn-outline:hover { border-color: rgba(139,124,246,.6); color: #c4b5fd; }
+        .btn-add { background: var(--brand-soft); color: #c4b5fd; border: 1px dashed rgba(139,124,246,.45); border-radius: 12px; }
+        .btn-danger { background: rgba(251,113,133,.12); color: #fda4af; border: 1px solid rgba(251,113,133,.25); }
+        input, select { background: var(--bg-input); border: 1px solid transparent; border-radius: 12px; }
+        input:focus, select:focus { border-color: rgba(139,124,246,.7); box-shadow: 0 0 0 3px rgba(139,124,246,.18); }
+        input[type=checkbox] { accent-color: #8b5cf6; }
+        .tx-field input, .tx-field select { border-color: var(--border); }
+
+        /* Tabelas */
+        th { background: transparent; color: var(--text-muted); text-transform: none; font-weight: 600; font-size: .74rem; letter-spacing: .02em; }
+        th, td { border-bottom: 1px solid var(--border); }
+        td input { background: transparent; }
+        td input:hover, td input:focus { border-color: rgba(139,124,246,.5); background: var(--bg-input); }
+        .total-row td { background: var(--brand-soft); color: var(--text-main); }
+        .subcat-label { background: transparent; color: var(--text-muted); text-transform: none; letter-spacing: 0; font-size: .78rem; font-weight: 600; padding: 14px 16px 6px; border-bottom: 0; }
+
+        /* Selos, status e grupos */
+        .badge { border-radius: 999px; text-shadow: none; font-size: .76rem; font-weight: 650; padding: 4px 11px; }
+        .status-pill.paid { background: rgba(52,211,153,.14); color: #6ee7b7; }
+        .status-pill.pending { background: rgba(251,191,36,.14); color: #fcd34d; }
+        .grp-btn { background: var(--bg-card); border-color: var(--border); }
+        .grp-btn.active, .subtabs button.active { background: var(--brand); color: #fff; border-color: transparent; }
+        .type-opt.sel { background: var(--brand-soft); }
+        .chip { background: var(--brand-soft); color: #c4b5fd; }
+
+        /* Cartões de fatura */
+        .bank-card { border-radius: 22px; padding: 18px 18px 16px 22px; background: var(--bg-card); }
+        .bank-card-strip { width: 4px !important; height: 100% !important; }
+        .bank-card .badge { background: rgba(255,255,255,.07) !important; color: var(--text-main); }
+        .bank-total { font-size: 1.65rem; font-weight: 750; letter-spacing: -.02em; }
+        .bank-card.expanded { border-color: rgba(139,124,246,.55); }
+        .next-invoice-link { background: transparent; border: 1px dashed rgba(139,124,246,.45); color: #c4b5fd; border-radius: 16px; }
+
+        /* Lançamentos como lista limpa */
+        #txLedgerTable { border-spacing: 0; padding: 0 14px 6px; }
+        #txLedgerTable tbody tr.tx-row { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 12px 2px; }
+        #txLedgerTable tbody tr.tx-row:hover { border-color: var(--border); background: rgba(255,255,255,.02); }
+        .tx-ico { border-radius: 50%; }
+        .tx-search-bar { background: transparent; border-bottom: 0; }
+        .home-row { background: transparent; border-radius: 0; border-top: 1px solid var(--border); padding: 12px 2px; margin-top: 0; }
+        .home-ico { border-radius: 14px; }
+        .home-link { color: #c4b5fd; }
+        .fix-box summary { padding: 14px 2px; }
+
+        /* Folhas e avisos */
+        .sheet-ov { background: rgba(5,7,15,.68); }
+        .sheet { border-radius: 28px 28px 0 0; background: var(--bg-card); border: 0; border-top: 1px solid var(--border); padding: 10px 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
+        .sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.18); margin: 0 auto 14px; }
+        .toast { background: var(--bg-card); border-radius: 16px; }
+        .toast button { background: var(--brand); color: #fff; border-radius: 10px; }
+        .chat-user { color: #fff; background: var(--brand); }
+        .modal { background: var(--bg-card); border-radius: 22px; }
+        .mk-item { border-radius: 16px; }
+        #btnBackToTop { background: var(--bg-card); color: #fff; border: 1px solid var(--border); }
+        #fab { background: var(--brand); border-radius: 50%; }
+
+        /* Barra inferior flutuante (celular) */
+        @media (max-width: 700px) {
+            body { padding-bottom: 120px; }
+            #bottomNav { left: 14px; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding: 8px 8px; border-radius: 30px; background: rgba(19,23,39,.97); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 20px 44px -14px rgba(0,0,0,.8); align-items: center; justify-content: space-between; }
+            #bottomNav button { flex: 1; padding: 6px 2px; font-size: .66rem; border-radius: 18px; gap: 3px; }
+            #bottomNav button span { width: 44px; height: 28px; border-radius: 14px; transition: background .2s; }
+            #bottomNav button.active { background: transparent; color: #fff; }
+            #bottomNav button.active span { background: var(--brand-soft); color: #c4b5fd; }
+            #bottomNav .bn-add { flex: 0 0 58px; width: 58px; height: 58px; margin-top: -34px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0; justify-content: center; border: 4px solid var(--bg-main); box-shadow: 0 14px 26px -8px rgba(139,92,246,.85); }
+            #bottomNav .bn-add span { width: 26px; height: 26px; background: transparent; }
+            #fab { display: none !important; }
+            #btnBackToTop { bottom: 118px; }
+        }
+
+        /* Compras futuras: cartões no celular */
+        @media (max-width: 700px) {
+            #futPlan table thead { display: none; }
+            #futPlan table, #futPlan tbody { display: block; width: 100%; }
+            #futureTableBody tr { display: grid; grid-template-columns: 26px 1fr auto; column-gap: 10px; row-gap: 6px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--border); }
+            #futureTableBody td { display: block; border: 0; padding: 0; width: auto !important; }
+            #futureTableBody td:nth-child(1) { grid-column: 1; grid-row: 1 / span 3; align-self: start; }
+            #futureTableBody td:nth-child(3) { grid-column: 2; grid-row: 1; font-size: .95rem; }
+            #futureTableBody td:nth-child(6) { grid-column: 3; grid-row: 1; text-align: right; }
+            #futureTableBody td:nth-child(4) { grid-column: 2; grid-row: 2; }
+            #futureTableBody td:nth-child(5) { grid-column: 3; grid-row: 2; text-align: right; font-size: .8rem; }
+            #futureTableBody td:nth-child(2) { grid-column: 2; grid-row: 3; }
+            #futureTableBody td:nth-child(7) { grid-column: 3; grid-row: 3; text-align: right; }
+            #futureTableBody td[colspan] { grid-column: 1 / -1; grid-row: auto; text-align: center; }
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -509,10 +729,13 @@
             </div>
         </div>
         <div class="ab-right">
-            <div class="profile-badge" style="padding:0 6px;">
-                👤 <select id="profileSelect" onchange="changeProfile()" style="background:transparent; border:none; color:var(--profile-color); font-weight:bold; padding:0; outline:none; cursor:pointer; filter: brightness(1.5);"></select>
+            <label class="avatar" title="Trocar perfil"><span id="avatarLetter">M</span><select id="profileSelect" onchange="changeProfile()" aria-label="Perfil"></select></label>
+            <div class="month-nav">
+                <button class="mn-btn" onclick="stepMonth(-1)" aria-label="Mês anterior">‹</button>
+                <label class="mn-label"><span id="monthLabel">—</span><select id="monthSelect" onchange="changeMonth()" aria-label="Mês"></select></label>
+                <button class="mn-btn" onclick="stepMonth(1)" aria-label="Próximo mês">›</button>
             </div>
-            <select id="monthSelect" onchange="changeMonth()"></select>
+            <span class="ab-spacer"></span>
             <button class="icon-btn" onclick="openChat()" title="Consultor IA" aria-label="Consultor IA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></button>
             <button class="icon-btn" id="bellBtn" onclick="toggleNotifPanel(event)" title="Notificações" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="badge-dot" id="bellBadge">0</span></button>
             <button class="icon-btn" onclick="toggleDrawer(true)" title="Menu" aria-label="Menu"><span data-i="menu"></span></button>
@@ -529,15 +752,7 @@
         <button class="tab-btn active" onclick="switchTab('visao', this)">Visão Mensal</button>
         <button class="tab-btn" onclick="switchTab('cartoes', this)">Faturas</button>
         <button class="tab-btn" onclick="switchTab('futuras', this)">Compras Futuras</button>
-        <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">📊 Relatórios & CSV</button>
-    </div>
-
-    <div class="kpi-grid">
-        <div class="kpi-card positive"><div class="kpi-title">Total de Entradas</div><div class="kpi-value" id="kpiEntradas">R$ 0,00</div><div class="kpi-compare" id="kpiCompEntradas"></div></div>
-        <div class="kpi-card negative"><div class="kpi-title">Total de Saídas</div><div class="kpi-value" id="kpiSaidas">R$ 0,00</div><div class="kpi-compare" id="kpiCompSaidas"></div></div>
-        <div class="kpi-card" id="kpiSaldoCard"><div class="kpi-title">Saídas − Entradas</div><div class="kpi-value" id="kpiSaldo">R$ 0,00</div><div class="kpi-compare" id="kpiSaldoSub"></div></div>
-        <div class="kpi-card"><div class="kpi-title">Reserva Ideal (6x)</div><div class="kpi-value" id="kpiReserva">R$ 0,00</div></div>
-        <div class="kpi-card" style="border-left-color: #38bdf8;"><div class="kpi-title">Compras Futuras</div><div class="kpi-value" id="kpiFuturas" style="color:#38bdf8;">R$ 0,00</div></div>
+        <button class="tab-btn" onclick="switchTab('openfinance', this)">Relatórios</button>
     </div>
 
     <!-- ===== SWIPE VIEWPORT ===== -->
@@ -552,21 +767,31 @@
                     </div>
                     <button class="icon-btn" id="eyeBtn" onclick="togglePrivacy()" title="Ocultar valores" aria-label="Ocultar valores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
+                <div class="hero-stats"><div><small class="i">Entradas</small><b id="heroRec">R$ 0,00</b></div><div><small class="o">Saídas</small><b id="heroOut">R$ 0,00</b></div></div>
                 <div style="height:8px; border-radius:8px; background:rgba(255,255,255,.1); overflow:hidden; margin-top:12px;"><div id="greetBar" style="height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#22c55e,#facc15,#ef4444); transition:width .6s ease;"></div></div>
                 <div id="greetSub" style="font-size:.78rem; color:var(--text-muted); margin-top:8px;"></div>
                 <div id="greetDue" style="margin-top:8px; font-size:.84rem;"></div>
             </div>
+            <div class="panel acc" id="kpiPanel" style="margin-bottom:14px;"><div class="panel-header acc-head" data-k="kpi" onclick="toggleAcc(this)"><span>Indicadores do mês</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="acc-body" style="padding:12px;">
+<div class="kpi-grid">
+        <div class="kpi-card positive"><div class="kpi-title">Total de Entradas</div><div class="kpi-value" id="kpiEntradas">R$ 0,00</div><div class="kpi-compare" id="kpiCompEntradas"></div></div>
+        <div class="kpi-card negative"><div class="kpi-title">Total de Saídas</div><div class="kpi-value" id="kpiSaidas">R$ 0,00</div><div class="kpi-compare" id="kpiCompSaidas"></div></div>
+        <div class="kpi-card" id="kpiSaldoCard"><div class="kpi-title">Saídas − Entradas</div><div class="kpi-value" id="kpiSaldo">R$ 0,00</div><div class="kpi-compare" id="kpiSaldoSub"></div></div>
+        <div class="kpi-card"><div class="kpi-title">Reserva Ideal (6x)</div><div class="kpi-value" id="kpiReserva">R$ 0,00</div></div>
+        <div class="kpi-card" style="border-left-color: #38bdf8;"><div class="kpi-title">Compras Futuras</div><div class="kpi-value" id="kpiFuturas" style="color:#38bdf8;">R$ 0,00</div></div>
+    </div>
+            </div></div>
             <div class="panel" id="homeSpend" style="padding:16px; margin-bottom:14px;"></div>
             <div class="main-grid">
-                <div class="panel acc"><div class="panel-header acc-head" data-k="rec" onclick="toggleAcc(this)"><span>💰 ENTRADAS</span><span class="acc-sum"><b class="hv" id="accRecTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
+                <div class="panel acc"><div class="panel-header acc-head" data-k="rec" onclick="toggleAcc(this)"><span>Entradas</span><span class="acc-sum"><b class="hv" id="accRecTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
                         <thead><tr><th>Descrição</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
                         <tbody id="receitasBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:8px;"><button class="btn-add" onclick="addRow('receitas')">+ Nova Receita</button></td></tr></tbody>
-                        <tfoot><tr class="total-row"><td>TOTAL DE ENTRADAS</td><td class="val-col" id="totalReceitasCell">R$ 0,00</td><td></td></tr></tfoot>
+                        <tfoot><tr class="total-row"><td>Total de entradas</td><td class="val-col" id="totalReceitasCell">R$ 0,00</td><td></td></tr></tfoot>
                     </table>
                 </div>
 
-                <div class="panel acc"><div class="panel-header acc-head" data-k="des" onclick="toggleAcc(this)"><span>🧾 DESPESAS</span><span class="acc-sum"><b class="hv" id="accDesTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
+                <div class="panel acc"><div class="panel-header acc-head" data-k="des" onclick="toggleAcc(this)"><span>Despesas</span><span class="acc-sum"><b class="hv" id="accDesTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
                         <thead><tr><th>Descrição</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
                         <tbody><tr><td colspan="3" class="subcat-label">Custo Essencial</td></tr></tbody>
                         <tbody id="essenciaisBody"></tbody>
@@ -577,14 +802,14 @@
                         <tbody id="naoEssenciaisBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('naoEssenciais')">+ Despesa Variável</button></td></tr></tbody>
                         <tfoot>
-                            <tr class="total-row"><td>TOTAL ESSENCIAIS</td><td class="val-col" id="totalEssenciaisCell">R$ 0,00</td><td></td></tr>
-                            <tr class="total-row"><td>TOTAL CARTÕES + VARIÁVEIS</td><td class="val-col" id="totalNaoEssenciaisCell">R$ 0,00</td><td></td></tr>
-                            <tr class="total-row" style="font-size:0.95rem;"><td>TOTAL GERAL DE DESPESAS</td><td class="val-col" id="totalGeralDespesasCell">R$ 0,00</td><td></td></tr>
+                            <tr class="total-row"><td>Essenciais</td><td class="val-col" id="totalEssenciaisCell">R$ 0,00</td><td></td></tr>
+                            <tr class="total-row"><td>Faturas e variáveis</td><td class="val-col" id="totalNaoEssenciaisCell">R$ 0,00</td><td></td></tr>
+                            <tr class="total-row" style="font-size:0.95rem;"><td>Total de despesas</td><td class="val-col" id="totalGeralDespesasCell">R$ 0,00</td><td></td></tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <div class="panel acc"><div class="panel-header acc-head" data-k="bal" onclick="toggleAcc(this)"><span>📊 BALANÇO VISUAL</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="chart-box acc-body">
+                <div class="panel acc"><div class="panel-header acc-head" data-k="bal" onclick="toggleAcc(this)"><span>Balanço</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="chart-box acc-body">
                         <div class="bar-group"><div class="bar-label"><span>Entradas</span><span id="barValEntradas">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillEntradas" style="width:0%; background:#22c55e;"></div></div></div>
                         <div class="bar-group"><div class="bar-label"><span>Essenciais</span><span id="barValEssenciais">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillEssenciais" style="width:0%; background:#38bdf8;"></div></div></div>
                         <div class="bar-group"><div class="bar-label"><span>Cartões + Variáveis</span><span id="barValNaoEssenciais">R$ 0,00</span></div><div class="bar-track"><div class="bar-fill" id="barFillNaoEssenciais" style="width:0%; background:#facc15;"></div></div></div>
@@ -596,23 +821,22 @@
 
         <div id="tab-cartoes" class="tab-content">
             <div class="panel-header" style="margin-bottom: 12px; border-radius: 8px;">
-                <span>PAINEL DE FATURAS</span>
+                <span>Faturas</span>
                 <button class="btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="promptNewBank()">+ Nova Despesa</button>
             </div>
             <div class="grp-tabs" id="grpTabs"></div>
             <div class="cards-grid" id="bankCardsContainer"></div>
-            <div class="panel" id="finishedPanel" style="margin-bottom:12px;"></div>
+            <div class="panel acc" id="finishedPanel" style="margin-bottom:12px;"></div>
             <button class="next-invoice-link" onclick="goToNextInvoiceMonth()">↗ Ver próxima fatura</button>
 
-            <div class="panel tx-entry-panel">
-                <div class="tx-entry-heading">
+            <div class="panel acc tx-entry-panel">
+                <div class="tx-entry-heading acc-head" data-k="txform" onclick="toggleAcc(this)">
                     <div>
-                        <div class="panel-header">NOVO LANÇAMENTO</div>
-                        <p>Adicione uma compra ou estorno à fatura selecionada.</p>
+                        <div class="panel-header">Novo lançamento</div>
                     </div>
-                    <span class="tx-entry-month" id="txEntryMonthLabel">—</span>
+                    <span style="display:flex;align-items:center;gap:8px;"><span class="tx-entry-month" id="txEntryMonthLabel">—</span><i class="acc-chev">▸</i></span>
                 </div>
-                <div class="tx-entry-grid">
+                <div class="tx-entry-grid acc-body">
                     <label class="tx-field tx-field-date"><span>Data da compra</span><input type="date" id="txDate"></label>
                     <label class="tx-field tx-field-bank"><span>Fatura</span><select id="txBank"></select></label>
                     <label class="tx-field tx-field-desc"><span>Descrição</span><input type="text" id="txDesc" placeholder="Ex.: Tênis, mercado, assinatura"></label>
@@ -626,13 +850,11 @@
             <div class="panel">
                 <div class="panel-header">
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <span>LANÇAMENTOS DO MÊS <small id="txListMonthLabel" class="tx-list-month">—</small></span>
+                        <span>Lançamentos <small id="txListMonthLabel" class="tx-list-month">—</small></span>
                         <button class="btn-danger" id="btnDelBulkTx" style="display:none; padding:4px 8px; font-size:0.75rem;" onclick="deleteBulkTx()"><span data-i="trash" data-s="14"></span> Excluir (<span id="countSelectedTx">0</span>)</button>
-                        <button class="btn-outline" style="padding:2px 8px; font-size:0.75rem;" onclick="clearCurrentMonthTransactions()">Limpar mês</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <select id="filterBank" onchange="renderTransactionsOnly()" style="padding:3px 6px; font-size:0.8rem;"></select>
-                        <button class="btn-outline" style="padding:3px 8px; font-size:0.8rem;" onclick="renderAll()" title="Atualizar"><span data-i="refresh" data-s="14"></span></button>
                     </div>
                 </div>
                 <div class="tx-search-bar">
@@ -647,6 +869,7 @@
                 <table id="txLedgerTable">
                     <tbody id="txTableBody"></tbody>
                 </table>
+                <div style="padding:2px 14px 14px; text-align:center;"><button class="btn-outline" style="font-size:.75rem;" onclick="clearCurrentMonthTransactions()">Limpar lançamentos do mês</button></div>
             </div>
         </div>
 
@@ -656,9 +879,9 @@
                 <button id="stMarket" onclick="futSub('market')"><span data-i="cart" data-s="16"></span> Mercado <b class="mk-badge" id="mkBadge"></b></button>
             </div>
             <div id="futPlan">
-            <div class="panel">
-                <div class="panel-header"><span>ADICIONAR COMPRA FUTURA</span></div>
-                <div class="future-form-row">
+            <div class="panel acc">
+                <div class="panel-header acc-head" data-k="futform" onclick="toggleAcc(this)"><span>Nova compra futura</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div>
+                <div class="future-form-row acc-body">
                     <input type="text" id="futureDesc" placeholder="O que planeja comprar?">
                     <input type="text" id="futureVal" inputmode="numeric" placeholder="Valor Estimado" oninput="maskCurrencyInput(this)">
                     <select id="futureBank"></select>
@@ -669,7 +892,7 @@
             <div class="panel">
                 <div class="panel-header">
                     <div>
-                        <span>ITENS PLANEJADOS</span>
+                        <span>Itens planejados</span>
                         <button class="btn-danger" id="btnDelBulkFut" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkFut()">🗑 Excluir Selecionados</button>
                     </div>
                     <span id="futureTotalBadge" style="font-size:0.85rem; color:var(--accent); font-weight:700;">Total: R$ 0,00</span>
@@ -682,7 +905,7 @@
             </div>
             <div id="futMarket" style="display:none;">
                 <div class="panel">
-                    <div class="panel-header"><span>LISTA DO MERCADO</span><span class="mk-count" id="mkCount"></span></div>
+                    <div class="panel-header"><span>Lista do mercado</span><span class="mk-count" id="mkCount"></span></div>
                     <div class="mk-add">
                         <input id="mkInput" type="text" placeholder="Adicionar item (vários separados por vírgula)" enterkeyhint="done" onkeydown="if(event.key==='Enter')marketAdd()">
                         <button class="btn mk-add-btn" onclick="marketAdd()" aria-label="Adicionar"><span data-i="plus" data-s="20"></span></button>
@@ -702,7 +925,7 @@
             <div class="main-grid" style="grid-template-columns: 1fr;">
                 <div class="panel">
                     <div class="panel-header">
-                        <span onclick="toggleImport()" style="cursor:pointer; flex:1;">📥 IMPORTAÇÃO DE EXTRATO (CSV)</span>
+                        <span onclick="toggleImport()" style="cursor:pointer; flex:1;">Importar extrato (CSV)</span>
                         <button id="importToggle" class="btn-outline" style="padding:3px 10px; font-size:0.75rem;" onclick="toggleImport()">▸ Abrir</button>
                     </div>
                     <div id="importBody" class="collapsible closed" style="padding: 20px;">
@@ -727,12 +950,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel"><div class="panel-header">✨ RESUMO DO MÊS</div><div id="monthSummary" style="padding:16px;"></div></div>
-                <div class="panel"><div class="panel-header">📈 EVOLUÇÃO MENSAL</div><div id="evolutionChart" style="padding:16px; overflow-x:auto;"></div></div>
-                <div class="panel"><div class="panel-header">📊 GASTOS POR CATEGORIA</div><div class="chart-box" id="categoryReportBody"><p style="color:var(--text-muted); text-align:center;">Nenhum gasto para exibir.</p></div></div>
-                <div class="panel"><div class="panel-header">📅 PARCELAS FUTURAS</div><div id="installmentsBody" style="padding:16px; overflow-x:auto;"></div></div>
-                <div class="panel"><div class="panel-header">📊 HISTÓRICO DE MESES</div>
-                    <div style="padding: 20px; overflow-x: auto;">
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_sum" onclick="toggleAcc(this)"><span>Resumo do mês</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="monthSummary" class="acc-body" style="padding:16px;"></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_evo" onclick="toggleAcc(this)"><span>Evolução mensal</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="evolutionChart" class="acc-body" style="padding:16px; overflow-x:auto;"></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_cat" onclick="toggleAcc(this)"><span>Gastos por categoria</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="chart-box acc-body" id="categoryReportBody"><p style="color:var(--text-muted); text-align:center;">Nenhum gasto para exibir.</p></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_inst" onclick="toggleAcc(this)"><span>Parcelas futuras</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="installmentsBody" class="acc-body" style="padding:16px; overflow-x:auto;"></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_hist" onclick="toggleAcc(this)"><span>Histórico de meses</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div>
+                    <div class="acc-body" style="padding: 20px; overflow-x: auto;">
                         <table style="min-width: 600px;">
                             <thead><tr><th>Mês / Período</th><th class="val-col">Entradas</th><th class="val-col">Fixas</th><th class="val-col">Faturas + Variáveis</th><th class="val-col">Total Saídas</th><th class="val-col">Saldo</th></tr></thead>
                             <tbody id="historyTableBody"></tbody>
@@ -780,6 +1003,7 @@
 <nav id="bottomNav">
     <button data-t="visao" onclick="bnGo('visao')"><span data-i="home" data-s="22"></span>Início</button>
     <button data-t="cartoes" onclick="bnGo('cartoes')"><span data-i="receipt" data-s="22"></span>Faturas</button>
+    <button class="bn-add" onclick="openQuickAdd()" aria-label="Novo lançamento"><span data-i="plus" data-s="26"></span></button>
     <button data-t="futuras" onclick="bnGo('futuras')"><span data-i="cart" data-s="22"></span>Compras</button>
     <button data-t="openfinance" onclick="bnGo('openfinance')"><span data-i="chart" data-s="22"></span>Relatórios</button>
 </nav>
@@ -787,6 +1011,16 @@
 <button id="btnBackToTop" onclick="scrollToTopFast()" title="Voltar ao topo">↑</button>
 
 <script>
+function syncMonthLabel() {
+    const l = document.getElementById("monthLabel"); if (l) l.textContent = currentMonth;
+    const a = document.getElementById("avatarLetter"); if (a) a.textContent = String(currentProfile || "?").trim().charAt(0).toUpperCase() || "?";
+    const s = document.getElementById("monthSelect"); if (s && s.value !== currentMonth) s.value = currentMonth;
+}
+function stepMonth(d) {
+    const i = MONTHS.indexOf(currentMonth) + d; if (i < 0 || i >= MONTHS.length) return;
+    const s = document.getElementById("monthSelect"); s.value = MONTHS[i]; changeMonth();
+}
+const _renderAll0 = renderAll; renderAll = function () { const r = _renderAll0.apply(this, arguments); syncMonthLabel(); return r; };
 const _mn = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const MONTHS = (() => {
     const now = new Date();
@@ -1019,7 +1253,7 @@ const jsq = v => esc(String(v).replace(/\\/g, "\\\\").replace(/'/g, "\\'"));
 function createBankBadgeHTML(bank, showPicker = false) {
     const col = getBankColor(bank);
     if (!showPicker) return `<span class="badge" style="background:${col};">${esc(bank)}</span>`;
-    return `<label class="badge" style="background:${col};" title="Alterar cor">${esc(bank)} ✎ <input type="color" value="${col}" class="badge-color-picker" onchange="updateBankColor('${jsq(bank)}', this.value)" onclick="event.stopPropagation()"></label>`;
+    return `<label class="badge" style="background:${col};" title="Alterar cor">${esc(bank)}<input type="color" value="${col}" class="badge-color-picker" onchange="updateBankColor('${jsq(bank)}', this.value)" onclick="event.stopPropagation()"></label>`;
 }
 function formatCentsToBRL(cents) { return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
 function parseInputCurrency(valStr) { const clean = String(valStr).replace(/[^0-9]/g, ""); return clean ? (parseInt(clean, 10) / 100) : 0; }
@@ -1579,7 +1813,7 @@ function renderTransactionsOnly() {
                 <td class="c-chk"><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td>
                 <td class="c-ico"><span class="tx-ico" style="--c:${col}">${ico(txIconFor(tag), 18)}</span></td>
                 <td class="c-main"><div class="tx-desc">${esc(cleanDisplayDesc(stripCatTag(t.desc)))}</div>
-                    <div class="tx-meta"><span title="${esc(d)}">${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : `<span class="chip chip-soft">À vista</span>`}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}</div></td>
+                    <div class="tx-meta"><span title="${esc(d)}">${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : ""}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}</div></td>
                 <td class="c-val"><div class="tx-val">${fmtBRL(t.val)}</div><button class="tx-del" onclick="deleteTx('${t.id}')" aria-label="Excluir lançamento">${ico("trash", 16)}</button></td>
             </tr>`;
         });
@@ -1860,11 +2094,11 @@ function renderFinishedInstallments() {
     const el = document.getElementById("finishedPanel"); if (!el) return;
     const paidMap = store.profiles[currentProfile].finishedPaid || {}, list = getFinishedInstallments();
     const pend = list.filter(x => !paidMap[x.key]).length;
-    el.innerHTML = `<div class="panel-header"><span>PARCELAS FINALIZADAS <small style="color:var(--text-muted);font-weight:500;">(${list.length})</small></span>${pend ? `<button class="btn" style="padding:4px 10px;font-size:.78rem;" onclick="markAllFinishedPaid()">✔ Tudo pago</button>` : ""}</div>` +
-        (list.length ? `<div style="padding:8px 12px 12px;">` + list.map(x => {
+    el.innerHTML = `<div class="panel-header acc-head" data-k="fin" onclick="toggleAcc(this)"><span>Parcelas finalizadas <small style="color:var(--text-muted);font-weight:500;">(${list.length})</small></span>${pend ? `<button class="btn" style="padding:4px 10px;font-size:.78rem;" onclick="event.stopPropagation();markAllFinishedPaid()">✔ Tudo pago</button>` : ""}<i class="acc-chev">▸</i></div>` +
+        '<div class="acc-body">' + (list.length ? `<div style="padding:8px 12px 12px;">` + list.map(x => {
             const ok = !!paidMap[x.key];
             return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);opacity:${ok ? .6 : 1};"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;overflow-wrap:anywhere;${ok ? "text-decoration:line-through;" : ""}">${esc(x.desc)}</div><div class="tx-meta">${createBankBadgeHTML(x.bank)}<span class="chip">${x.total}/${x.total} · finalizado</span><span>${esc(x.month)}</span></div></div><div style="text-align:right;"><div class="hv" style="font-weight:700;font-size:.85rem;">${fmtBRL(x.val * x.total)}</div><button class="${ok ? "btn-outline" : "btn"}" style="padding:3px 8px;font-size:.72rem;margin-top:4px;" onclick="toggleFinishedPaid('${jsq(x.key)}')">${ok ? "↩ Desfazer" : "✔ Pago"}</button></div></div>`;
-        }).join("") + `</div>` : `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.84rem;">Nenhum parcelamento finalizado ainda. Quando a última parcela vencer, ele aparece aqui.</div>`);
+        }).join("") + `</div>` : `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.84rem;">Nenhum parcelamento finalizado ainda. Quando a última parcela vencer, ele aparece aqui.</div>`) + '</div>';
 }
 function renderGroupTabs() {
     const el = document.getElementById("grpTabs"); if (!el) return;
@@ -2113,7 +2347,7 @@ function renderAll() {
         const dueDisplay = String(info.venc || "Dia 10").replace(/^Dia\s*/i, "");
         const bankTx = (data.transactions || []).filter(t => t.bank === bank);
         const detailRows = bankTx.length ? bankTx.map(t => `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:.78rem;border-top:1px solid var(--border);"><span>${esc(cleanDisplayDesc(t.desc))} ${cleanParcelaDisplay(t.parcela || "") && !/^(à\s*vista)$/i.test(cleanParcelaDisplay(t.parcela || "")) ? `(${esc(cleanParcelaDisplay(t.parcela))})` : ""}</span><b>${fmtBRL(t.val)}</b></div>`).join("") : `<div style="font-size:.78rem;color:var(--text-muted);padding:6px 0;">Nenhum lançamento.</div>`;
-        bankContainer.innerHTML += `<div class="bank-card" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta" style="margin-bottom:6px;"><span>Tipo: <select class="type-sel" onclick="event.stopPropagation()" onchange="setBankType('${jsq(bank)}', this.value)">${Object.keys(BANK_TYPES).map(k => `<option value="${k}" ${getBankType(bank) === k ? "selected" : ""}>${BANK_TYPES[k].label}</option>`).join("")}</select></span></div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" onclick="event.stopPropagation()" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" onclick="event.stopPropagation()" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div><div style="font-size:.74rem;color:var(--text-muted);margin-top:6px;">📆 ${dueFull} · fatura de ${esc(currentMonth)}</div><div class="bank-card-detail">${detailRows}</div></div>`;
+        bankContainer.innerHTML += `<div class="bank-card" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-due">📆 ${dueFull || "Sem vencimento definido"}</div><div class="bank-more">Toque para ver detalhes ▾</div><div class="bank-card-detail"><div class="bank-set" onclick="event.stopPropagation()"><div class="bank-meta"><span>Tipo: <select class="type-sel" onchange="setBankType('${jsq(bank)}', this.value)">${Object.keys(BANK_TYPES).map(k => `<option value="${k}" ${getBankType(bank) === k ? "selected" : ""}>${BANK_TYPES[k].label}</option>`).join("")}</select></span></div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div></div>${detailRows}</div></div>`;
     });
 
     renderFinishedInstallments();
@@ -2368,7 +2602,7 @@ function getAlerts(includeDismissed) {
     getDueList().forEach(x => {
         const when = x.diff < 0 ? `Vencida há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
         const rem = x.diff === 5 || x.diff === 1; // lembretes: 5 dias e 1 dia antes
-        al.push({ level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon: "💳", title: `${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: `due_${x.bank}_${x.iso}`, notifyKey: `due_${x.bank}_${x.iso}_d${x.diff}`, notify: rem, tab: "cartoes" });
+        al.push({ due: true, level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon: "💳", title: `${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: `due_${x.bank}_${x.iso}`, notifyKey: `due_${x.bank}_${x.iso}_d${x.diff}`, notify: rem, tab: "cartoes" });
     });
     const cur = calcMonthTotals(currentMonth);
     if (cur.falta > 0) al.push({ level: "danger", icon: "📉", title: "Saídas maiores que as entradas", text: `${currentMonth}: faltam ${fmtBRL(cur.falta)}`, key: `neg_${currentMonth}`, tab: "visao" });
@@ -2380,6 +2614,61 @@ function clearNotifications() {
     try { localStorage.setItem("fin_dismissed", JSON.stringify(dis)); localStorage.setItem("fin_notified", "{}"); } catch (e) {}
     renderNotifications(); toast("Notificações zeradas. Os lembretes de 5 e 1 dia antes continuam ativos para os próximos vencimentos.");
 }
+
+// ===== Faturas vencidas / a vencer: lista com ações =====
+function dueGoMonth(key) {
+    if (!MONTHS.includes(key)) return false;
+    if (key === currentMonth) return true;
+    const prof = store.profiles[currentProfile];
+    if (!prof[key]) prof[key] = getDefaultMonthData();
+    currentMonth = key; guardFutureMonth();
+    const sel = document.getElementById("monthSelect"); if (sel) sel.value = key;
+    const i = MONTHS.indexOf(key); prevMonthStr = i > 0 ? MONTHS[i - 1] : null;
+    saveStore(); renderAll(); checkNotifications();
+    return true;
+}
+function dueOpenInvoice(bank, key) {
+    const sh = document.getElementById("dueSheet"); if (sh) sh.remove();
+    if (!dueGoMonth(key)) return;
+    if (faturaGroup !== "todos") setFaturaGroup("todos");
+    bnGo("cartoes");
+    setTimeout(() => {
+        const card = Array.from(document.querySelectorAll(".bank-card")).find(c => c.dataset.bank === bank);
+        if (!card) return;
+        card.classList.add("expanded", "flash");
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => card.classList.remove("flash"), 2000);
+    }, 500);
+}
+function duePay(bank, key) {
+    if (!MONTHS.includes(key) || !store.profiles[currentProfile][key]) return;
+    const keep = currentMonth; currentMonth = key;
+    try { payCard(bank); } finally { currentMonth = keep; }
+    saveStore(); renderAll(); checkNotifications();
+    toast(`${bank} (${key}) marcada como paga.`, () => {
+        const k2 = currentMonth; currentMonth = key;
+        try { unpairCard(bank); } finally { currentMonth = k2; }
+        saveStore(); renderAll(); checkNotifications();
+        if (document.getElementById("dueSheet")) openDueSheet();
+    });
+    if (getDueList().length) openDueSheet(); else { const sh = document.getElementById("dueSheet"); if (sh) sh.remove(); }
+}
+function openDueSheet() {
+    const old = document.getElementById("dueSheet"); if (old) old.remove();
+    const due = getDueList(), od = due.filter(x => x.diff < 0), up = due.filter(x => x.diff >= 0);
+    const o = document.createElement("div"); o.id = "dueSheet"; o.className = "sheet-ov";
+    o.onclick = e => { if (e.target === o) o.remove(); };
+    const when = x => x.diff < 0 ? `Venceu há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
+    const br = iso => iso.split("-").reverse().join("/");
+    const row = x => `<div class="due-row ${x.diff < 0 ? "late" : ""}"><div class="due-top">${createBankBadgeHTML(x.bank)}<b class="hv due-val">${fmtBRL(x.total)}</b></div><div class="due-when">${when(x)} · ${br(x.iso)}<span class="due-ref">Fatura de ${esc(x.key)}</span></div><div class="due-actions"><button class="btn-outline" onclick="dueOpenInvoice('${jsq(x.bank)}','${x.key}')">Ver fatura</button><button class="btn" onclick="duePay('${jsq(x.bank)}','${x.key}')">Marcar como paga</button></div></div>`;
+    const title = od.length ? (od.length > 1 ? `${od.length} faturas vencidas` : "1 fatura vencida") : "Próximos vencimentos";
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><b style="font-size:1.05rem;">${title}</b><button class="btn-icon" style="color:var(--text-muted);" onclick="document.getElementById('dueSheet').remove()" aria-label="Fechar">✖</button></div>`
+        + od.map(row).join("")
+        + (up.length ? (od.length ? `<div class="grp-title" style="margin-top:16px;"><span>A vencer nos próximos 7 dias</span></div>` : "") + up.map(row).join("") : "")
+        + (!od.length && !up.length ? `<div class="np-empty">Nenhuma fatura vencida. Tudo em dia.</div>` : "")
+        + `</div>`;
+    document.body.appendChild(o);
+}
 function renderGreeting() {
     const el = document.getElementById("greetHello"); if (!el) return;
     renderHomeSpend();
@@ -2390,9 +2679,12 @@ function renderGreeting() {
     document.getElementById("greetCard").dataset.t = h < 5 ? "n" : h < 12 ? "m" : h < 18 ? "a" : "n";
     const pct = t.rec > 0 ? Math.min(100, t.saidas / t.rec * 100) : (t.saidas > 0 ? 100 : 0);
     document.getElementById("greetBar").style.width = pct + "%";
-    document.getElementById("greetSub").textContent = `${pct.toFixed(0)}% da renda comprometida · Entradas ${fmtBRL(t.rec)} · Saídas ${fmtBRL(t.saidas)}`;
+    const hr = document.getElementById("heroRec"), ho = document.getElementById("heroOut"); if (hr) hr.textContent = fmtBRL(t.rec); if (ho) ho.textContent = fmtBRL(t.saidas);
+    document.getElementById("greetSub").textContent = `${pct.toFixed(0)}% da renda comprometida`;
     const due = getDueList(), nx = due.find(x => x.diff >= 0), od = due.filter(x => x.diff < 0).length;
-    document.getElementById("greetDue").innerHTML = (od ? `<div style="color:#f87171;">${ico("alert", 14)} ${od} fatura(s) vencida(s)</div>` : "") + (nx ? `<div>${ico("card", 14)} <b>${esc(nx.bank)}</b> ${nx.diff === 0 ? "vence hoje" : nx.diff === 1 ? "vence amanhã" : "vence em " + nx.diff + " dias"} · ${fmtBRL(nx.total)}</div>` : "");
+    document.getElementById("greetDue").innerHTML =
+        (od ? `<button class="due-chip danger" onclick="openDueSheet()">${ico("alert", 16)}<span>${od} ${od > 1 ? "faturas vencidas" : "fatura vencida"}</span><span class="due-go">Ver quais ›</span></button>` : "") +
+        (nx ? `<button class="due-chip" onclick="openDueSheet()">${ico("card", 16)}<span><b>${esc(nx.bank)}</b> ${nx.diff === 0 ? "vence hoje" : nx.diff === 1 ? "vence amanhã" : "vence em " + nx.diff + " dias"} · ${fmtBRL(nx.total)}</span><span class="due-go">›</span></button>` : "");
 }
 function renderMonthSummary() {
     const el = document.getElementById("monthSummary"); if (!el) return;
@@ -2486,7 +2778,7 @@ function txIconFor(tag) {
     if (t.includes("ASSINAT")) return "tv"; if (t.includes("SAUDE")) return "heart"; if (t.includes("PET")) return "paw"; if (t.includes("COMPRAS")) return "bag";
     return "card";
 }
-const RING_COLORS = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
+const RING_COLORS = ["#8b5cf6", "#ec4899", "#38bdf8", "#34d399", "#fbbf24", "#6366f1", "#f472b6", "#2dd4bf"];
 function fmtCompact(v) { return v >= 1000 ? (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: v >= 10000 ? 0 : 1 }) + " mil" : fmtBRL(v); }
 function ringSVG(cats, total, size) {
     const cx = size / 2, sw = 14, r = cx - sw - 2, c = 2 * Math.PI * r, gap = cats.length > 1 ? 18 : 0;
@@ -2510,15 +2802,16 @@ function renderHomeSpend() {
     if (a) a.textContent = fmtBRL(t.rec); if (b) b.textContent = fmtBRL(t.saidas);
     const el = document.getElementById("homeSpend"); if (!el) return;
     const fixed = store.profiles[currentProfile][currentMonth].essenciais || [];
-    const fixedHtml = `<section style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px;">Despesas fixas · marcar como pagas</div>${fixed.length ? fixed.map((item, i) => `<label style="display:flex;align-items:center;gap:9px;padding:7px 2px;border-bottom:1px solid var(--border);opacity:${item.paid ? '.68' : '1'};"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:var(--success);width:17px;height:17px;flex:0 0 17px;"><span style="flex:1;min-width:0;${item.paid ? 'text-decoration:line-through;' : ''}">${esc(item.nome)}</span><b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`).join('') : `<div style="color:var(--text-muted);font-size:.8rem;">Nenhuma despesa fixa.</div>`}<div style="font-size:.76rem;color:var(--text-muted);margin-top:7px;">O saldo disponível diminui conforme você marca despesas e faturas como pagas.</div></section>`;
+    const paidN = fixed.filter(i => i.paid).length;
+    const fixedHtml = `<details class="fix-box" ${window._fixOpen ? "open" : ""} ontoggle="window._fixOpen=this.open"><summary><span>Despesas fixas</span><span class="fix-count">${paidN}/${fixed.length} pagas</span></summary>${fixed.length ? fixed.map((item, i) => `<label style="display:flex;align-items:center;gap:9px;padding:9px 2px;border-top:1px solid var(--border);opacity:${item.paid ? '.68' : '1'};"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:var(--success);width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;${item.paid ? 'text-decoration:line-through;' : ''}">${esc(item.nome)}</span><b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`).join('') : `<div style="color:var(--text-muted);font-size:.8rem;padding:6px 2px;">Nenhuma despesa fixa.</div>`}</details>`;
     const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((x, y) => y.val - x.val);
     const total = cats.reduce((acc, c) => acc + c.val, 0);
     if (!total) { el.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:10px;">Sem gastos em ${esc(currentMonth)}. Toque em ＋ para lançar.</div>${fixedHtml}`; return; }
-    const rows = cats.slice(0, 4).map((c, i) => {
+    const rows = cats.slice(0, 3).map((c, i) => {
         const parts = c.name.match(/^(\S+)\s+(.*)$/), emoji = parts ? parts[1] : "•", label = parts ? parts[2] : c.name, col = RING_COLORS[i % 8];
         return `<div class="home-row" onclick="goAlert('openfinance')"><div class="home-ico" style="background:${col}33;">${emoji}</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(label)}</div><div style="font-size:.74rem;color:var(--text-muted);">${(c.val / total * 100).toFixed(0)}%</div></div><div class="hv" style="font-weight:700;font-size:.88rem;">${fmtBRL(c.val)}</div></div>`;
     }).join("");
-    el.innerHTML = `<div style="display:flex;justify-content:center;">${ringSVG(cats, total, 200)}</div><div style="margin-top:6px;font-size:.82rem;color:var(--text-muted);">Gastos em ${esc(currentMonth)}</div>${rows}<a class="home-link" onclick="goAlert('openfinance')">Ver todas as categorias ›</a>${fixedHtml}`;
+    el.innerHTML = `<div style="display:flex;justify-content:center;">${ringSVG(cats, total, 150)}</div><div style="margin-top:6px;font-size:.82rem;color:var(--text-muted);">Gastos em ${esc(currentMonth)}</div>${rows}<a class="home-link" onclick="goAlert('openfinance')">Ver todas as categorias ›</a>${fixedHtml}`;
 }
 function toggleAcc(head) {
     const p = head.parentElement; p.classList.toggle("open");
@@ -2528,7 +2821,7 @@ function toggleAcc(head) {
 }
 function initAcc() {
     let st = {}; try { st = JSON.parse(localStorage.getItem("fin_acc") || "{}"); } catch (e) {}
-    document.querySelectorAll(".acc-head").forEach(h => h.parentElement.classList.toggle("open", !!st[h.dataset.k]));
+    const DEF = { r_sum: 1 }; document.querySelectorAll(".acc-head").forEach(h => h.parentElement.classList.toggle("open", st[h.dataset.k] === undefined ? !!DEF[h.dataset.k] : !!st[h.dataset.k]));
 }
 initAcc();
 function renderNotifications() {
@@ -2538,7 +2831,7 @@ function renderNotifications() {
     const sub = document.getElementById("abSub"); if (sub) sub.textContent = `${currentProfile} · ${currentMonth}`;
     const n = al.filter(a => a.level !== "info").length;
     badge.textContent = n; badge.style.display = n ? "grid" : "none";
-    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="goAlert('${a.tab || ""}')"><div class="np-ico">${ico(EMO2ICO[a.icon] || "bell", 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Ativados" : "🔔 Ativar avisos"}</button></div></div>`;
+    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="${a.due ? "goAlert('');openDueSheet()" : `goAlert('${a.tab || ""}')`}"><div class="np-ico">${ico(EMO2ICO[a.icon] || "bell", 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Ativados" : "🔔 Ativar avisos"}</button></div></div>`;
 }
 function toggleNotifPanel(e) { if (e) e.stopPropagation(); document.getElementById("notifPanel").classList.toggle("open"); }
 function goAlert(tab) {
