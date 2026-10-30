@@ -2607,9 +2607,6 @@ function applyActiveTab(tabId) {
     const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
     if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 }
-    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
-    if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-}
 
 function markTabMoving() {
     document.body.classList.add("tab-moving"); clearTimeout(markTabMoving.t);
