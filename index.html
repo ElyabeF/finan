@@ -52,6 +52,8 @@
             overscroll-behavior-x: contain;
         }
         .tabs-viewport::-webkit-scrollbar { display: none; }
+        .tabs-viewport { align-items: flex-start; }
+        .tab-content:not(.active) { max-height: 100vh; max-height: 100svh; overflow: hidden; }
         .tab-content {
             flex: 0 0 100%;
             width: 100%;
@@ -168,27 +170,24 @@
 
         /* ============ HEADER SEM TREMER ============ */
         header.appbar {
-            position: sticky;
-            top: 0;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            width: 100%; max-width: 1280px;
+            margin-left: auto !important; margin-right: auto !important;
             z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
             padding: 10px 14px;
-            margin: 0 0 14px;
+            margin: 0;
             /* SEM backdrop-filter (causa jitter no iOS) */
             background: rgba(15, 23, 42, 0.97);
             border-bottom: 1px solid var(--border);
             border-radius: 0 0 14px 14px;
             box-shadow: 0 2px 10px rgba(0,0,0,.25);
-            /* GPU layer para evitar repaint */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            will-change: transform;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
         }
+        #appbarSpacer { height: 120px; margin-bottom: 14px; pointer-events: none; }
         .ab-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
         .ab-logo { width: 36px; height: 36px; border-radius: 10px; background: var(--profile-color, #6366f1); color: #fff; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
         .ab-title { font-size: 1rem; font-weight: 700; line-height: 1.1; }
@@ -227,7 +226,7 @@
         .dr-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--bg-input); display: grid; place-items: center; flex-shrink: 0; }
         .dr-t { font-size: .88rem; font-weight: 600; } .dr-s { font-size: .74rem; color: var(--text-muted); }
 
-        html { max-width: 100vw; overflow-x: hidden; }
+        html { max-width: 100vw; overscroll-behavior-y: none; -webkit-text-size-adjust: 100%; }
         body { max-width: 100vw; overflow-x: clip; }
         .container { width: 100%; max-width: 1280px; margin: 0 auto; overflow-x: clip; }
         header.appbar { flex-wrap: wrap; width: 100%; }
@@ -236,10 +235,12 @@
             body { padding: 6px; }
             header.appbar { padding: 12px 10px; gap: 12px; flex-direction: column; align-items: stretch; border-radius: 0 0 16px 16px; }
             .ab-left { width: 100%; justify-content: center; text-align: center; }
-            .ab-right { width: 100%; display: grid; grid-template-columns: 1fr 1fr auto auto auto; gap: 8px; align-items: center; }
+            .ab-right { width: 100%; display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr) auto auto auto; gap: 6px; align-items: center; }
+            .ab-right .icon-btn { width: 34px; height: 34px; border-radius: 10px; }
+            .ab-right .icon-btn svg { width: 18px; height: 18px; }
             .ab-right .profile-badge { width: 100%; max-width: none; min-width: 0; padding: 6px; justify-content: center; }
             .ab-right .profile-badge select { width: 100%; text-overflow: ellipsis; overflow: hidden; font-size: 0.8rem; text-align: center; }
-            .ab-right #monthSelect { width: 100%; max-width: none; min-width: 0; padding: 6px; font-size: 0.8rem; text-align: center; }
+            .ab-right #monthSelect { width: 100%; max-width: none; min-width: 0; padding: 6px 2px; font-size: 0.78rem; text-align: center; text-align-last: center; text-overflow: clip; letter-spacing: -.2px; }
             .val-col { width: 145px; min-width: 140px; }
             .val-col input { font-size: 0.9rem; padding: 6px 4px; text-align: right; letter-spacing: -0.3px; }
             .action-col { width: 32px; }
@@ -410,8 +411,6 @@
             background: radial-gradient(ellipse at 50% 0, rgba(99,102,241,.2), transparent 70%);
             pointer-events: none;
             z-index: -1;
-            transform: translateZ(0);
-            will-change: transform;
         }
         .ic { display: block; flex: none; }
         .icon-btn { padding: 0 !important; display: grid !important; place-items: center; line-height: 0; }
@@ -476,7 +475,20 @@
         .tab-content.pop-r { animation: tabSlideR .34s cubic-bezier(.22,.8,.3,1); }
         .tab-content.pop-l { animation: tabSlideL .34s cubic-bezier(.22,.8,.3,1); }
         body.tab-moving :is(.panel.acc, #homeSpend, header.appbar, #bottomNav, #greetCard .icon-btn) { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-        body.tab-moving #greetCard::before { animation-play-state: paused; }
+        body.tab-moving #greetCard::before, body.is-scrolling #greetCard::before { animation-play-state: paused; }
+
+        /* ============ GRUPOS DE FATURAS ============ */
+        .grp-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+        .grp-tabs::-webkit-scrollbar { display: none; }
+        .grp-btn { flex: 1 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; border-radius: 999px; background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); font-size: .82rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
+        .grp-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+        .grp-btn small { font-size: .7rem; opacity: .75; }
+        .type-sel { font-size: .7rem; padding: 2px 4px; border-radius: 6px; max-width: 110px; }
+        .grp-title { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 4px 2px 8px; display: flex; justify-content: space-between; }
+        .type-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .type-opt { padding: 12px 6px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-muted); font-size: .8rem; font-weight: 600; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .type-opt.sel { border-color: var(--accent); color: var(--accent); background: rgba(250,204,21,.08); }
+        .np-clear { display: flex; gap: 8px; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -507,6 +519,7 @@
         </div>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
     </header>
+    <div id="appbarSpacer"></div>
 
     <div id="notifPanel"></div>
     <div id="drawerOverlay" onclick="toggleDrawer(false)"></div>
@@ -514,7 +527,7 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('visao', this)">Visão Mensal</button>
-        <button class="tab-btn" onclick="switchTab('cartoes', this)">Cartões & Faturas</button>
+        <button class="tab-btn" onclick="switchTab('cartoes', this)">Faturas</button>
         <button class="tab-btn" onclick="switchTab('futuras', this)">Compras Futuras</button>
         <button class="tab-btn" onclick="switchTab('openfinance', this)" style="border-color:#6366f1; color:#a855f7;">📊 Relatórios & CSV</button>
     </div>
@@ -558,7 +571,7 @@
                         <tbody><tr><td colspan="3" class="subcat-label">Custo Essencial</td></tr></tbody>
                         <tbody id="essenciaisBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><span>Cartões & Faturas</span><button class="btn-outline" style="padding: 2px 6px; font-size: 0.72rem;" onclick="promptNewBank()">+ Novo Cartão</button></td></tr></tbody>
+                        <tbody><tr><td colspan="3" class="subcat-label"><span>Faturas</span><button class="btn-outline" style="padding: 2px 6px; font-size: 0.72rem;" onclick="promptNewBank()">+ Nova Despesa</button></td></tr></tbody>
                         <tbody id="cartoesResumoBody"></tbody>
                         <tbody><tr><td colspan="3" class="subcat-label">Variáveis / Não Essenciais</td></tr></tbody>
                         <tbody id="naoEssenciaisBody"></tbody>
@@ -583,9 +596,10 @@
 
         <div id="tab-cartoes" class="tab-content">
             <div class="panel-header" style="margin-bottom: 12px; border-radius: 8px;">
-                <span>PAINEL DE CARTÕES</span>
-                <button class="btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="promptNewBank()">+ Novo Cartão</button>
+                <span>PAINEL DE FATURAS</span>
+                <button class="btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="promptNewBank()">+ Nova Despesa</button>
             </div>
+            <div class="grp-tabs" id="grpTabs"></div>
             <div class="cards-grid" id="bankCardsContainer"></div>
             <button class="next-invoice-link" onclick="goToNextInvoiceMonth()">↗ Ver próxima fatura</button>
 
@@ -599,7 +613,7 @@
                 </div>
                 <div class="tx-entry-grid">
                     <label class="tx-field tx-field-date"><span>Data da compra</span><input type="date" id="txDate"></label>
-                    <label class="tx-field tx-field-bank"><span>Cartão</span><select id="txBank"></select></label>
+                    <label class="tx-field tx-field-bank"><span>Fatura</span><select id="txBank"></select></label>
                     <label class="tx-field tx-field-desc"><span>Descrição</span><input type="text" id="txDesc" placeholder="Ex.: Tênis, mercado, assinatura"></label>
                     <label class="tx-field tx-field-installment"><span>Parcela</span><input type="text" id="txParcela" placeholder="Ex.: 1/3" inputmode="text"></label>
                     <label class="tx-field tx-field-value"><span>Valor (R$)</span><input type="text" id="txVal" inputmode="numeric" placeholder="R$ 0,00" oninput="maskCurrencyInput(this)"></label>
@@ -764,7 +778,7 @@
 
 <nav id="bottomNav">
     <button data-t="visao" onclick="bnGo('visao')"><span data-i="home" data-s="22"></span>Início</button>
-    <button data-t="cartoes" onclick="bnGo('cartoes')"><span data-i="card" data-s="22"></span>Cartões</button>
+    <button data-t="cartoes" onclick="bnGo('cartoes')"><span data-i="receipt" data-s="22"></span>Faturas</button>
     <button data-t="futuras" onclick="bnGo('futuras')"><span data-i="cart" data-s="22"></span>Compras</button>
     <button data-t="openfinance" onclick="bnGo('openfinance')"><span data-i="chart" data-s="22"></span>Relatórios</button>
 </nav>
@@ -779,6 +793,7 @@ const MONTHS = (() => {
     return Array.from({ length: total }, (_, i) => { const k = 7 + i; return `${_mn[k % 12]}/${2026 + Math.floor(k / 12)}`; });
 })();
 
+const BANK_TYPES = { cartao: { label: "Cartão", plural: "Cartões", icon: "card" }, emprestimo: { label: "Empréstimo", plural: "Empréstimos", icon: "loan" }, outros: { label: "Outros", plural: "Outros", icon: "dots" } };
 const DEFAULT_BANK_COLORS = { "Nubank": "#8a05be", "Itaú": "#ec7000", "Shopee": "#ee4d2d", "Mercado Pago": "#009ee3", "Neon": "#00e5ff", "Santander": "#ec0000" };
 let chatHistory = [];
 
@@ -819,11 +834,48 @@ function paidAtToMonthKey(paidAt) {
     return `${_mn[d.getMonth()]}/${d.getFullYear()}`;
 }
 
+// === Reset de pagamentos (mês virou / migração) ===
+function resetMonthStatuses(pData, m, banks, stamp, includeFixed) {
+    if (!pData.cardStatus) pData.cardStatus = {};
+    if (!pData.paymentStatus) pData.paymentStatus = {};
+    pData._pendingStatusResetAt = stamp;
+    banks.forEach(b => {
+        const cs = pData.cardStatus[b] || (pData.cardStatus[b] = { venc: "Dia 10", manualExtra: 0 });
+        cs.status = "Pendente"; cs.paidAt = null; cs.paidMonthKey = null; cs.statusUpdatedAt = stamp;
+        pData.paymentStatus[b] = { status: "Pendente", updatedAt: stamp, monthKey: m, paidAt: null, resetAt: stamp, resetPendingOverride: true };
+    });
+    if (includeFixed) {
+        (pData.essenciais || []).forEach(e => { if (e) e.paid = false; });
+        (pData.naoEssenciais || []).forEach(e => { if (e && e.paid) e.paid = false; });
+    }
+}
+function realMonthKey() { const d = new Date(); return `${_mn[d.getMonth()]}/${d.getFullYear()}`; }
+// Virou o mês (data real): tudo que estava pago no mês atual (e seguintes) volta a Pendente.
+function rolloverIfNeeded() {
+    const todayKey = realMonthKey();
+    if (!store.config) return false;
+    if (!store.config.rolloverKey) { store.config.rolloverKey = todayKey; return true; }
+    if (store.config.rolloverKey === todayKey) return false;
+    const idx = MONTHS.indexOf(todayKey);
+    if (idx >= 0) {
+        const stamp = Date.now();
+        Object.keys(store.profiles || {}).forEach(prof => {
+            MONTHS.forEach((m, i) => {
+                const pd = store.profiles[prof][m];
+                if (i >= idx && pd && typeof pd === "object") resetMonthStatuses(pd, m, store.config.banks, stamp, true);
+            });
+        });
+    }
+    store.config.rolloverKey = todayKey;
+    return true;
+}
+
 // === Sanitização v4 (migração forte) ===
 function sanitizeStore(rawData) {
     if (!rawData) return null;
     let data = rawData;
     const legacyModel = Number(data.paymentModelVersion || 0) < 4;
+    const needsV5 = Number(data.paymentModelVersion || 0) < 5;
     const today = new Date();
     const todayKey = `${_mn[today.getMonth()]}/${today.getFullYear()}`;
     const todayMonthIndex = MONTHS.indexOf(todayKey);
@@ -844,6 +896,8 @@ function sanitizeStore(rawData) {
     if (!data.config.bankColors) data.config.bankColors = {};
     data.config.banks.forEach(b => { if (!data.config.bankColors[b]) data.config.bankColors[b] = DEFAULT_BANK_COLORS[b] || "#64748b"; });
     if (!data.config.profileColors) data.config.profileColors = {};
+    if (!data.config.bankTypes || typeof data.config.bankTypes !== "object") data.config.bankTypes = {};
+    data.config.banks.forEach(b => { if (!BANK_TYPES[data.config.bankTypes[b]]) data.config.bankTypes[b] = "cartao"; });
 
     data.config.profilesList.forEach(prof => {
         if (!data.config.profileColors[prof]) data.config.profileColors[prof] = "#6366f1";
@@ -862,6 +916,9 @@ function sanitizeStore(rawData) {
             pData.transactions.forEach(t => { if (t && t.parcela != null) t.parcela = cleanParcelaDisplay(t.parcela); });
             if (!pData.cardStatus) pData.cardStatus = {};
             if (!pData.paymentStatus || typeof pData.paymentStatus !== "object") pData.paymentStatus = {};
+
+            // v5: meses depois do mês real sempre começam Pendentes (bug: "pago" seguia para o mês seguinte)
+            if (needsV5 && todayMonthIndex >= 0 && mIdx > todayMonthIndex) resetMonthStatuses(pData, m, data.config.banks, Date.now() + mIdx, true);
 
             // Migração forte: resetar TODOS os meses futuros que estejam Pago sem ação explícita do usuário
             const isFutureMonth = todayMonthIndex >= 0 && mIdx > todayMonthIndex;
@@ -933,7 +990,7 @@ function sanitizeStore(rawData) {
             });
         });
     });
-    data.paymentModelVersion = 4;
+    data.paymentModelVersion = 5;
     return data;
 }
 
@@ -988,6 +1045,7 @@ function init() {
     document.getElementById("chatApiKey").value = store.config.geminiApiKey || "";
     if (store.config.geminiApiKey) document.getElementById("apiSetupBox").style.display = 'none';
     document.documentElement.style.setProperty('--profile-color', store.config.profileColors[currentProfile] || '#6366f1');
+    rolloverIfNeeded();
     saveStore();
     updateBankSelects();
     if (typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
@@ -1196,7 +1254,7 @@ function mergeRemote(R) {
             const localReset = Number(localMonth?._pendingStatusResetAt) || 0;
             const remoteReset = Number(remoteMonth?._pendingStatusResetAt) || 0;
             if (localReset > remoteReset) {
-                out.profiles[p][k] = { ...(remoteMonth || localMonth), ...localMonth, receitas: remoteMonth?.receitas || localMonth.receitas, essenciais: remoteMonth?.essenciais || localMonth.essenciais, naoEssenciais: remoteMonth?.naoEssenciais || localMonth.naoEssenciais, transactions: remoteMonth?.transactions || localMonth.transactions, cardStatus: { ...(remoteMonth?.cardStatus || {}), ...(localMonth?.cardStatus || {}) }, paymentStatus: { ...(remoteMonth?.paymentStatus || {}), ...(localMonth?.paymentStatus || {}) }, _pendingStatusResetAt: localReset };
+                out.profiles[p][k] = { ...(remoteMonth || localMonth), ...localMonth, receitas: remoteMonth?.receitas || localMonth.receitas, essenciais: (remoteMonth?.essenciais || localMonth.essenciais).map(e => ({ ...e, paid: false })), naoEssenciais: remoteMonth?.naoEssenciais || localMonth.naoEssenciais, transactions: remoteMonth?.transactions || localMonth.transactions, cardStatus: { ...(remoteMonth?.cardStatus || {}), ...(localMonth?.cardStatus || {}) }, paymentStatus: { ...(remoteMonth?.paymentStatus || {}), ...(localMonth?.paymentStatus || {}) }, _pendingStatusResetAt: localReset };
                 out.meta[key] = Math.max(Number(lm[key]) || 0, (Number(rm[key]) || 0) + 1, localReset);
                 keptLocal = true;
             } else if ((lm[key] || 0) > (rm[key] || 0)) { out.profiles[p][k] = localMonth; out.meta[key] = lm[key]; keptLocal = true; }
@@ -1721,17 +1779,45 @@ function renderHistoryTable() {
 }
 function updateBankSelects() {
     const txBank = document.getElementById("txBank"); const filterBank = document.getElementById("filterBank"); const futureBank = document.getElementById("futureBank");
-    txBank.innerHTML = ""; filterBank.innerHTML = '<option value="TODOS">Todos os Cartões</option>'; futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>';
+    txBank.innerHTML = ""; filterBank.innerHTML = '<option value="TODOS">Todas as Faturas</option>'; futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>';
     store.config.banks.forEach(b => { txBank.innerHTML += `<option value="${b}">${b}</option>`; filterBank.innerHTML += `<option value="${b}">${b}</option>`; futureBank.innerHTML += `<option value="${b}">${b}</option>`; });
     if (typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
 }
+let newBankType = "cartao";
+function getBankType(b) { const t = store.config.bankTypes && store.config.bankTypes[b]; return BANK_TYPES[t] ? t : "cartao"; }
 function promptNewBank() {
-    const name = prompt("Nome do novo cartão:");
-    if (name && name.trim() && !store.config.banks.includes(name.trim())) {
-        const clean = name.trim();
-        store.config.banks.push(clean); store.config.bankColors[clean] = "#3b82f6";
-        store = sanitizeStore(store); saveStore(); updateBankSelects(); renderAll();
-    }
+    const old = document.getElementById("newBankSheet"); if (old) old.remove();
+    newBankType = BANK_TYPES[faturaGroup] ? faturaGroup : "cartao";
+    const o = document.createElement("div"); o.id = "newBankSheet"; o.className = "sheet-ov";
+    o.onclick = e => { if (e.target === o) o.remove(); };
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span>＋ Nova despesa</span><button class="btn-icon" onclick="document.getElementById('newBankSheet').remove()">✖</button></div>
+        <input id="nbName" class="qa-field" type="text" placeholder="Nome (ex.: Nubank, Financiamento, Escola)" maxlength="40">
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:12px;">Tipo</div>
+        <div class="type-opts">${Object.keys(BANK_TYPES).map(k => `<button type="button" class="type-opt ${k === newBankType ? "sel" : ""}" data-k="${k}" onclick="pickNewBankType('${k}')">${ico(BANK_TYPES[k].icon, 22)}${BANK_TYPES[k].label}</button>`).join("")}</div>
+        <button class="btn" style="width:100%;margin-top:14px;padding:12px;" onclick="submitNewBank()">Criar</button></div>`;
+    document.body.appendChild(o); setTimeout(() => { const i = document.getElementById("nbName"); if (i) i.focus(); }, 250);
+}
+function pickNewBankType(k) { newBankType = k; document.querySelectorAll("#newBankSheet .type-opt").forEach(b => b.classList.toggle("sel", b.dataset.k === k)); }
+function submitNewBank() {
+    const clean = (document.getElementById("nbName").value || "").trim();
+    if (!clean) return toast("Informe o nome.");
+    if (store.config.banks.includes(clean)) return toast("Já existe uma despesa com esse nome.");
+    store.config.banks.push(clean); store.config.bankColors[clean] = "#3b82f6";
+    store.config.bankTypes[clean] = newBankType;
+    store = sanitizeStore(store); saveStore(); updateBankSelects(); renderAll();
+    document.getElementById("newBankSheet").remove(); toast(`✅ ${clean} criado em ${BANK_TYPES[newBankType].plural}.`);
+}
+function setBankType(bank, t) {
+    if (!BANK_TYPES[t]) return;
+    store.config.bankTypes[bank] = t; saveStore(); renderAll();
+}
+let faturaGroup = (() => { try { const v = localStorage.getItem("fin_fat_group"); return v === "cartao" || v === "emprestimo" || v === "outros" ? v : "todos"; } catch (e) { return "todos"; } })();
+function setFaturaGroup(g) { faturaGroup = g; try { localStorage.setItem("fin_fat_group", g); } catch (e) {} renderAll(); }
+function renderGroupTabs() {
+    const el = document.getElementById("grpTabs"); if (!el) return;
+    const count = k => store.config.banks.filter(b => getBankType(b) === k).length;
+    const tabs = [["todos", "Todos", "layers", store.config.banks.length], ...Object.keys(BANK_TYPES).map(k => [k, BANK_TYPES[k].plural, BANK_TYPES[k].icon, count(k)])];
+    el.innerHTML = tabs.map(([k, l, ic, n]) => `<button class="grp-btn ${faturaGroup === k ? "active" : ""}" onclick="setFaturaGroup('${k}')">${ico(ic, 16)}${l} <small>${n}</small></button>`).join("");
 }
 function updateBankColor(bank, colorHex) { store.config.bankColors[bank] = colorHex; saveStore(); renderAll(); }
 function addRow(group) { store.profiles[currentProfile][currentMonth][group].push({ nome: "Nova Despesa", valor: 0 }); saveStore(); renderAll(); }
@@ -1960,14 +2046,18 @@ function renderAll() {
     store.config.banks.forEach(bank => { cardBody.innerHTML += `<tr><td>${createBankBadgeHTML(bank, true)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(getBankTotal(bank))}</td><td></td></tr>`; });
 
     const bankContainer = document.getElementById("bankCardsContainer"); bankContainer.innerHTML = "";
+    renderGroupTabs();
+    const visibleBanks = store.config.banks.filter(b => faturaGroup === "todos" || getBankType(b) === faturaGroup);
+    if (!visibleBanks.length) bankContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:22px;font-size:.88rem;">Nenhuma despesa neste grupo. Toque em “+ Nova Despesa”.</div>`;
     store.config.banks.forEach(bank => {
         const info = ensureMonthCardStatus(store.profiles[currentProfile], currentMonth, bank);
+        if (!visibleBanks.includes(bank)) return;
         const effectiveStatus = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, bank);
         const dueLabel = info.vencNextMonth ? "Mês seguinte" : "Mês atual";
         const dueDisplay = String(info.venc || "Dia 10").replace(/^Dia\s*/i, "");
         const bankTx = (data.transactions || []).filter(t => t.bank === bank);
         const detailRows = bankTx.length ? bankTx.map(t => `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:.78rem;border-top:1px solid var(--border);"><span>${esc(cleanDisplayDesc(t.desc))} ${cleanParcelaDisplay(t.parcela || "") && !/^(à\s*vista)$/i.test(cleanParcelaDisplay(t.parcela || "")) ? `(${esc(cleanParcelaDisplay(t.parcela))})` : ""}</span><b>${fmtBRL(t.val)}</b></div>`).join("") : `<div style="font-size:.78rem;color:var(--text-muted);padding:6px 0;">Nenhum lançamento.</div>`;
-        bankContainer.innerHTML += `<div class="bank-card" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" onclick="event.stopPropagation()" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" onclick="event.stopPropagation()" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div><div class="bank-card-detail">${detailRows}</div></div>`;
+        bankContainer.innerHTML += `<div class="bank-card" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta" style="margin-bottom:6px;"><span>Tipo: <select class="type-sel" onclick="event.stopPropagation()" onchange="setBankType('${jsq(bank)}', this.value)">${Object.keys(BANK_TYPES).map(k => `<option value="${k}" ${getBankType(bank) === k ? "selected" : ""}>${BANK_TYPES[k].label}</option>`).join("")}</select></span></div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" onclick="event.stopPropagation()" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" onclick="event.stopPropagation()" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div><div class="bank-card-detail">${detailRows}</div></div>`;
     });
 
     renderTransactionsOnly();
@@ -2182,34 +2272,53 @@ function showLock() {
 }
 
 const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+// Data real de vencimento da fatura do mês `key` (respeita "mês seguinte")
+function dueDateFor(base, key, cs, today) {
+    const dm = String(cs?.venc || "").match(/\d+/); if (!dm) return null;
+    const day = parseInt(dm[0], 10); if (!day) return null;
+    let next;
+    if (typeof cs.vencNextMonth === "boolean") next = cs.vencNextMonth;
+    else next = key === realMonthKey() && day < today.getDate(); // sem marcação: dia já passou neste mês => próximo mês
+    const m0 = new Date(base.getFullYear(), base.getMonth() + (next ? 1 : 0), 1);
+    const last = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
+    return new Date(m0.getFullYear(), m0.getMonth(), Math.min(day, last));
+}
 function getDueList() {
     const out = [], today = new Date(); today.setHours(0, 0, 0, 0);
     [-1, 0, 1].forEach(off => {
         const base = new Date(today.getFullYear(), today.getMonth() + off, 1);
         const key = `${_mn[base.getMonth()]}/${base.getFullYear()}`;
-        const md = store.profiles[currentProfile][key]; if (!md) return;
+        const md = store.profiles[currentProfile][key]; if (!md || !md.cardStatus) return;
         store.config.banks.forEach(b => {
             const cs = md.cardStatus[b], total = getBankTotal(b, key);
-            const dm = String(cs?.venc || "").match(/\d+/);
-            if (!cs || getEffectivePaymentStatus(store.profiles[currentProfile], key, b) !== "Pendente" || total <= 0 || !dm) return;
-            const last = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-            const due = new Date(base.getFullYear(), base.getMonth(), Math.min(parseInt(dm[0], 10), last));
+            if (!cs || getEffectivePaymentStatus(store.profiles[currentProfile], key, b) !== "Pendente" || total <= 0) return;
+            // mês passado sem marcação explícita: não gera alerta (evita "atraso" falso)
+            if (off < 0 && typeof cs.vencNextMonth !== "boolean") return;
+            const due = dueDateFor(base, key, cs, today); if (!due) return;
             const diff = Math.round((due - today) / 86400000);
             if (diff < -30 || diff > 7) return;
-            out.push({ bank: b, key, total, diff, iso: isoDate(due) });
+            out.push({ bank: b, key, total, diff, iso: isoDate(due), type: getBankType(b) });
         });
     });
     return out.sort((a, b) => a.diff - b.diff);
 }
-function getAlerts() {
-    const al = [];
+function getDismissed() { try { return JSON.parse(localStorage.getItem("fin_dismissed") || "{}"); } catch (e) { return {}; } }
+function getAlerts(includeDismissed) {
+    const al = [], dis = getDismissed();
     getDueList().forEach(x => {
         const when = x.diff < 0 ? `Vencida há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
-        al.push({ level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon: "💳", title: `${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: `due_${x.bank}_${x.iso}`, notify: x.diff <= 3, tab: "cartoes" });
+        const rem = x.diff === 5 || x.diff === 1; // lembretes: 5 dias e 1 dia antes
+        al.push({ level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon: "💳", title: `${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: `due_${x.bank}_${x.iso}`, notifyKey: `due_${x.bank}_${x.iso}_d${x.diff}`, notify: rem, tab: "cartoes" });
     });
     const cur = calcMonthTotals(currentMonth);
     if (cur.falta > 0) al.push({ level: "danger", icon: "📉", title: "Saídas maiores que as entradas", text: `${currentMonth}: faltam ${fmtBRL(cur.falta)}`, key: `neg_${currentMonth}`, tab: "visao" });
-    return al;
+    return includeDismissed ? al : al.filter(a => !dis[a.key]);
+}
+function clearNotifications() {
+    const dis = getDismissed();
+    getAlerts(true).forEach(a => { dis[a.key] = 1; });
+    try { localStorage.setItem("fin_dismissed", JSON.stringify(dis)); localStorage.setItem("fin_notified", "{}"); } catch (e) {}
+    renderNotifications(); toast("Notificações zeradas. Os lembretes de 5 e 1 dia antes continuam ativos para os próximos vencimentos.");
 }
 function renderGreeting() {
     const el = document.getElementById("greetHello"); if (!el) return;
@@ -2276,6 +2385,10 @@ const ICONS = {
     heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.600C19.500 15.400 12 20 12 20Z"/>',
     paw: '<circle cx="6" cy="10" r="1.7"/><circle cx="10" cy="5.800" r="1.7"/><circle cx="14" cy="5.800" r="1.7"/><circle cx="18" cy="10" r="1.7"/><path d="M12 11.500c-3 0-5.200 2.800-5.200 5 0 1.700 1.400 2.500 2.800 2.500.9 0 1.500-.4 2.400-.4s1.500.4 2.400.4c1.400 0 2.800-.8 2.800-2.500 0-2.200-2.200-5-5.200-5Z"/>',
     bag: '<path d="M5.500 7h13l1 13h-15z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/>',
+    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    loan: '<path d="M3 10 12 4l9 6"/><path d="M5 10v8M9.500 10v8M14.500 10v8M19 10v8"/><path d="M3 20h18"/>',
+    dots: '<circle cx="6" cy="12" r="1.500"/><circle cx="12" cy="12" r="1.500"/><circle cx="18" cy="12" r="1.500"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
     card: '<rect x="3" y="5.500" width="18" height="13" rx="2.200"/><path d="M3 10h18M7 15h3"/>',
     trash: '<path d="M4 7h16M9 7V4.500h6V7M6.500 7l1 13h9l1-13M10 11v6M14 11v6"/>',
     bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 20.500a2 2 0 0 0 4 0"/>',
@@ -2365,7 +2478,7 @@ function renderNotifications() {
     const sub = document.getElementById("abSub"); if (sub) sub.textContent = `${currentProfile} · ${currentMonth}`;
     const n = al.filter(a => a.level !== "info").length;
     badge.textContent = n; badge.style.display = n ? "grid" : "none";
-    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="goAlert('${a.tab || ""}')"><div class="np-ico">${ico(EMO2ICO[a.icon] || "bell", 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><button class="btn-outline" style="width:100%;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Ativados" : "🔔 Ativar avisos"}</button></div>`;
+    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="goAlert('${a.tab || ""}')"><div class="np-ico">${ico(EMO2ICO[a.icon] || "bell", 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Ativados" : "🔔 Ativar avisos"}</button></div></div>`;
 }
 function toggleNotifPanel(e) { if (e) e.stopPropagation(); document.getElementById("notifPanel").classList.toggle("open"); }
 function goAlert(tab) {
@@ -2375,7 +2488,11 @@ function goAlert(tab) {
 }
 document.addEventListener("click", e => { const p = document.getElementById("notifPanel"); if (p && !p.contains(e.target) && e.target.id !== "bellBtn") p.classList.remove("open"); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { toggleDrawer(false); document.getElementById("notifPanel").classList.remove("open"); } });
-document.addEventListener("visibilitychange", () => { if (!document.hidden) checkNotifications(); });
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    if (rolloverIfNeeded()) { saveStore(); renderAll(); }
+    checkNotifications();
+});
 async function showSysNotif(title, body, tag) {
     const opts = { body, tag, icon: "icon-192.png" };
     try { const reg = await navigator.serviceWorker?.getRegistration(); if (reg) return reg.showNotification(title, opts); } catch (e) {}
@@ -2385,9 +2502,10 @@ async function notifyDue() {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
     const seen = JSON.parse(localStorage.getItem("fin_notified") || "{}"), today = isoDate(new Date());
     for (const a of getAlerts().filter(a => a.notify)) {
-        if (seen[a.key] === today) continue;
-        seen[a.key] = today;
-        await showSysNotif(`${a.icon} ${a.title}`, a.text, a.key);
+        const nk = a.notifyKey || a.key;
+        if (seen[nk] === today) continue;
+        seen[nk] = today;
+        await showSysNotif(`${a.icon} Lembrete de vencimento · ${a.title}`, a.text, nk);
     }
     Object.keys(seen).forEach(k => { if (seen[k] !== today) delete seen[k]; });
     localStorage.setItem("fin_notified", JSON.stringify(seen));
@@ -2525,6 +2643,14 @@ if ("Notification" in window && Notification.permission === "granted") registerS
 showLock();
 hydrateIcons();
 (function () { const v = document.getElementById("tabsViewport"); if (v) v.addEventListener("scroll", markTabMoving, { passive: true }); })();
+// Cabeçalho fixo: reserva o espaço dele e pausa animações pesadas durante a rolagem (iOS)
+(function () {
+    const hd = document.querySelector("header.appbar"), sp = document.getElementById("appbarSpacer");
+    const sync = () => { if (hd && sp) sp.style.height = hd.offsetHeight + "px"; };
+    sync(); window.addEventListener("resize", sync); window.addEventListener("load", sync);
+    if (window.ResizeObserver && hd) new ResizeObserver(sync).observe(hd);
+    let t; window.addEventListener("scroll", () => { document.body.classList.add("is-scrolling"); clearTimeout(t); t = setTimeout(() => document.body.classList.remove("is-scrolling"), 160); }, { passive: true });
+})();
 init();
 futSub(localStorage.getItem("fin_fut_sub") === "market" ? "market" : "plan");
 </script>
