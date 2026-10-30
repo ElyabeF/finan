@@ -682,18 +682,31 @@
         #btnBackToTop { background: var(--bg-card); color: #fff; border: 1px solid var(--border); }
         #fab { background: var(--brand); border-radius: 50%; }
 
-        /* Barra inferior flutuante (celular) */
+        /* Barra inferior encaixada na borda inferior (celular) */
         @media (max-width: 700px) {
-            body { padding-bottom: 120px; }
-            #bottomNav { left: 14px; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding: 8px 8px; border-radius: 30px; background: rgba(19,23,39,.97); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 20px 44px -14px rgba(0,0,0,.8); align-items: center; justify-content: space-between; }
-            #bottomNav button { flex: 1; padding: 6px 2px; font-size: .66rem; border-radius: 18px; gap: 3px; }
-            #bottomNav button span { width: 44px; height: 28px; border-radius: 14px; transition: background .2s; }
+            body { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
+            #bottomNav {
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100%;
+                padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+                border-radius: 22px 22px 0 0 !important;
+                background: rgba(16, 20, 35, 0.98) !important;
+                border: 0 !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6) !important;
+                align-items: center;
+                justify-content: space-around;
+            }
+            #bottomNav button { flex: 1; padding: 5px 2px; font-size: .67rem; border-radius: 16px; gap: 3px; }
+            #bottomNav button span { width: 44px; height: 28px; border-radius: 14px; transition: background .2s, color .2s; }
             #bottomNav button.active { background: transparent; color: #fff; }
             #bottomNav button.active span { background: var(--brand-soft); color: #c4b5fd; }
-            #bottomNav .bn-add { flex: 0 0 58px; width: 58px; height: 58px; margin-top: -34px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0; justify-content: center; border: 4px solid var(--bg-main); box-shadow: 0 14px 26px -8px rgba(139,92,246,.85); }
+            #bottomNav .bn-add { flex: 0 0 54px; width: 54px; height: 54px; margin-top: -24px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0; justify-content: center; border: 4px solid var(--bg-main); box-shadow: 0 12px 24px -6px rgba(139,92,246,.85); }
             #bottomNav .bn-add span { width: 26px; height: 26px; background: transparent; }
             #fab { display: none !important; }
-            #btnBackToTop { bottom: 118px; }
+            #btnBackToTop { bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important; }
         }
 
         /* Compras futuras: cartões no celular */
@@ -818,7 +831,7 @@
             border: 1px dashed rgba(139, 124, 246, 0.45);
             border-radius: 22px; padding: 20px 18px; text-align: center;
         }
-        .fatura-onboarding h4 { font-size: 1rem; font-weight: 750; margin-bottom: 6px; color: var(--text-main); }
+        .fatura-onboarding h4 { font-size: 1rem; font-weight: 750; margin-bottom: 6px; color: var(--text-main); display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
         .fatura-onboarding p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45; }
         .bank-picker-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
         .bank-pick-chip {
@@ -879,8 +892,14 @@
         .filter-fatura-btn.active {
             background: var(--brand-soft); border-color: rgba(139, 124, 246, 0.65); color: #ddd6fe;
         }
+        .sort-wrap {
+            position: relative; display: inline-flex; align-items: center;
+        }
+        .sort-wrap .sort-ico {
+            position: absolute; left: 10px; color: var(--text-muted); pointer-events: none; display: inline-flex;
+        }
         .tx-sort-sel {
-            padding: 6px 10px !important; border-radius: 999px !important;
+            padding: 6px 10px 6px 30px !important; border-radius: 999px !important;
             background: var(--bg-input) !important; border: 1px solid var(--border) !important;
             color: var(--text-main) !important; font-size: 0.8rem !important; font-weight: 600; cursor: pointer;
         }
@@ -903,6 +922,31 @@
         .tx-field-duedate { grid-column: span 3; }
         @media (max-width: 700px) { .tx-field-duedate { grid-column: span 1; } }
         @media (max-width: 380px) { .tx-field-duedate { grid-column: 1 / -1; } }
+
+        /* Alinhamento vetorial global e barra de resumo das faturas */
+        .ic { display: inline-block; vertical-align: -0.18em; flex-shrink: 0; }
+        .icon-btn .ic, .dr-ico .ic, .np-ico .ic, .tx-ico .ic, .ui-dialog-ico .ic, #bottomNav button span .ic, #fab .ic, #btnBackToTop .ic { display: block; vertical-align: middle; }
+        .status-pill, .venc-toggle, .btn, .btn-outline, .btn-danger, .bank-due { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .bank-due { justify-content: flex-start; }
+        .toast-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .toast-ico { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; background: rgba(139,124,246,.16); color: #c4b5fd; }
+        .toast-ico.ok { background: rgba(52,211,153,.16); color: #34d399; }
+        .toast-ico.warn { background: rgba(251,191,36,.16); color: #fbbf24; }
+        .toast-ico.del { background: rgba(251,113,133,.16); color: #fb7185; }
+        .faturas-overview {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
+        }
+        .fo-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 11px 13px; display: flex; flex-direction: column; gap: 3px; min-width: 0;
+        }
+        .fo-label { font-size: .71rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fo-val { font-size: 1rem; font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        @media (max-width: 480px) {
+            .faturas-overview { gap: 7px; }
+            .fo-card { padding: 9px 10px; border-radius: 14px; }
+            .fo-val { font-size: .88rem; }
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -1019,7 +1063,7 @@
                         <tbody><tr><td colspan="3" class="subcat-label"><span>Custo Essencial (Fixas)</span></td></tr></tbody>
                         <tbody id="essenciaisBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><span>Faturas</span><div style="display:flex;gap:6px;"><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="openManageBanksSheet()">👁️ Escolher / Ocultar</button><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="promptNewBank()">+ Nova Fatura</button></div></td></tr></tbody>
+                        <tbody><tr><td colspan="3" class="subcat-label"><span>Faturas</span><div style="display:flex;gap:6px;"><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="openManageBanksSheet()"><span data-i="eye" data-s="13"></span> Escolher / Ocultar</button><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="promptNewBank()"><span data-i="plus" data-s="13"></span> Nova Fatura</button></div></td></tr></tbody>
                         <tbody id="cartoesResumoBody"></tbody>
                         <tbody><tr><td colspan="3" class="subcat-label"><span>Variáveis / Não Essenciais</span></td></tr></tbody>
                         <tbody id="naoEssenciaisBody"></tbody>
@@ -1046,16 +1090,17 @@
             <div class="panel-header" style="margin-bottom: 12px; border-radius: 8px; flex-wrap: wrap; gap: 8px;">
                 <span>Faturas</span>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <button class="btn-outline" id="btnFilterCardsView" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 999px;" onclick="openBankFilterSheet()">🔍 Filtrar Faturas</button>
-                    <button class="btn-outline" id="btnManageBanks" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 999px;" onclick="openManageBanksSheet()">👁️ Gerenciar Faturas</button>
-                    <button class="btn" style="padding: 6px 12px; font-size: 0.82rem;" onclick="promptNewBank()">+ Nova Fatura</button>
+                    <button class="btn-outline" id="btnFilterCardsView" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 999px;" onclick="openBankFilterSheet()"><span data-i="filter" data-s="14"></span> Filtrar Faturas</button>
+                    <button class="btn-outline" id="btnManageBanks" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 999px;" onclick="openManageBanksSheet()"><span data-i="eye" data-s="14"></span> Gerenciar Faturas</button>
+                    <button class="btn" style="padding: 6px 12px; font-size: 0.82rem;" onclick="promptNewBank()"><span data-i="plus" data-s="14"></span> Nova Fatura</button>
                 </div>
             </div>
+            <div class="faturas-overview" id="faturasOverviewBar"></div>
             <div class="grp-tabs" id="grpTabs"></div>
             <div class="tx-active-filters" id="cardsActiveFilterBar" style="padding: 0 2px 10px;"></div>
             <div class="cards-grid" id="bankCardsContainer"></div>
             <div class="panel acc" id="finishedPanel" style="margin-bottom:12px;"></div>
-            <button class="next-invoice-link" onclick="goToNextInvoiceMonth()">↗ Ver próxima fatura</button>
+            <button class="next-invoice-link" onclick="goToNextInvoiceMonth()"><span data-i="arrowUpRight" data-s="15"></span> Ver próxima fatura</button>
 
             <div class="panel acc tx-entry-panel">
                 <div class="tx-entry-heading acc-head" data-k="txform" onclick="toggleAcc(this)">
@@ -1084,19 +1129,22 @@
                     </div>
                     <div class="tx-controls-bar">
                         <button type="button" class="filter-fatura-btn" id="btnTxFilterMulti" onclick="openBankFilterSheet()">
-                            <span data-i="card" data-s="15"></span>
+                            <span data-i="filter" data-s="14"></span>
                             <span id="btnTxFilterLabel">Filtrar Faturas: Todas</span>
                         </button>
-                        <select id="sortTxSelect" class="tx-sort-sel" onchange="onTxSortChange(this.value)" aria-label="Ordenar lançamentos">
-                            <option value="ultimos">🕒 Últimos colocados (Padrão)</option>
-                            <option value="primeiros">⏳ Primeiros colocados</option>
-                            <option value="data_desc">📅 Data da compra (Mais recente)</option>
-                            <option value="data_asc">📅 Data da compra (Mais antiga)</option>
-                            <option value="fatura">💳 Ordem de Fatura (A–Z)</option>
-                            <option value="valor_desc">💰 Maior valor</option>
-                            <option value="valor_asc">🪙 Menor valor</option>
-                            <option value="az">🔤 Descrição (A–Z)</option>
-                        </select>
+                        <div class="sort-wrap">
+                            <span class="sort-ico" data-i="sort" data-s="14"></span>
+                            <select id="sortTxSelect" class="tx-sort-sel" onchange="onTxSortChange(this.value)" aria-label="Ordenar lançamentos">
+                                <option value="ultimos">Últimos colocados (Padrão)</option>
+                                <option value="primeiros">Primeiros colocados</option>
+                                <option value="data_desc">Data da compra (Mais recente)</option>
+                                <option value="data_asc">Data da compra (Mais antiga)</option>
+                                <option value="fatura">Ordem de Fatura (A–Z)</option>
+                                <option value="valor_desc">Maior valor</option>
+                                <option value="valor_asc">Menor valor</option>
+                                <option value="az">Descrição (A–Z)</option>
+                            </select>
+                        </div>
                         <select id="filterBank" onchange="onLegacyFilterBankChange(this.value)" style="display:none;"></select>
                     </div>
                 </div>
@@ -1130,14 +1178,14 @@
                     <input type="text" id="futureVal" inputmode="numeric" placeholder="Valor Estimado" oninput="maskCurrencyInput(this)">
                     <select id="futureBank"></select>
                     <select id="futurePriority"><option value="Alta">Prioridade Alta</option><option value="Média" selected>Prioridade Média</option><option value="Baixa">Prioridade Baixa</option></select>
-                    <button class="btn" onclick="addFuturePurchase()">+ Adicionar</button>
+                    <button class="btn" onclick="addFuturePurchase()"><span data-i="plus" data-s="15"></span> Adicionar</button>
                 </div>
             </div>
             <div class="panel">
                 <div class="panel-header">
                     <div>
                         <span>Itens planejados</span>
-                        <button class="btn-danger" id="btnDelBulkFut" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkFut()">🗑 Excluir Selecionados</button>
+                        <button class="btn-danger" id="btnDelBulkFut" style="display:none; padding:4px 8px; margin-left:10px; font-size:0.75rem;" onclick="deleteBulkFut()"><span data-i="trash" data-s="14"></span> Excluir Selecionados</button>
                     </div>
                     <span id="futureTotalBadge" style="font-size:0.85rem; color:var(--accent); font-weight:700;">Total: R$ 0,00</span>
                 </div>
@@ -1184,7 +1232,7 @@
                                 <option value="date">Distribuir pelo mês da compra</option>
                             </select>
                             <input type="file" id="csvFile" accept=".csv, .txt" style="display:none" onchange="importBankCSV(event)">
-                            <button class="btn" style="padding: 9px 18px;" onclick="document.getElementById('csvFile').click()">📂 Escolher Arquivo CSV</button>
+                            <button class="btn" style="padding: 9px 18px;" onclick="document.getElementById('csvFile').click()"><span data-i="folder" data-s="16"></span> Escolher Arquivo CSV</button>
                         </div>
                         <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
                             <strong style="font-size:0.85rem; color:var(--accent);">Extratos Armazenados:</strong>
@@ -1213,7 +1261,7 @@
 
 <div class="modal-overlay" id="firebaseModal">
     <div class="modal" style="max-width: 500px; height: auto;">
-        <div class="modal-header"><h3 style="color:#38bdf8;">☁️ Firebase</h3><button class="btn-icon" onclick="closeFirebaseModal()">✖</button></div>
+        <div class="modal-header"><h3 style="color:#38bdf8; display:flex; align-items:center; gap:8px;"><span data-i="cloud" data-s="20"></span> Firebase</h3><button class="btn-icon" onclick="closeFirebaseModal()"><span data-i="x" data-s="18"></span></button></div>
         <div style="padding: 20px;">
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Cole o objeto <b>firebaseConfig</b> em JSON.</p>
             <textarea id="firebaseConfigInput" rows="6" style="width:100%; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:monospace;" placeholder='{"apiKey": "..."}'></textarea>
@@ -1224,10 +1272,10 @@
 
 <div class="modal-overlay" id="chatModal">
     <div class="modal">
-        <div class="modal-header"><h3 style="color:var(--accent); font-size:1.1rem;">✨ Consultor IA</h3><div><button class="btn-icon" style="color:var(--text-muted); font-size:0.9rem; margin-right:10px;" onclick="toggleApiKeyBox()">🔑</button><button class="btn-icon" onclick="closeChat()">✖</button></div></div>
+        <div class="modal-header"><h3 style="color:var(--accent); font-size:1.1rem; display:flex; align-items:center; gap:8px;"><span data-i="sparkles" data-s="20"></span> Consultor IA</h3><div style="display:flex;align-items:center;gap:4px;"><button class="btn-icon" style="color:var(--text-muted);" onclick="toggleApiKeyBox()" title="Chave API"><span data-i="key" data-s="18"></span></button><button class="btn-icon" onclick="closeChat()"><span data-i="x" data-s="18"></span></button></div></div>
         <div class="chat-container" id="chatContainer">
             <div class="api-setup" id="apiSetupBox"><strong>Insira a chave Google Gemini API:</strong><input type="password" id="chatApiKey" placeholder="AIzaSy..." style="width:100%; margin-top:8px; padding:8px; border-radius:6px; background:#0f172a; border:1px solid #6366f1; color:#fff;" onchange="saveApiKey(this.value)"></div>
-            <div class="chat-bubble chat-ai">Olá! Sou seu assistente financeiro. Como posso ajudar?</div>
+            <div class="chat-bubble chat-ai">Olá! Sou seu assistente financeiro FinEly. Como posso ajudar?</div>
         </div>
         <div class="modal-footer"><input type="text" id="chatInput" placeholder="Pergunte algo..." onkeypress="if(event.key === 'Enter') sendChatMessage()"><button class="btn-ai" onclick="sendChatMessage()">Enviar</button></div>
     </div>
@@ -1235,11 +1283,11 @@
 
 <div class="modal-overlay" id="profileModal">
     <div class="modal" style="max-width: 400px; height: auto;">
-        <div class="modal-header"><h3 style="color:var(--accent);">⚙️ Perfil</h3><button class="btn-icon" onclick="closeProfileModal()">✖</button></div>
+        <div class="modal-header"><h3 style="color:var(--accent); display:flex; align-items:center; gap:8px;"><span data-i="settings" data-s="20"></span> Perfil</h3><button class="btn-icon" onclick="closeProfileModal()"><span data-i="x" data-s="18"></span></button></div>
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
             <div><label style="font-size:0.85rem; color:var(--text-muted);">Nome:</label><input type="text" id="editProfileName" style="width:100%; margin-top:5px; font-weight:bold;"></div>
             <div><label style="font-size:0.85rem; color:var(--text-muted);">Cor:</label><input type="color" id="editProfileColor" style="width:100%; height: 40px; margin-top:5px; cursor:pointer; border:none; background:transparent;"></div>
-            <div style="display:flex; justify-content:space-between; margin-top: 10px;"><button class="btn-danger" style="padding: 10px 15px;" onclick="deleteCurrentProfile()">🗑 Excluir</button><button class="btn" style="padding: 10px 20px;" onclick="saveProfileSettings()">Salvar</button></div>
+            <div style="display:flex; justify-content:space-between; margin-top: 10px;"><button class="btn-danger" style="padding: 10px 15px;" onclick="deleteCurrentProfile()"><span data-i="trash" data-s="15"></span> Excluir</button><button class="btn" style="padding: 10px 20px;" onclick="saveProfileSettings()">Salvar</button></div>
         </div>
     </div>
 </div>
@@ -1252,9 +1300,96 @@
     <button data-t="openfinance" onclick="bnGo('openfinance')"><span data-i="chart" data-s="22"></span>Relatórios</button>
 </nav>
 <button id="fab" onclick="openQuickAdd()" aria-label="Novo lançamento"><span data-i="plus" data-s="26"></span></button>
-<button id="btnBackToTop" onclick="scrollToTopFast()" title="Voltar ao topo">↑</button>
+<button id="btnBackToTop" onclick="scrollToTopFast()" title="Voltar ao topo"><span data-i="arrowUp" data-s="20"></span></button>
 
 <script>
+// ---------- Sistema de Ícones Vetoriais FinEly (100% SVG) ----------
+const ICONS = {
+    cart: '<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2.5 3h2.4l2.5 11.2a1.8 1.8 0 0 0 1.8 1.4h8.3a1.8 1.8 0 0 0 1.8-1.4L20.8 7H5.6"/>',
+    car: '<path d="M5 16V12l1.6-4.2A2 2 0 0 1 8.5 6.5h7a2 2 0 0 1 1.9 1.3L19 12v4"/><path d="M3.5 12h17v4a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/>',
+    utensils: '<path d="M6 3v7a2 2 0 0 0 2 2v9"/><path d="M10 3v7a2 2 0 0 1-2 2"/><path d="M6 3v5M18 21V3c-2.2 1.2-3.5 3.6-3.5 6.5V13H18"/>',
+    tv: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.600C19.500 15.400 12 20 12 20Z"/>',
+    paw: '<circle cx="6" cy="10" r="1.7"/><circle cx="10" cy="5.800" r="1.7"/><circle cx="14" cy="5.800" r="1.7"/><circle cx="18" cy="10" r="1.7"/><path d="M12 11.500c-3 0-5.200 2.800-5.200 5 0 1.700 1.400 2.500 2.800 2.500.9 0 1.500-.4 2.400-.4s1.500.4 2.400.4c1.400 0 2.800-.8 2.800-2.500 0-2.200-2.200-5-5.200-5Z"/>',
+    bag: '<path d="M5.500 7h13l1 13h-15z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/>',
+    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    loan: '<path d="M3 10 12 4l9 6"/><path d="M5 10v8M9.500 10v8M14.500 10v8M19 10v8"/><path d="M3 20h18"/>',
+    dots: '<circle cx="6" cy="12" r="1.500"/><circle cx="12" cy="12" r="1.500"/><circle cx="18" cy="12" r="1.500"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+    card: '<rect x="3" y="5.500" width="18" height="13" rx="2.200"/><path d="M3 10h18M7 15h3"/>',
+    trash: '<path d="M4 7h16M9 7V4.500h6V7M6.500 7l1 13h9l1-13M10 11v6M14 11v6"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 20.500a2 2 0 0 0 4 0"/>',
+    sparkles: '<path d="m12 3 1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800z"/><path d="m19 15 .9 2.100L22 18l-2.100.9L19 21l-.9-2.100L16 18l2.100-.9z"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    home: '<path d="M4 11 12 4l8 7v8.500a.5.5 0 0 1-.5.5H15v-5.500H9V20H4.500a.5.5 0 0 1-.5-.5z"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    search: '<circle cx="11" cy="11" r="6.500"/><path d="m20 20-4.200-4.200"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    chart: '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+    refresh: '<path d="M20 11a8 8 0 0 0-14.500-3.500L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14.500 3.500L20 15"/><path d="M20 20v-5h-5"/>',
+    pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.500 6.500 4 4"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+    download: '<path d="M12 4v11M7.500 11 12 15.500 16.500 11M5 20h14"/>',
+    upload: '<path d="M12 16V5M7.500 9 12 4.500 16.500 9M5 20h14"/>',
+    printer: '<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v6H7z"/>',
+    clock: '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>',
+    folder: '<path d="M3.500 7.500a1.500 1.500 0 0 1 1.500-1.500h4l2 2.500H19a1.500 1.500 0 0 1 1.500 1.500V17.500A1.500 1.500 0 0 1 19 19H5a1.500 1.500 0 0 1-1.500-1.500z"/>',
+    cloud: '<path d="M7 18a4.500 4.500 0 0 1-.6-8.960A6 6 0 0 1 18 10.500a3.800 3.800 0 0 1-.5 7.500z"/>',
+    user: '<circle cx="12" cy="8.500" r="3.500"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    unlock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/>',
+    save: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+    alert: '<path d="M12 4 3 19.500h18z"/><path d="M12 10v4.500M12 17.300v.2"/>',
+    trend: '<path d="M4 7l6 6 3-3 7 7"/><path d="M15 17h5v-5"/>',
+    target: '<circle cx="12" cy="12" r="8.500"/><circle cx="12" cy="12" r="4.500"/><circle cx="12" cy="12" r="1"/>',
+    check: '<path d="m5 12.500 4.500 4.500L19 7.500"/>',
+    dot: '<circle cx="12" cy="12" r="3"/>',
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    eyeOff: '<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a15.8 15.8 0 0 1-3.1 3.8"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7c1.2 0 2.3-.2 3.3-.6"/>',
+    calendar: '<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/>',
+    filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+    key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M16 7l3 3M18.5 4.5 21 7"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    arrowRight: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    arrowUp: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+    arrowUpRight: '<path d="M7 17 17 7M9 7h8v8"/>',
+    sort: '<path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/>',
+    wallet: '<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><rect x="15" y="9" width="7" height="6" rx="1.5"/>'
+};
+const EMO2ICO = {
+    "pencil": "pencil", "plus": "plus", "trash": "trash", "copy": "copy", "download": "download",
+    "printer": "printer", "refresh": "refresh", "upload": "upload", "clock": "clock", "folder": "folder",
+    "cloud": "cloud", "user": "user", "lock": "lock", "bell": "bell", "sparkles": "sparkles",
+    "save": "save", "cart": "cart", "card": "card", "trend": "trend", "target": "target",
+    "chart": "chart", "receipt": "receipt", "eye": "eye", "eyeOff": "eyeOff", "calendar": "calendar",
+    "filter": "filter", "key": "key", "settings": "settings", "check": "check", "alert": "alert"
+};
+function ico(name, size = 20) {
+    return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.dot}</svg>`;
+}
+function hydrateIcons(root) {
+    (root || document).querySelectorAll("[data-i]").forEach(el => {
+        if (!el.firstChild) el.innerHTML = ico(el.dataset.i, +el.dataset.s || 20);
+    });
+}
+function cleanCatLabel(raw) {
+    return String(raw || "").replace(/^[^\p{L}\p{N}]+/u, "").trim() || String(raw || "").trim();
+}
+function txIconFor(tag) {
+    const t = normText(tag);
+    if (t.includes("SUPERMERC")) return "cart";
+    if (t.includes("TRANSP") || t.includes("COMBUST")) return "car";
+    if (t.includes("ALIMENT") || t.includes("LAZER")) return "utensils";
+    if (t.includes("ASSINAT")) return "tv";
+    if (t.includes("SAUDE")) return "heart";
+    if (t.includes("PET")) return "paw";
+    if (t.includes("COMPRAS")) return "bag";
+    if (t.includes("FIXO:")) return "home";
+    if (t.includes("VARIAVEL:")) return "wallet";
+    return "card";
+}
 function syncMonthLabel() {
     const l = document.getElementById("monthLabel"); if (l) l.textContent = currentMonth;
     const a = document.getElementById("avatarLetter"); if (a) a.textContent = String(currentProfile || "?").trim().charAt(0).toUpperCase() || "?";
@@ -1776,8 +1911,8 @@ function pushCloud() {
             await firebase.database().ref('financeStore').set(payload);
         } catch (e) {
             console.error("Firebase save erro", e);
-            if (e.message && e.message.includes("Permission denied")) { toast("⚠️ Nuvem bloqueada: faça login."); cloudBlocked = true; }
-            else toast("⚠️ Falha ao sincronizar: " + (e.message || e));
+            if (e.message && e.message.includes("Permission denied")) { toast("Nuvem bloqueada: faça login.", null, "warn"); cloudBlocked = true; }
+            else toast("Falha ao sincronizar: " + (e.message || e), null, "warn");
         } finally { setTimeout(() => isSyncing = false, 350); }
     };
     pushTimer = setTimeout(flush, 300);
@@ -1830,7 +1965,7 @@ function showCloudLogin(msg) {
     const o = document.createElement("div"); o.id = "cloudLogin";
     o.style.cssText = "position:fixed;inset:0;z-index:2500;background:rgba(15,23,42,.94);display:flex;align-items:center;justify-content:center;padding:16px";
     const inp = "width:100%;padding:10px;border-radius:8px;margin-top:4px;background:#0f172a;border:1px solid #334155;color:#e2e8f0";
-    o.innerHTML = `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:400px;color:#e2e8f0;display:flex;flex-direction:column;gap:12px"><h3>☁️ Entrar na nuvem</h3><div id="cloudMsg" style="color:#fbbf24;font-size:.85rem;min-height:1em">${esc(msg || "")}</div><label style="font-size:.8rem">E-mail<input id="cloudEmail" type="email" style="${inp}" value="${esc(localStorage.getItem("fin_email") || "")}"></label><label style="font-size:.8rem">Senha<input id="cloudPass" type="password" style="${inp}"></label><label style="font-size:.8rem">Senha de criptografia (opcional)<input id="cloudEnc" type="password" style="${inp}" value="${esc(localStorage.getItem("fin_enc_pass") || "")}"></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-outline" onclick="document.getElementById('cloudLogin').remove()">Local</button><button class="btn" onclick="doCloudLogin()">Entrar</button></div></div>`;
+    o.innerHTML = `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:400px;color:#e2e8f0;display:flex;flex-direction:column;gap:12px"><h3 style="display:inline-flex;align-items:center;gap:8px;">${ico("cloud", 20)} Entrar na nuvem</h3><div id="cloudMsg" style="color:#fbbf24;font-size:.85rem;min-height:1em">${esc(msg || "")}</div><label style="font-size:.8rem">E-mail<input id="cloudEmail" type="email" style="${inp}" value="${esc(localStorage.getItem("fin_email") || "")}"></label><label style="font-size:.8rem">Senha<input id="cloudPass" type="password" style="${inp}"></label><label style="font-size:.8rem">Senha de criptografia (opcional)<input id="cloudEnc" type="password" style="${inp}" value="${esc(localStorage.getItem("fin_enc_pass") || "")}"></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-outline" onclick="document.getElementById('cloudLogin').remove()">Local</button><button class="btn" onclick="doCloudLogin()">Entrar</button></div></div>`;
     document.body.appendChild(o);
 }
 async function doCloudLogin() {
@@ -1845,7 +1980,7 @@ async function doCloudLogin() {
         await firebase.auth().signInWithEmailAndPassword(email, pass);
         cloudBlocked = false;
         const l = document.getElementById("cloudLogin"); if (l) l.remove();
-        toast("☁️ Conectado.");
+        toast("Conectado à nuvem.", null, "ok");
     } catch (err) { msgEl.textContent = (err.code || err.message); }
 }
 // === Sistema de Pop-ups e Confirmações Profissionais FinEly ===
@@ -1917,7 +2052,7 @@ function uiChoice({ title = "Escolha uma opção", message = "", choices = [], i
             <div class="ui-dialog-title">${esc(title)}</div>
             ${message ? `<div class="ui-dialog-msg">${esc(message)}</div>` : ""}
             <div class="ui-choice-list">
-                ${choices.map((c, idx) => `<button type="button" class="ui-choice-btn ${c.danger ? "danger" : ""}" data-idx="${idx}"><span>${esc(c.label)}</span><span>›</span></button>`).join("")}
+                ${choices.map((c, idx) => `<button type="button" class="ui-choice-btn ${c.danger ? "danger" : ""}" data-idx="${idx}"><span style="display:inline-flex;align-items:center;gap:8px;">${c.icon ? ico(c.icon, 16) : ""}${esc(c.label)}</span><span>›</span></button>`).join("")}
             </div>
             <div class="ui-dialog-actions">
                 <button type="button" class="ui-btn-cancel" id="uiDlgCancel">Cancelar</button>
@@ -1934,7 +2069,7 @@ function uiChoice({ title = "Escolha uma opção", message = "", choices = [], i
 }
 
 async function cloudAccount() {
-    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro.");
+    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro.", null, "warn");
     if (cloudUser) {
         const ok = await uiConfirm({
             title: "Desconectar da nuvem?",
@@ -1950,9 +2085,9 @@ function openFirebaseModal() { document.getElementById('firebaseConfigInput').va
 function closeFirebaseModal() { document.getElementById('firebaseModal').style.display = 'none'; }
 function saveFirebaseConfig() {
     const val = document.getElementById('firebaseConfigInput').value.trim();
-    if (val && !val.includes("apiKey")) return toast("Formato inválido. Cole o JSON contendo apiKey.");
+    if (val && !val.includes("apiKey")) return toast("Formato inválido. Cole o JSON contendo apiKey.", null, "warn");
     store.config.firebaseConfig = val; saveStore(); closeFirebaseModal();
-    toast("Configuração guardada! Recarregando..."); setTimeout(() => location.reload(), 600);
+    toast("Configuração guardada! Recarregando...", null, "ok"); setTimeout(() => location.reload(), 600);
 }
 
 // === Perfis ===
@@ -1961,9 +2096,9 @@ function closeProfileModal() { document.getElementById("profileModal").style.dis
 function saveProfileSettings() {
     const newName = document.getElementById("editProfileName").value.trim();
     const newColor = document.getElementById("editProfileColor").value;
-    if (!newName) return toast("Informe um nome para o perfil.");
+    if (!newName) return toast("Informe um nome para o perfil.", null, "warn");
     if (newName !== currentProfile) {
-        if (store.config.profilesList.includes(newName)) return toast("Já existe um perfil com este nome.");
+        if (store.config.profilesList.includes(newName)) return toast("Já existe um perfil com este nome.", null, "warn");
         const idx = store.config.profilesList.indexOf(currentProfile);
         store.config.profilesList[idx] = newName;
         store.profiles[newName] = store.profiles[currentProfile];
@@ -1976,7 +2111,7 @@ function saveProfileSettings() {
     saveStore(); closeProfileModal(); init();
 }
 async function deleteCurrentProfile() {
-    if (store.config.profilesList.length <= 1) return toast("É necessário manter pelo menos um perfil.");
+    if (store.config.profilesList.length <= 1) return toast("É necessário manter pelo menos um perfil.", null, "warn");
     const ok = await uiConfirm({
         title: `Excluir perfil "${currentProfile}"?`,
         message: `Todos os dados e lançamentos exclusivos do perfil "${currentProfile}" serão removidos. Esta ação não pode ser desfeita.`,
@@ -2003,7 +2138,7 @@ async function promptNewProfile() {
     });
     if (name && name.trim()) {
         const clean = name.trim();
-        if (store.config.profilesList.includes(clean)) return toast("Já existe um perfil com esse nome.");
+        if (store.config.profilesList.includes(clean)) return toast("Já existe um perfil com esse nome.", null, "warn");
         store.config.profilesList.push(clean);
         store = sanitizeStore(store);
         // Novo perfil sem saldo devedor começa com lista enxuta para escolher um por um
@@ -2012,7 +2147,7 @@ async function promptNewProfile() {
         currentProfile = clean;
         saveStore();
         init();
-        toast(`✅ Perfil "${clean}" criado! Escolha quais faturas deseja usar.`);
+        toast(`Perfil "${clean}" criado! Escolha quais faturas deseja usar.`, null, "ok");
     }
 }
 function changeProfile() {
@@ -2075,7 +2210,7 @@ function toggleProfileBank(bank) {
     if (isVis) {
         const curVal = Math.abs(getBankTotal(bank, currentMonth));
         if (curVal > 0.009) {
-            return toast(`⚠️ Só é possível ocultar "${bank}" quando a fatura estiver zerada (atual: ${fmtBRL(curVal)}).`);
+            return toast(`Só é possível ocultar "${bank}" quando a fatura estiver zerada (atual: ${fmtBRL(curVal)}).`, null, "warn");
         }
         prof.enabledBanks = prof.enabledBanks.filter(b => b !== bank);
         if (!prof.hiddenBanks.includes(bank)) prof.hiddenBanks.push(bank);
@@ -2092,13 +2227,13 @@ function enableAllProfileBanks() {
     prof.enabledBanks = store.config.banks.slice();
     saveStore(); updateBankSelects(); renderAll();
     if (document.getElementById("manageBanksSheet")) openManageBanksSheet();
-    toast("✅ Todas as faturas estão visíveis neste perfil.");
+    toast("Todas as faturas estão visíveis neste perfil.", null, "ok");
 }
 async function hideBankCard(bank, event) {
     if (event) event.stopPropagation();
     const total = getBankTotal(bank, currentMonth);
     if (Math.abs(total) > 0.009) {
-        return toast(`⚠️ A fatura "${bank}" possui saldo de ${fmtBRL(total)}. Só é possível ocultar faturas zeradas.`);
+        return toast(`A fatura "${bank}" possui saldo de ${fmtBRL(total)}. Só é possível ocultar faturas zeradas.`, null, "warn");
     }
     const prof = store.profiles[currentProfile];
     if (!Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = [];
@@ -2108,32 +2243,31 @@ async function hideBankCard(bank, event) {
     prof.enabledBanks = prof.enabledBanks.filter(b => b !== bank);
     if (!prof.hiddenBanks.includes(bank)) prof.hiddenBanks.push(bank);
     saveStore(); updateBankSelects(); renderAll();
-    toast(`👁️ Fatura "${bank}" ocultada neste perfil.`, () => {
+    toast(`Fatura "${bank}" ocultada neste perfil.`, () => {
         prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bank);
         if (!prof.enabledBanks.includes(bank)) prof.enabledBanks.push(bank);
         saveStore(); updateBankSelects(); renderAll();
-    });
+    }, "info");
 }
 async function deleteBankCard(bank, event) {
     if (event) event.stopPropagation();
     const totalMonth = getBankTotal(bank, currentMonth);
     if (Math.abs(totalMonth) > 0.009) {
-        return toast(`⚠️ A fatura "${bank}" não está zerada (${fmtBRL(totalMonth)}). Zere os lançamentos antes de excluir.`);
+        return toast(`A fatura "${bank}" não está zerada (${fmtBRL(totalMonth)}). Zere os lançamentos antes de excluir.`, null, "warn");
     }
     const choice = await uiChoice({
         title: `Remover fatura "${bank}"`,
         message: `A fatura "${bank}" está zerada neste mês. Como deseja prosseguir?`,
         icon: "trash",
         choices: [
-            { label: `👁️ Apenas ocultar no perfil "${currentProfile}"`, value: "hide" },
-            { label: `🗑️ Excluir "${bank}" permanentemente do app`, value: "delete", danger: true }
+            { label: `Apenas ocultar no perfil "${currentProfile}"`, value: "hide", icon: "eyeOff" },
+            { label: `Excluir "${bank}" permanentemente do app`, value: "delete", danger: true, icon: "trash" }
         ]
     });
     if (choice === "hide") {
         return hideBankCard(bank);
     }
     if (choice === "delete") {
-        // Verifica se em algum perfil/mês há saldo não zerado
         const hasOtherBalance = store.config.profilesList.some(p => hasBankAnyDebtInProfile(bank, p));
         if (hasOtherBalance) {
             const forceOk = await uiConfirm({
@@ -2162,7 +2296,7 @@ async function deleteBankCard(bank, event) {
         });
         selectedFilterBanks.delete(bank);
         saveStore(); updateBankSelects(); renderAll(); checkNotifications();
-        toast(`🗑️ Fatura "${bank}" excluída.`);
+        toast(`Fatura "${bank}" excluída.`, null, "del");
     }
 }
 function openManageBanksSheet() {
@@ -2181,7 +2315,7 @@ function openManageBanksSheet() {
             </div>
             <div style="display:flex;align-items:center;gap:6px;">
                 <button type="button" class="${isVis ? "btn" : "btn-outline"}" style="padding:5px 11px;font-size:.76rem;" onclick="toggleProfileBank('${jsq(b)}')">
-                    ${isVis ? "✓ Visível" : "＋ Mostrar"}
+                    ${isVis ? `${ico("check", 13)} Visível` : `${ico("plus", 13)} Mostrar`}
                 </button>
                 <button type="button" class="bank-act-btn del ${locked ? "disabled" : ""}" title="${locked ? "Fatura com saldo não pode ser excluída" : "Excluir fatura"}" onclick="deleteBankCard('${jsq(b)}', event)">
                     ${ico("trash", 15)}
@@ -2191,15 +2325,15 @@ function openManageBanksSheet() {
     }).join("");
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:4px;">
-            <span>👁️ Faturas do perfil · ${esc(currentProfile)}</span>
-            <button class="btn-icon" onclick="document.getElementById('manageBanksSheet').remove()">✖</button>
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("eye", 18)} Faturas do perfil · ${esc(currentProfile)}</span>
+            <button class="btn-icon" onclick="document.getElementById('manageBanksSheet').remove()">${ico("x", 16)}</button>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">
             Escolha uma por uma quais faturas deseja exibir neste perfil. Faturas zeradas (R$ 0,00) podem ser ocultadas ou excluídas.
         </p>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <button class="btn-outline" style="flex:1;padding:8px;font-size:.78rem;" onclick="enableAllProfileBanks()">Mostrar todas</button>
-            <button class="btn" style="flex:1;padding:8px;font-size:.78rem;" onclick="document.getElementById('manageBanksSheet').remove();promptNewBank()">＋ Criar nova fatura</button>
+            <button class="btn-outline" style="flex:1;padding:8px;font-size:.78rem;" onclick="enableAllProfileBanks()">${ico("eye", 14)} Mostrar todas</button>
+            <button class="btn" style="flex:1;padding:8px;font-size:.78rem;" onclick="document.getElementById('manageBanksSheet').remove();promptNewBank()">${ico("plus", 14)} Criar nova fatura</button>
         </div>
         <div>${rows || '<p style="color:var(--text-muted);text-align:center;padding:16px;">Nenhuma fatura cadastrada.</p>'}</div>
     </div>`;
@@ -2312,7 +2446,7 @@ function changeMonth() {
 function goToNextInvoiceMonth() {
     const idx = MONTHS.indexOf(currentMonth);
     const next = MONTHS[idx + 1];
-    if (!next) return toast("Não há mês seguinte.");
+    if (!next) return toast("Não há mês seguinte.", null, "warn");
     if (!store.profiles[currentProfile][next]) store.profiles[currentProfile][next] = getDefaultMonthData();
     currentMonth = next;
     guardFutureMonth();
@@ -2373,14 +2507,14 @@ function openBankFilterSheet() {
     }).join("");
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:4px;">
-            <span>🔍 Filtrar Faturas</span>
-            <button class="btn-icon" onclick="document.getElementById('bankFilterSheet').remove()">✖</button>
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("filter", 18)} Filtrar Faturas</span>
+            <button class="btn-icon" onclick="document.getElementById('bankFilterSheet').remove()">${ico("x", 16)}</button>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">
             Marque uma ou mais faturas para ver lançamentos e cartões específicos, ou clique em "Só esta" para ver apenas uma.
         </p>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <button type="button" class="${allSelected ? "btn" : "btn-outline"}" style="flex:1;padding:9px;font-size:.8rem;" onclick="clearBankFilter()">✓ Todas as Faturas</button>
+            <button type="button" class="${allSelected ? "btn" : "btn-outline"}" style="flex:1;padding:9px;font-size:.8rem;" onclick="clearBankFilter()">${ico("check", 14)} Todas as Faturas</button>
             <button type="button" class="btn" style="flex:1;padding:9px;font-size:.8rem;" onclick="document.getElementById('bankFilterSheet').remove()">Concluir (${allSelected ? "Todas" : selectedFilterBanks.size})</button>
         </div>
         <div>${rows}</div>
@@ -2399,11 +2533,12 @@ function renderActiveFilterChips() {
     }
     if (btnMulti) btnMulti.classList.toggle("active", n > 0);
     if (btnCards) {
-        btnCards.textContent = n === 0 ? "🔍 Filtrar Faturas" : (n === 1 ? `🔍 ${Array.from(selectedFilterBanks)[0]}` : `🔍 ${n} Faturas`);
+        const lbl = n === 0 ? "Filtrar Faturas" : (n === 1 ? Array.from(selectedFilterBanks)[0] : `${n} Faturas`);
+        btnCards.innerHTML = `${ico("filter", 13)} ${esc(lbl)}`;
         btnCards.style.borderColor = n > 0 ? "rgba(139,124,246,.7)" : "";
     }
     const chipsHtml = n > 0
-        ? Array.from(selectedFilterBanks).map(b => `<span class="filter-chip-tag" onclick="toggleFilterBankItem('${jsq(b)}')">${esc(b)} ✕</span>`).join("") +
+        ? Array.from(selectedFilterBanks).map(b => `<span class="filter-chip-tag" onclick="toggleFilterBankItem('${jsq(b)}')">${esc(b)} ${ico("x", 11)}</span>`).join("") +
           `<button type="button" class="btn-outline" style="padding:2px 8px;font-size:.7rem;border-radius:999px;" onclick="clearBankFilter()">Limpar filtro</button>`
         : "";
     const bar1 = document.getElementById("txActiveFilterBar");
@@ -2478,7 +2613,8 @@ function renderTransactionsOnly() {
         txBody.innerHTML = `<tr class="tx-empty"><td colspan="4" style="text-align:center; padding:18px; color:var(--text-muted);">${rawQuery || selectedFilterBanks.size ? 'Nenhum lançamento encontrado para o filtro selecionado.' : 'Sem lançamentos neste mês.'}</td></tr>`;
     } else {
         list.forEach(t => {
-            const tag = ((String(t.desc || "").match(/^\[(.*?)\]/) || [])[1] || "").replace(/^\S+\s+/, "");
+            const rawTag = (String(t.desc || "").match(/^\[(.*?)\]/) || [])[1] || "";
+            const tag = cleanCatLabel(rawTag);
             const parc = cleanParcelaDisplay(t.parcela || "");
             const d = String(t.date || "-"), shortDate = /^\d{2}\/\d{2}\/\d{4}$/.test(d) ? d.slice(0, 5) : d;
             const col = tag ? RING_COLORS[Math.abs([...tag].reduce((h, c) => h * 31 + c.charCodeAt(0), 7)) % 8] : "#94a3b8";
@@ -2486,16 +2622,16 @@ function renderTransactionsOnly() {
             let dueBadgeHtml = "";
             if (t.dueDate || isOutros) {
                 const badgeInfo = getAvulsoDueStatus(t);
-                dueBadgeHtml = `<button type="button" class="due-pill-btn ${badgeInfo.cls}" onclick="openTxDuePicker('${jsq(t.id)}', event)" title="Definir vencimento avulso">📅 ${esc(badgeInfo.label)}</button>`;
+                dueBadgeHtml = `<button type="button" class="due-pill-btn ${badgeInfo.cls}" onclick="openTxDuePicker('${jsq(t.id)}', event)" title="Definir vencimento avulso">${ico("calendar", 11)} ${esc(badgeInfo.label)}</button>`;
                 if (isOutros) {
-                    dueBadgeHtml += `<button type="button" class="due-pill-btn ${t.paid ? 'due-paid' : ''}" onclick="toggleAvulsoTxPaid('${jsq(t.id)}', event)" title="Marcar conta avulsa como paga">${t.paid ? '✓ Paga' : '⏳ Pendente'}</button>`;
+                    dueBadgeHtml += `<button type="button" class="due-pill-btn ${t.paid ? 'due-paid' : ''}" onclick="toggleAvulsoTxPaid('${jsq(t.id)}', event)" title="Marcar conta avulsa como paga">${t.paid ? `${ico("check", 11)} Paga` : `${ico("clock", 11)} Pendente`}</button>`;
                 }
             }
             txBody.innerHTML += `<tr class="tx-row ${Number(t.val) < 0 ? "is-credit" : ""}" style="${t.paid ? 'opacity:0.65;' : ''}">
                 <td class="c-chk"><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td>
-                <td class="c-ico"><span class="tx-ico" style="--c:${col}">${ico(txIconFor(tag), 18)}</span></td>
+                <td class="c-ico"><span class="tx-ico" style="--c:${col}">${ico(txIconFor(tag || rawTag), 18)}</span></td>
                 <td class="c-main"><div class="tx-desc" style="${t.paid ? 'text-decoration:line-through;' : ''}">${esc(cleanDisplayDesc(stripCatTag(t.desc)))}</div>
-                    <div class="tx-meta"><span title="Data da compra: ${esc(d)}">🛒 ${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : ""}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}${dueBadgeHtml}</div></td>
+                    <div class="tx-meta"><span title="Data da compra: ${esc(d)}" style="display:inline-flex;align-items:center;gap:4px;">${ico("calendar", 12)} ${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : ""}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}${dueBadgeHtml}</div></td>
                 <td class="c-val"><div class="tx-val">${fmtBRL(t.val)}</div><button class="tx-edit-btn" onclick="openEditTxSheet('${jsq(t.id)}')" title="Editar lançamento" aria-label="Editar lançamento">${ico("pencil", 15)}</button><button class="tx-del" onclick="deleteTx('${jsq(t.id)}')" title="Excluir lançamento" aria-label="Excluir lançamento">${ico("trash", 16)}</button></td>
             </tr>`;
         });
@@ -2530,10 +2666,10 @@ async function deleteBulkTx() {
     const backup = [...store.profiles[currentProfile][currentMonth].transactions];
     store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => !ids.includes(String(t.id)));
     saveStore(); renderAll(); checkNotifications();
-    toast(`🗑️ ${ids.length} lançamento(s) excluído(s).`, () => {
+    toast(`${ids.length} lançamento(s) excluído(s).`, () => {
         store.profiles[currentProfile][currentMonth].transactions = backup;
         saveStore(); renderAll(); checkNotifications();
-    });
+    }, "del");
 }
 async function clearCurrentMonthTransactions() {
     const hasFilter = selectedFilterBanks.size > 0;
@@ -2551,10 +2687,10 @@ async function clearCurrentMonthTransactions() {
     if (!hasFilter) store.profiles[currentProfile][currentMonth].transactions = [];
     else store.profiles[currentProfile][currentMonth].transactions = store.profiles[currentProfile][currentMonth].transactions.filter(t => !selectedFilterBanks.has(t.bank));
     saveStore(); renderAll(); checkNotifications();
-    toast("🗑️ Lançamentos limpos.", () => {
+    toast("Lançamentos limpos.", () => {
         store.profiles[currentProfile][currentMonth].transactions = backup;
         saveStore(); renderAll(); checkNotifications();
-    });
+    }, "del");
 }
 function toggleAllFut(el) { document.querySelectorAll('.cb-fut').forEach(cb => cb.checked = el.checked); toggleFutBtn(); }
 function toggleFutBtn() { const checked = document.querySelectorAll('.cb-fut:checked'); const btn = document.getElementById('btnDelBulkFut'); if (btn) btn.style.display = checked.length > 0 ? 'inline-block' : 'none'; }
@@ -2607,7 +2743,7 @@ function parseMoney(raw) {
     const n = parseFloat(s); if (isNaN(n)) return null;
     return neg ? -n : n;
 }
-const CATEGORY_LIST = ["🚗 Transp/Combust.", "🍔 Alimentação/Lazer", "🛒 Supermercado", "📺 Assinaturas", "💊 Saúde", "🐾 Pet", "🛍️ Compras"];
+const CATEGORY_LIST = ["Transp/Combust.", "Alimentação/Lazer", "Supermercado", "Assinaturas", "Saúde", "Pet", "Compras"];
 function merchantKey(desc) { return normText(String(desc || "").replace(/^\[.*?\]\s*/, "")).replace(/\s*-?\s*(PARCELA\s*)?\d+\/\d+\s*$/, "").slice(0, 24); }
 function recategorizeTx(id, cat) {
     const month = store.profiles[currentProfile][currentMonth];
@@ -2621,12 +2757,12 @@ function recategorizeTx(id, cat) {
 }
 function categorizeDesc(upDesc) {
     const has = (...k) => k.some(x => upDesc.includes(x));
-    if (has("UBER", "POSTO", "GASOLINA", "COMBUSTIVEL", "SHELL", "IPIRANGA") || /\b99\b/.test(upDesc)) return "🚗 Transp/Combust.";
-    if (has("IFOOD", "MCDONALD", "BURGER", "PIZZA", "RESTAURANTE", "LANCHONETE", "PADARIA", "SORVETE")) return "🍔 Alimentação/Lazer";
-    if (has("MERCADO", "SUPERMERC", "ATACADAO", "ASSAI", "CARREFOUR", "COMPER", "BRETAS", "EXTRA")) return "🛒 Supermercado";
-    if (has("NETFLIX", "AMAZON PRIME", "SPOTIFY", "HBO", "DISNEY", "YOUTUBE", "APPLE.COM", "DEEZER")) return "📺 Assinaturas";
-    if (has("PET LOVE", "PETLOVE", "PETSHOP", "PET CAO")) return "🐾 Pet";
-    if (has("FARMACIA", "DROGASIL", "PAGUE MENOS", "RAIA", "DROGARIA")) return "💊 Saúde";
+    if (has("UBER", "POSTO", "GASOLINA", "COMBUSTIVEL", "SHELL", "IPIRANGA") || /\b99\b/.test(upDesc)) return "Transp/Combust.";
+    if (has("IFOOD", "MCDONALD", "BURGER", "PIZZA", "RESTAURANTE", "LANCHONETE", "PADARIA", "SORVETE")) return "Alimentação/Lazer";
+    if (has("MERCADO", "SUPERMERC", "ATACADAO", "ASSAI", "CARREFOUR", "COMPER", "BRETAS", "EXTRA")) return "Supermercado";
+    if (has("NETFLIX", "AMAZON PRIME", "SPOTIFY", "HBO", "DISNEY", "YOUTUBE", "APPLE.COM", "DEEZER")) return "Assinaturas";
+    if (has("PET LOVE", "PETLOVE", "PETSHOP", "PET CAO")) return "Pet";
+    if (has("FARMACIA", "DROGASIL", "PAGUE MENOS", "RAIA", "DROGARIA")) return "Saúde";
     return "";
 }
 function updateCSVBankSelect() {
@@ -2639,7 +2775,7 @@ function renderImportedBatches() {
     const batches = store.profiles[currentProfile].importedBatches || [];
     if (batches.length === 0) { listEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">Nenhum extrato registrado ainda.</p>'; return; }
     batches.forEach(b => {
-        listEl.innerHTML += `<div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div><span style="font-weight:bold; font-size:0.85rem;">${esc(b.fileName)}</span> <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${esc(b.bank)} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span></div><button class="btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="deleteImportedBatch('${b.id}')">🗑️ Excluir</button></div>`;
+        listEl.innerHTML += `<div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div><span style="font-weight:bold; font-size:0.85rem;">${esc(b.fileName)}</span> <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${esc(b.bank)} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span></div><button class="btn-danger" style="padding:4px 10px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px;" onclick="deleteImportedBatch('${b.id}')">${ico("trash", 13)} Excluir</button></div>`;
     });
 }
 async function deleteImportedBatch(batchId) {
@@ -2661,7 +2797,7 @@ async function deleteImportedBatch(batchId) {
 function importBankCSV(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(evt) { try { runCSVImport(String(evt.target.result || ""), file.name); } catch (err) { toast("Erro: " + err.message); } };
+    reader.onload = function(evt) { try { runCSVImport(String(evt.target.result || ""), file.name); } catch (err) { toast("Erro: " + err.message, null, "warn"); } };
     reader.readAsText(file, "UTF-8"); e.target.value = "";
 }
 async function runCSVImport(text, fileName) {
@@ -2701,7 +2837,7 @@ async function runCSVImport(text, fileName) {
         if (val === 0) continue;
         items.push({ dateObj, desc, upDesc, val });
     }
-    if (items.length === 0) { toast(`Nenhuma compra encontrada.\n${ignored.length} linhas ignoradas.`); return; }
+    if (items.length === 0) { toast(`Nenhuma compra encontrada.\n${ignored.length} linhas ignoradas.`, null, "warn"); return; }
     const preTotal = items.reduce((a, i) => a + i.val, 0);
     const ok = await uiConfirm({
         title: `Importar ${items.length} lançamentos?`,
@@ -2723,7 +2859,7 @@ async function runCSVImport(text, fileName) {
     let batchTotal = 0;
     items.forEach(it => {
         let desc = it.desc;
-        const category = (store.profiles[currentProfile].catRules || {})[merchantKey(it.desc)] || categorizeDesc(it.upDesc);
+        const category = cleanCatLabel((store.profiles[currentProfile].catRules || {})[merchantKey(it.desc)] || categorizeDesc(it.upDesc));
         if (category) desc = `[${category}] ${desc}`;
         const pm = it.desc.match(/(?:parcela\s+|-\s*)(\d{1,2})\s*\/\s*(\d{1,2})\s*$/i);
         store.profiles[currentProfile][destOf(it)].transactions.push({
@@ -2741,7 +2877,7 @@ async function runCSVImport(text, fileName) {
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bankName);
     if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bankName)) prof.enabledBanks.push(bankName);
     saveStore(); renderAll(); checkNotifications();
-    toast(`✅ ${items.length} lançamentos importados.`);
+    toast(`${items.length} lançamentos importados.`, null, "ok");
 }
 
 function renderHistoryTable() {
@@ -2793,7 +2929,7 @@ function promptNewBank() {
     newBankType = BANK_TYPES[faturaGroup] ? faturaGroup : "cartao";
     const o = document.createElement("div"); o.id = "newBankSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span>＋ Nova fatura / despesa</span><button class="btn-icon" onclick="document.getElementById('newBankSheet').remove()">✖</button></div>
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("plus", 16)} Nova fatura / despesa</span><button class="btn-icon" onclick="document.getElementById('newBankSheet').remove()">${ico("x", 16)}</button></div>
         <input id="nbName" class="qa-field" type="text" placeholder="Nome (ex.: Nubank, Financiamento, Contas Avulsas)" maxlength="40">
         <div style="font-size:.78rem;color:var(--text-muted);margin-top:12px;">Tipo</div>
         <div class="type-opts">${Object.keys(BANK_TYPES).map(k => `<button type="button" class="type-opt ${k === newBankType ? "sel" : ""}" data-k="${k}" onclick="pickNewBankType('${k}')">${ico(BANK_TYPES[k].icon, 22)}${BANK_TYPES[k].label}</button>`).join("")}</div>
@@ -2803,8 +2939,8 @@ function promptNewBank() {
 function pickNewBankType(k) { newBankType = k; document.querySelectorAll("#newBankSheet .type-opt").forEach(b => b.classList.toggle("sel", b.dataset.k === k)); }
 function submitNewBank() {
     const clean = (document.getElementById("nbName").value || "").trim();
-    if (!clean) return toast("Informe o nome.");
-    if (store.config.banks.includes(clean)) return toast("Já existe uma fatura com esse nome.");
+    if (!clean) return toast("Informe o nome.", null, "warn");
+    if (store.config.banks.includes(clean)) return toast("Já existe uma fatura com esse nome.", null, "warn");
     store.config.banks.push(clean); store.config.bankColors[clean] = "#6366f1";
     store.config.bankTypes[clean] = newBankType;
     store = sanitizeStore(store);
@@ -2813,7 +2949,7 @@ function submitNewBank() {
     if (!prof.enabledBanks.includes(clean)) prof.enabledBanks.push(clean);
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== clean);
     saveStore(); updateBankSelects(); renderAll();
-    document.getElementById("newBankSheet").remove(); toast(`✅ ${clean} criado em ${BANK_TYPES[newBankType].plural}.`);
+    document.getElementById("newBankSheet").remove(); toast(`${clean} criado em ${BANK_TYPES[newBankType].plural}.`, null, "ok");
 }
 function setBankType(bank, t) {
     if (!BANK_TYPES[t]) return;
@@ -2858,10 +2994,10 @@ function renderFinishedInstallments() {
     const el = document.getElementById("finishedPanel"); if (!el) return;
     const paidMap = store.profiles[currentProfile].finishedPaid || {}, list = getFinishedInstallments();
     const pend = list.filter(x => !paidMap[x.key]).length;
-    el.innerHTML = `<div class="panel-header acc-head" data-k="fin" onclick="toggleAcc(this)"><span>Parcelas finalizadas <small style="color:var(--text-muted);font-weight:500;">(${list.length})</small></span>${pend ? `<button class="btn" style="padding:4px 10px;font-size:.78rem;" onclick="event.stopPropagation();markAllFinishedPaid()">✔ Tudo pago</button>` : ""}<i class="acc-chev">▸</i></div>` +
+    el.innerHTML = `<div class="panel-header acc-head" data-k="fin" onclick="toggleAcc(this)"><span>Parcelas finalizadas <small style="color:var(--text-muted);font-weight:500;">(${list.length})</small></span>${pend ? `<button class="btn" style="padding:4px 10px;font-size:.78rem;" onclick="event.stopPropagation();markAllFinishedPaid()">${ico("check", 13)} Tudo pago</button>` : ""}<i class="acc-chev">▸</i></div>` +
         '<div class="acc-body">' + (list.length ? `<div style="padding:8px 12px 12px;">` + list.map(x => {
             const ok = !!paidMap[x.key];
-            return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);opacity:${ok ? .6 : 1};"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;overflow-wrap:anywhere;${ok ? "text-decoration:line-through;" : ""}">${esc(x.desc)}</div><div class="tx-meta">${createBankBadgeHTML(x.bank)}<span class="chip">${x.total}/${x.total} · finalizado</span><span>${esc(x.month)}</span></div></div><div style="text-align:right;"><div class="hv" style="font-weight:700;font-size:.85rem;">${fmtBRL(x.val * x.total)}</div><button class="${ok ? "btn-outline" : "btn"}" style="padding:3px 8px;font-size:.72rem;margin-top:4px;" onclick="toggleFinishedPaid('${jsq(x.key)}')">${ok ? "↩ Desfazer" : "✔ Pago"}</button></div></div>`;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);opacity:${ok ? .6 : 1};"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;overflow-wrap:anywhere;${ok ? "text-decoration:line-through;" : ""}">${esc(x.desc)}</div><div class="tx-meta">${createBankBadgeHTML(x.bank)}<span class="chip">${x.total}/${x.total} · finalizado</span><span>${esc(x.month)}</span></div></div><div style="text-align:right;"><div class="hv" style="font-weight:700;font-size:.85rem;">${fmtBRL(x.val * x.total)}</div><button class="${ok ? "btn-outline" : "btn"}" style="padding:3px 8px;font-size:.72rem;margin-top:4px;" onclick="toggleFinishedPaid('${jsq(x.key)}')">${ok ? `${ico("undo", 12)} Desfazer` : `${ico("check", 12)} Pago`}</button></div></div>`;
         }).join("") + `</div>` : `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.84rem;">Nenhum parcelamento finalizado ainda. Quando a última parcela vencer, ele aparece aqui.</div>`) + '</div>';
 }
 function renderGroupTabs() {
@@ -2889,10 +3025,10 @@ async function removeRow(group, index) {
     if (ok) {
         const removed = store.profiles[currentProfile][currentMonth][group].splice(index, 1)[0];
         saveStore(); renderAll(); checkNotifications();
-        toast(`🗑️ "${removed.nome}" removido.`, () => {
+        toast(`"${removed.nome}" removido.`, () => {
             store.profiles[currentProfile][currentMonth][group].splice(index, 0, removed);
             saveStore(); renderAll(); checkNotifications();
-        });
+        }, "del");
     }
 }
 // ---------- Lista do mercado ----------
@@ -2907,7 +3043,7 @@ function marketAdd() {
 function marketToggle(id) { const it = marketList().find(x => x.id === id); if (!it) return; it.done = !it.done; saveStore(); renderMarket(); }
 function marketRemove(id) { const p = store.profiles[currentProfile]; p.market = marketList().filter(x => x.id !== id); saveStore(); renderMarket(); }
 function marketRemoveDone() { const p = store.profiles[currentProfile]; if (!marketList().some(x => x.done)) return; p.market = marketList().filter(x => !x.done); saveStore(); renderMarket(); }
-function marketReset() { const l = marketList(); if (!l.length) return; l.forEach(x => { x.done = false; }); saveStore(); renderMarket(); toast("Lista pronta para a próxima compra."); }
+function marketReset() { const l = marketList(); if (!l.length) return; l.forEach(x => { x.done = false; }); saveStore(); renderMarket(); toast("Lista pronta para a próxima compra.", null, "ok"); }
 async function marketClear() {
     if (!marketList().length) return;
     const ok = await uiConfirm({
@@ -2967,21 +3103,21 @@ function parseExpenseDueDate(vencRaw, monthKey = currentMonth) {
     return null;
 }
 function getExpenseDueBadgeInfo(item, monthKey = currentMonth) {
-    if (!item || !item.venc) return { label: "＋ Venc.", cls: "" };
+    if (!item || !item.venc) return { label: "Venc.", cls: "", empty: true };
     const dt = parseExpenseDueDate(item.venc, monthKey);
-    if (!dt) return { label: String(item.venc), cls: "has-due" };
+    if (!dt) return { label: String(item.venc), cls: "has-due", empty: false };
     const dd = String(dt.getDate()).padStart(2, "0");
     const mm = String(dt.getMonth() + 1).padStart(2, "0");
-    if (item.paid) return { label: `${dd}/${mm}`, cls: "due-paid" };
+    if (item.paid) return { label: `${dd}/${mm}`, cls: "due-paid", empty: false };
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const diff = Math.round((dt - today) / 86400000);
-    if (diff < 0) return { label: `${dd}/${mm} · Vencida`, cls: "due-late" };
-    if (diff === 0) return { label: `${dd}/${mm} · Hoje`, cls: "due-soon" };
-    if (diff <= 3) return { label: `${dd}/${mm} · ${diff}d`, cls: "due-soon" };
-    return { label: `${dd}/${mm}`, cls: "has-due" };
+    if (diff < 0) return { label: `${dd}/${mm} · Vencida`, cls: "due-late", empty: false };
+    if (diff === 0) return { label: `${dd}/${mm} · Hoje`, cls: "due-soon", empty: false };
+    if (diff <= 3) return { label: `${dd}/${mm} · ${diff}d`, cls: "due-soon", empty: false };
+    return { label: `${dd}/${mm}`, cls: "has-due", empty: false };
 }
 function getAvulsoDueStatus(tx) {
-    if (!tx || !tx.dueDate) return { label: "＋ Vencimento", cls: "" };
+    if (!tx || !tx.dueDate) return { label: "Vencimento", cls: "" };
     const dt = parseExpenseDueDate(tx.dueDate, currentMonth);
     if (!dt) return { label: tx.dueDate, cls: "has-due" };
     const dd = String(dt.getDate()).padStart(2, "0");
@@ -3007,8 +3143,8 @@ function openItemDuePicker(group, index, event) {
     const quickDays = [1, 5, 8, 10, 12, 15, 20, 25, 28, 30];
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:4px;">
-            <span>📅 Vencimento · ${esc(item.nome || "Despesa")}</span>
-            <button class="btn-icon" onclick="document.getElementById('itemDueSheet').remove()">✖</button>
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} Vencimento · ${esc(item.nome || "Despesa")}</span>
+            <button class="btn-icon" onclick="document.getElementById('itemDueSheet').remove()">${ico("x", 16)}</button>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">
             Defina a data de vencimento para receber alertas e notificações antes de vencer.
@@ -3058,7 +3194,7 @@ function saveItemDueDate(group, index, val) {
     }
     document.getElementById("itemDueSheet")?.remove();
     saveStore(); renderAll(); checkNotifications();
-    toast(val ? `📅 Vencimento de "${item.nome}" salvo.` : `Vencimento removido.`);
+    toast(val ? `Vencimento de "${item.nome}" salvo.` : `Vencimento removido.`, null, "ok");
 }
 
 function updateItem(group, index, field, val) {
@@ -3108,18 +3244,18 @@ function renderTableRows(group, containerId) {
                 <div class="item-row-main">
                     ${isExpense ? `<input type="checkbox" class="pay-chk" title="Marcar como paga neste mês" ${item.paid ? 'checked' : ''} onchange="updateItem('${group}', ${i}, 'paid', this.checked)">` : ''}
                     <input type="text" value="${esc(item.nome)}" oninput="updateItem('${group}', ${i}, 'nome', this.value)" onchange="updateItem('${group}', ${i}, 'nome', this.value)">
-                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', ${i}, event)" title="Data de vencimento">${esc(dueInfo.label)}</button>` : ''}
+                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', ${i}, event)" title="Data de vencimento">${ico("calendar", 11)} ${esc(dueInfo.label)}</button>` : ''}
                 </div>
             </td>
             <td class="val-col"><input type="text" inputmode="numeric" value="${fmtBRL(item.valor)}" oninput="maskCurrencyInput(this); updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))" onchange="updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))"></td>
-            <td class="action-col"><button class="btn-icon" onclick="removeRow('${group}', ${i})">✖</button></td>
+            <td class="action-col"><button class="btn-icon" onclick="removeRow('${group}', ${i})" aria-label="Remover">${ico("x", 15)}</button></td>
         </tr>`;
     });
 }
 function addFuturePurchase() {
     const desc = document.getElementById("futureDesc").value.trim(); const val = parseInputCurrency(document.getElementById("futureVal").value);
     const bank = document.getElementById("futureBank").value; const priority = document.getElementById("futurePriority").value;
-    if (!desc || val <= 0) return toast("Informe descrição e valor.");
+    if (!desc || val <= 0) return toast("Informe descrição e valor.", null, "warn");
     store.profiles[currentProfile].futurePurchases.push({ id: Date.now(), desc, val, bank, priority, status: "Pendente" });
     document.getElementById("futureDesc").value = ""; document.getElementById("futureVal").value = "";
     saveStore(); renderAll();
@@ -3153,7 +3289,7 @@ async function moveFutureToCurrentMonth(id) {
         if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bankName);
         if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bankName)) prof.enabledBanks.push(bankName);
         item.status = "Comprado"; saveStore(); renderAll();
-        toast(`✅ "${item.desc}" lançado em ${bankName}.`);
+        toast(`"${item.desc}" lançado em ${bankName}.`, null, "ok");
     }
 }
 function renderFuturePurchases() {
@@ -3165,7 +3301,7 @@ function renderFuturePurchases() {
         if (item.status === "Pendente") totFut += Number(item.val) || 0;
         const prioCls = item.priority === "Alta" ? "prio-alta" : (item.priority === "Média" ? "prio-media" : "prio-baixa");
         const isDone = item.status === "Comprado";
-        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td><input type="checkbox" class="cb-fut" value="${item.id}" onchange="toggleFutBtn()"></td><td style="width:100px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? '✅ Comprado' : '⏳ Pendente'}</button></td><td style="font-weight:600;">${esc(item.desc)}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : esc(item.bank)}</td><td class="${prioCls}">${esc(item.priority)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;"><button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="moveFutureToCurrentMonth(${item.id})">➔ Lançar</button> <button class="btn-danger" onclick="deleteFuturePurchase(${item.id})">✖</button></td></tr>`;
+        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td><input type="checkbox" class="cb-fut" value="${item.id}" onchange="toggleFutBtn()"></td><td style="width:105px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? `${ico("check", 12)} Comprado` : `${ico("clock", 12)} Pendente`}</button></td><td style="font-weight:600;">${esc(item.desc)}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : esc(item.bank)}</td><td class="${prioCls}">${esc(item.priority)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;white-space:nowrap;"><button class="btn" style="padding:4px 9px; font-size:0.74rem; display:inline-flex; align-items:center; gap:4px;" onclick="moveFutureToCurrentMonth(${item.id})">${ico("arrowRight", 12)} Lançar</button> <button class="btn-danger" style="padding:4px 7px;" onclick="deleteFuturePurchase(${item.id})" aria-label="Excluir">${ico("trash", 13)}</button></td></tr>`;
     });
     document.getElementById("futureTotalBadge").textContent = "Total Pendente: " + fmtBRL(totFut);
 }
@@ -3202,17 +3338,20 @@ function renderCompareBadge(curr, prev, elemId, invert = false) {
 }
 let openCategories = new Set();
 let _catList = [];
-function getTxCategory(t) { const m = String(t.desc || "").match(/^\[(.*?)\]/); return m ? m[0] : "💳 Outros Cartão / Não Categorizado"; }
+function getTxCategory(t) {
+    const m = String(t.desc || "").match(/^\[(.*?)\]/);
+    return m ? cleanCatLabel(m[1]) : "Outros Cartão / Não Categorizado";
+}
 function stripCatTag(d) { return String(d || "").replace(/^\[.*?\]\s*/, ""); }
 function buildCategoryData(month) {
     const data = store.profiles[currentProfile][month];
     const cats = {};
     const add = (name, item) => { if (!cats[name]) cats[name] = { name, val: 0, items: [] }; cats[name].val += item.val; cats[name].items.push(item); };
     if (!data) return [];
-    data.transactions.forEach(t => add(getTxCategory(t), { id: t.id, tag: (String(t.desc || '').match(/^\[(.*?)\]/) || [])[1] || '', date: t.date || "-", bank: t.bank, desc: stripCatTag(t.desc), parcela: t.parcela, val: Number(t.val) || 0 }));
-    store.config.banks.forEach(b => { const extra = Number(data.cardStatus?.[b]?.manualExtra) || 0; if (extra !== 0) add("💳 Valor fixo lançado no cartão", { date: "-", bank: b, desc: "Valor fixo / extra manual", parcela: "", val: extra }); });
-    data.essenciais.forEach(e => { if (Number(e.valor) > 0) add("🏠 Fixo: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
-    data.naoEssenciais.forEach(e => { if (Number(e.valor) > 0) add("💸 Variável: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
+    data.transactions.forEach(t => add(getTxCategory(t), { id: t.id, tag: cleanCatLabel((String(t.desc || '').match(/^\[(.*?)\]/) || [])[1] || ''), date: t.date || "-", bank: t.bank, desc: stripCatTag(t.desc), parcela: t.parcela, val: Number(t.val) || 0 }));
+    store.config.banks.forEach(b => { const extra = Number(data.cardStatus?.[b]?.manualExtra) || 0; if (extra !== 0) add("Valor fixo lançado no cartão", { date: "-", bank: b, desc: "Valor fixo / extra manual", parcela: "", val: extra }); });
+    data.essenciais.forEach(e => { if (Number(e.valor) > 0) add("Fixo: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
+    data.naoEssenciais.forEach(e => { if (Number(e.valor) > 0) add("Variável: " + e.nome, { date: "-", bank: "", desc: e.nome, parcela: "", val: Number(e.valor) }); });
     return Object.values(cats);
 }
 let openInstallmentMonths = new Set();
@@ -3233,12 +3372,12 @@ function renderInstallments() {
     });
     const keys = Object.keys(byMonth);
     if (!keys.length) { el.innerHTML = `<p style="color:var(--text-muted); padding: 12px 0;">Nenhuma parcela em aberto.</p>`; return; }
-    let html = `<div class="cat-hint" style="margin-bottom:12px;">👆 Toque no mês para ver as parcelas.</div>`;
+    let html = `<div class="cat-hint" style="margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;">${ico("info", 14)} Toque no mês para expandir as parcelas projetadas.</div>`;
     keys.forEach(k => {
         const mData = byMonth[k];
         const isOpen = openInstallmentMonths.has(k);
         const itemRows = mData.items.map(it => `<tr><td style="width:110px;">${it.bank ? createBankBadgeHTML(it.bank) : ""}</td><td>${esc(it.desc)}</td><td style="color:var(--text-muted); font-size:0.8rem; white-space:nowrap;">Parcela ${esc(it.futureParcela)}</td><td class="val-col" style="font-weight:600;">${fmtBRL(it.val)}</td></tr>`).join("");
-        html += `<div class="cat-group ${isOpen ? "open" : ""}" style="background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; border-radius:8px;"><div class="cat-head" onclick="toggleInstallmentMonth('${k}')" style="padding:10px 12px; display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:6px;"><span class="cat-arrow" style="${isOpen ? 'transform:rotate(90deg);' : ''}">▶</span> 📅 ${esc(k)} <small style="color:var(--text-muted); font-weight:normal;">(${mData.count})</small></span><span style="font-weight:700; font-size:0.95rem; color:var(--accent);">${fmtBRL(mData.val)}</span></div><div class="cat-items" style="${isOpen ? 'display:block;' : 'display:none;'} padding:6px 12px 10px; margin:0; border-top:1px solid var(--border);"><table><tbody>${itemRows}</tbody></table></div></div>`;
+        html += `<div class="cat-group ${isOpen ? "open" : ""}" style="background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; border-radius:8px;"><div class="cat-head" onclick="toggleInstallmentMonth('${k}')" style="padding:10px 12px; display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:6px;"><span class="cat-arrow" style="${isOpen ? 'transform:rotate(90deg);' : ''}">▶</span> ${ico("calendar", 15)} ${esc(k)} <small style="color:var(--text-muted); font-weight:normal;">(${mData.count})</small></span><span style="font-weight:700; font-size:0.95rem; color:var(--accent);">${fmtBRL(mData.val)}</span></div><div class="cat-items" style="${isOpen ? 'display:block;' : 'display:none;'} padding:6px 12px 10px; margin:0; border-top:1px solid var(--border);"><table><tbody>${itemRows}</tbody></table></div></div>`;
     });
     el.innerHTML = html;
 }
@@ -3250,7 +3389,7 @@ function renderCategoryReport() {
     const totalVal = sorted.reduce((a, c) => a + c.val, 0);
     if (totalVal === 0) { catContainer.innerHTML = "<p style='color:var(--text-muted); text-align:center; padding: 20px;'>Nenhum gasto.</p>"; return; }
     const colors = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#0ea5e9", "#6366f1", "#a855f7", "#ec4899"];
-    let html = `<div class="cat-hint">👆 Clique em uma categoria para ver as compras.</div><div style="display:flex;justify-content:center;margin-bottom:14px;">${ringSVG(sorted, totalVal, 210)}</div>`;
+    let html = `<div class="cat-hint" style="display:inline-flex;align-items:center;gap:6px;">${ico("info", 14)} Toque em uma categoria para detalhar as compras e metas.</div><div style="display:flex;justify-content:center;margin-bottom:14px;">${ringSVG(sorted, totalVal, 210)}</div>`;
     sorted.forEach((cat, idx) => {
         const pct = ((cat.val / totalVal) * 100).toFixed(1);
         const color = colors[idx % colors.length];
@@ -3258,8 +3397,9 @@ function renderCategoryReport() {
         const over = goal > 0 && cat.val > goal;
         const isOpen = openCategories.has(cat.name);
         const items = cat.items.slice().sort((a, b) => b.val - a.val);
-        const rows = items.map(it => `<tr><td style="white-space:nowrap; color:var(--text-muted);">${esc(it.date)}</td><td>${it.bank ? createBankBadgeHTML(it.bank) : ""}</td><td>${esc(cleanDisplayDesc(it.desc))}${it.parcela && it.parcela !== "Auto (CSV)" && it.parcela !== "À vista" ? ` <span style="color:var(--text-muted);">(${esc(cleanParcelaDisplay(it.parcela))})</span>` : ""}</td><td>${it.id ? `<select class="cat-sel" onchange="recategorizeTx('${it.id}', this.value)"><option value="">Outros</option>${CATEGORY_LIST.map(c => `<option value="${c}" ${c === it.tag ? "selected" : ""}>${c}</option>`).join("")}</select>` : ""}</td><td class="val-col" style="font-weight:600; ${it.val < 0 ? "color:#22c55e;" : ""}">${fmtBRL(it.val)}</td></tr>`).join("");
-        html += `<div class="cat-group ${isOpen ? "open" : ""}"><div class="cat-head" onclick="toggleCategory(${idx})"><div class="bar-label" style="font-size:0.85rem;"><span><span class="cat-arrow">▶</span> ${esc(cat.name)} <small style="color:var(--text-muted);">(${items.length})</small></span><span style="color:${over ? '#ef4444' : color};">${over ? "⚠️ " : ""}${fmtBRL(cat.val)} (${pct}%)${goal ? ` / meta ${fmtBRL(goal)}` : ""}</span></div><div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${pct}%; background:${over ? '#ef4444' : color};"></div></div></div><div class="cat-items"><div class="cat-hint">Meta mensal: <input type="text" inputmode="numeric" value="${fmtBRL(goal)}" oninput="maskCurrencyInput(this)" onchange="setGoal(${idx}, parseInputCurrency(this.value))" style="width:100px; padding:2px 4px;"></div><table><tbody>${rows}</tbody></table></div></div>`;
+        const cleanName = cleanCatLabel(cat.name);
+        const rows = items.map(it => `<tr><td style="white-space:nowrap; color:var(--text-muted);">${esc(it.date)}</td><td>${it.bank ? createBankBadgeHTML(it.bank) : ""}</td><td>${esc(cleanDisplayDesc(it.desc))}${it.parcela && it.parcela !== "Auto (CSV)" && it.parcela !== "À vista" ? ` <span style="color:var(--text-muted);">(${esc(cleanParcelaDisplay(it.parcela))})</span>` : ""}</td><td>${it.id ? `<select class="cat-sel" onchange="recategorizeTx('${it.id}', this.value)"><option value="">Outros</option>${CATEGORY_LIST.map(c => `<option value="${c}" ${cleanCatLabel(c) === cleanCatLabel(it.tag) ? "selected" : ""}>${c}</option>`).join("")}</select>` : ""}</td><td class="val-col" style="font-weight:600; ${it.val < 0 ? "color:#22c55e;" : ""}">${fmtBRL(it.val)}</td></tr>`).join("");
+        html += `<div class="cat-group ${isOpen ? "open" : ""}"><div class="cat-head" onclick="toggleCategory(${idx})"><div class="bar-label" style="font-size:0.85rem;"><span style="display:inline-flex;align-items:center;gap:6px;"><span class="cat-arrow">▶</span> <span style="color:${color};display:inline-flex;">${ico(txIconFor(cleanName), 15)}</span> ${esc(cleanName)} <small style="color:var(--text-muted);">(${items.length})</small></span><span style="color:${over ? '#ef4444' : color};display:inline-flex;align-items:center;gap:4px;">${over ? ico("alert", 14) : ""}${fmtBRL(cat.val)} (${pct}%)${goal ? ` / meta ${fmtBRL(goal)}` : ""}</span></div><div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${pct}%; background:${over ? '#ef4444' : color};"></div></div></div><div class="cat-items"><div class="cat-hint">Meta mensal: <input type="text" inputmode="numeric" value="${fmtBRL(goal)}" oninput="maskCurrencyInput(this)" onchange="setGoal(${idx}, parseInputCurrency(this.value))" style="width:100px; padding:2px 4px;"></div><table><tbody>${rows}</tbody></table></div></div>`;
     });
     catContainer.innerHTML = html;
 }
@@ -3287,22 +3427,55 @@ function renderAll() {
     const hiddenCount = store.config.banks.length - profileVisibleBanks.length;
     const manageBtn = document.getElementById("btnManageBanks");
     if (manageBtn) {
-        manageBtn.textContent = hiddenCount > 0 ? `👁️ Faturas (${hiddenCount} oculta${hiddenCount > 1 ? 's' : ''})` : "👁️ Gerenciar Faturas";
+        const lbl = hiddenCount > 0 ? `Faturas (${hiddenCount} oculta${hiddenCount > 1 ? 's' : ''})` : "Gerenciar Faturas";
+        manageBtn.innerHTML = `${ico("eye", 13)} ${esc(lbl)}`;
+    }
+
+    // Barra executiva de resumo das Faturas (#faturasOverviewBar)
+    const foBar = document.getElementById("faturasOverviewBar");
+    if (foBar) {
+        let sumAll = 0, sumPaid = 0, sumPend = 0, cntPaid = 0, cntPend = 0;
+        profileVisibleBanks.forEach(b => {
+            const v = getBankTotal(b, currentMonth);
+            if (Math.abs(v) < 0.009) return;
+            sumAll += v;
+            if (getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, b) === "Pago") {
+                sumPaid += v; cntPaid++;
+            } else {
+                sumPend += v; cntPend++;
+            }
+        });
+        foBar.innerHTML = `
+            <div class="fo-card">
+                <div class="fo-label">${ico("layers", 12)} Total em Faturas</div>
+                <div class="fo-val hv">${fmtBRL(sumAll)}</div>
+                <div class="fo-sub">${profileVisibleBanks.length} fatura${profileVisibleBanks.length === 1 ? '' : 's'} ativa${profileVisibleBanks.length === 1 ? '' : 's'}</div>
+            </div>
+            <div class="fo-card ok">
+                <div class="fo-label">${ico("check", 12)} Pago no mês</div>
+                <div class="fo-val hv">${fmtBRL(sumPaid)}</div>
+                <div class="fo-sub">${cntPaid} liquidada${cntPaid === 1 ? '' : 's'}</div>
+            </div>
+            <div class="fo-card warn">
+                <div class="fo-label">${ico("clock", 12)} Em aberto</div>
+                <div class="fo-val hv">${fmtBRL(sumPend)}</div>
+                <div class="fo-sub">${cntPend} pendente${cntPend === 1 ? '' : 's'}</div>
+            </div>`;
     }
 
     const cardBody = document.getElementById("cartoesResumoBody"); cardBody.innerHTML = "";
     if (profileVisibleBanks.length === 0) {
-        cardBody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem;">Nenhuma fatura selecionada neste perfil. <button type="button" class="btn-outline" style="padding:3px 9px;font-size:.74rem;margin-left:6px;" onclick="openManageBanksSheet()">＋ Escolher faturas</button></td></tr>`;
+        cardBody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem;">Nenhuma fatura selecionada neste perfil. <button type="button" class="btn-outline" style="padding:3px 9px;font-size:.74rem;margin-left:6px;display:inline-flex;align-items:center;gap:4px;" onclick="openManageBanksSheet()">${ico("plus", 12)} Escolher faturas</button></td></tr>`;
     } else {
         profileVisibleBanks.forEach(bank => {
             const tot = getBankTotal(bank);
             cardBody.innerHTML += `<tr>
                 <td style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
                     ${createBankBadgeHTML(bank, true)}
-                    ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="font-size:.75rem;color:var(--text-muted);" title="Ocultar fatura zerada" onclick="hideBankCard('${jsq(bank)}', event)">👁️</button>` : ""}
+                    ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="color:var(--text-muted);" title="Ocultar fatura zerada" onclick="hideBankCard('${jsq(bank)}', event)">${ico("eyeOff", 14)}</button>` : ""}
                 </td>
                 <td class="val-col" style="font-weight:700;">${fmtBRL(tot)}</td>
-                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button class="btn-icon" title="Excluir ou ocultar fatura zerada" onclick="deleteBankCard('${jsq(bank)}', event)">✖</button>` : ""}</td>
+                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button class="btn-icon" title="Excluir ou ocultar fatura zerada" onclick="deleteBankCard('${jsq(bank)}', event)">${ico("x", 14)}</button>` : ""}</td>
             </tr>`;
         });
     }
@@ -3316,19 +3489,18 @@ function renderAll() {
     });
 
     if (profileVisibleBanks.length === 0) {
-        // Perfil sem nenhum saldo devedor ou com todas ocultas: permite escolher 1 por 1 em vez de aparecer tudo de uma vez
         bankContainer.innerHTML = `<div class="fatura-onboarding">
-            <h4>💳 Escolha as faturas do perfil "${esc(currentProfile)}"</h4>
+            <h4 style="display:inline-flex;align-items:center;gap:7px;">${ico("card", 18)} Escolha as faturas do perfil "${esc(currentProfile)}"</h4>
             <p>Este perfil ainda não possui saldo devedor ativo. Toque uma por uma nas faturas que deseja utilizar aqui ou crie uma nova:</p>
             <div class="bank-picker-grid">
                 ${store.config.banks.map(b => `<button type="button" class="bank-pick-chip" onclick="toggleProfileBank('${jsq(b)}')">
                     <span class="bank-pick-dot" style="background:${getBankColor(b)};"></span>
-                    <span>＋ ${esc(b)}</span>
+                    <span>${ico("plus", 12)} ${esc(b)}</span>
                 </button>`).join("")}
             </div>
             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-                <button type="button" class="btn-outline" style="font-size:.78rem;padding:7px 14px;" onclick="enableAllProfileBanks()">Mostrar todas</button>
-                <button type="button" class="btn" style="font-size:.78rem;padding:7px 14px;" onclick="promptNewBank()">＋ Nova Fatura</button>
+                <button type="button" class="btn-outline" style="font-size:.78rem;padding:7px 14px;" onclick="enableAllProfileBanks()">${ico("eye", 14)} Mostrar todas</button>
+                <button type="button" class="btn" style="font-size:.78rem;padding:7px 14px;" onclick="promptNewBank()">${ico("plus", 14)} Nova Fatura</button>
             </div>
         </div>`;
     } else if (!visibleBanks.length) {
@@ -3350,7 +3522,7 @@ function renderAll() {
         const bankTx = (data.transactions || []).filter(t => t.bank === bank);
         const detailRows = bankTx.length ? bankTx.map(t => {
             const avulsoBadge = (isOutros || t.dueDate)
-                ? `<button type="button" class="due-pill-btn ${getAvulsoDueStatus(t).cls}" style="margin-left:4px;padding:1px 6px;font-size:.66rem;" onclick="openTxDuePicker('${jsq(t.id)}', event)">📅 ${esc(getAvulsoDueStatus(t).label)}</button>`
+                ? `<button type="button" class="due-pill-btn ${getAvulsoDueStatus(t).cls}" style="margin-left:4px;padding:1px 6px;font-size:.66rem;" onclick="openTxDuePicker('${jsq(t.id)}', event)">${ico("calendar", 11)} ${esc(getAvulsoDueStatus(t).label)}</button>`
                 : "";
             return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;font-size:.78rem;border-top:1px solid var(--border);">
                 <span style="min-width:0;overflow-wrap:anywhere;${t.paid ? 'text-decoration:line-through;opacity:.65;' : ''}">${esc(cleanDisplayDesc(t.desc))} ${cleanParcelaDisplay(t.parcela || "") && !/^(à\s*vista)$/i.test(cleanParcelaDisplay(t.parcela || "")) ? `(${esc(cleanParcelaDisplay(t.parcela))})` : ""}${avulsoBadge}</span>
@@ -3360,13 +3532,13 @@ function renderAll() {
 
         const vencControlHtml = isOutros
             ? `<span>Venc. Avulso: <input type="date" value="${dueDt ? isoDate(dueDt) : ''}" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:128px;padding:2px 5px;font-size:.74rem;"></span>`
-            : `<span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span>`;
+            : `<span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">${ico("calendar", 12)} ${dueLabel}</button></span>`;
 
         bankContainer.innerHTML += `<div class="bank-card" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')">
             <div class="bank-card-strip" style="background:${getBankColor(bank)};"></div>
-            <div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div>
+            <div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?`${ico("check", 12)} Pago`:`${ico("clock", 12)} Pendente`}</button></div>
             <div class="bank-total">${fmtBRL(bankTotalVal)}</div>
-            <div class="bank-due">📆 ${dueFull || (isOutros ? "Contas avulsas (defina por item ou data)" : "Sem vencimento definido")}</div>
+            <div class="bank-due" style="display:inline-flex;align-items:center;gap:5px;">${ico("calendar", 13)} ${dueFull || (isOutros ? "Contas avulsas (defina por item ou data)" : "Sem vencimento definido")}</div>
             <div class="bank-more">Toque para ver detalhes e opções ▾</div>
             <div class="bank-card-detail">
                 <div class="bank-set" onclick="event.stopPropagation()">
@@ -3375,8 +3547,8 @@ function renderAll() {
                 </div>
                 ${detailRows}
                 <div class="bank-card-actions" onclick="event.stopPropagation()">
-                    <button type="button" class="bank-act-btn" onclick="selectSingleFilterBank('${jsq(bank)}')">🔍 Filtrar lançamentos</button>
-                    <button type="button" class="bank-act-btn ${isZeroed ? '' : 'disabled'}" onclick="hideBankCard('${jsq(bank)}', event)" title="${isZeroed ? 'Ocultar esta fatura neste perfil' : 'Zere a fatura para poder ocultar'}">👁️ Ocultar</button>
+                    <button type="button" class="bank-act-btn" onclick="selectSingleFilterBank('${jsq(bank)}')">${ico("filter", 13)} Filtrar lançamentos</button>
+                    <button type="button" class="bank-act-btn ${isZeroed ? '' : 'disabled'}" onclick="hideBankCard('${jsq(bank)}', event)" title="${isZeroed ? 'Ocultar esta fatura neste perfil' : 'Zere a fatura para poder ocultar'}">${ico("eyeOff", 13)} Ocultar</button>
                     <button type="button" class="bank-act-btn del ${isZeroed ? '' : 'disabled'}" onclick="deleteBankCard('${jsq(bank)}', event)" title="${isZeroed ? 'Excluir esta fatura' : 'Zere a fatura para poder excluir'}">${ico("trash", 13)} Excluir</button>
                 </div>
             </div>
@@ -3445,7 +3617,7 @@ function cleanDisplayDesc(desc) {
 function addTransaction() {
     const desc = document.getElementById("txDesc").value.trim();
     const val = parseInputCurrency(document.getElementById("txVal").value) * (document.getElementById("txCredit") && document.getElementById("txCredit").checked ? -1 : 1);
-    if (!desc || val === 0) return toast("Preencha descrição e valor.");
+    if (!desc || val === 0) return toast("Preencha descrição e valor.", null, "warn");
     const bank = document.getElementById("txBank").value;
     const dueDate = document.getElementById("txDueDate") ? document.getElementById("txDueDate").value : "";
     const parcela = cleanParcelaDisplay(document.getElementById("txParcela").value) || "À vista";
@@ -3471,7 +3643,7 @@ function addTransaction() {
     if (document.getElementById("txDueDate")) document.getElementById("txDueDate").value = "";
     if (document.getElementById("txCredit")) document.getElementById("txCredit").checked = false;
     saveStore(); updateBankSelects(); renderAll(); checkNotifications();
-    toast(`✅ "${desc}" adicionado em ${bank}.`);
+    toast(`"${desc}" adicionado em ${bank}.`, null, "ok");
 }
 async function deleteTx(id) {
     const list = store.profiles[currentProfile][currentMonth].transactions || [];
@@ -3487,10 +3659,10 @@ async function deleteTx(id) {
     const idx = list.findIndex(t => String(t.id) === String(id));
     if (idx >= 0) list.splice(idx, 1);
     saveStore(); renderAll(); checkNotifications();
-    toast(`🗑️ Lançamento excluído.`, () => {
+    toast("Lançamento excluído.", () => {
         store.profiles[currentProfile][currentMonth].transactions.splice(idx, 0, target);
         saveStore(); renderAll(); checkNotifications();
-    });
+    }, "del");
 }
 function toggleAvulsoTxPaid(txId, event) {
     if (event) event.stopPropagation();
@@ -3513,8 +3685,8 @@ function openTxDuePicker(txId, event) {
     o.onclick = e => { if (e.target === o) o.remove(); };
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:4px;">
-            <span>📅 Vencimento avulso · ${esc(cleanDisplayDesc(stripCatTag(tx.desc)))}</span>
-            <button class="btn-icon" onclick="document.getElementById('txDueSheet').remove()">✖</button>
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} Vencimento avulso · ${esc(cleanDisplayDesc(stripCatTag(tx.desc)))}</span>
+            <button class="btn-icon" onclick="document.getElementById('txDueSheet').remove()">${ico("x", 16)}</button>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">
             Defina a data de vencimento desta conta avulsa em <b>${esc(tx.bank)}</b> para ser lembrado nas notificações.
@@ -3538,7 +3710,7 @@ function saveTxDueDate(txId, val, paidVal) {
     tx.paid = !!paidVal;
     document.getElementById("txDueSheet")?.remove();
     saveStore(); renderAll(); checkNotifications();
-    toast("✅ Vencimento avulso atualizado.");
+    toast("Vencimento avulso atualizado.", null, "ok");
 }
 function openEditTxSheet(txId) {
     const list = store.profiles[currentProfile][currentMonth]?.transactions || [];
@@ -3555,8 +3727,8 @@ function openEditTxSheet(txId) {
     const isCredit = Number(tx.val) < 0;
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:6px;">
-            <span>✏️ Editar lançamento</span>
-            <button class="btn-icon" onclick="document.getElementById('editTxSheet').remove()">✖</button>
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("pencil", 18)} Editar lançamento</span>
+            <button class="btn-icon" onclick="document.getElementById('editTxSheet').remove()">${ico("x", 16)}</button>
         </div>
         <label style="font-size:.75rem;color:var(--text-muted);display:block;margin-top:6px;">Descrição
             <input id="etDesc" class="qa-field" type="text" value="${esc(cleanDesc)}">
@@ -3593,7 +3765,7 @@ function saveEditedTx(txId) {
     if (!tx) return;
     const desc = document.getElementById("etDesc").value.trim();
     const rawVal = parseInputCurrency(document.getElementById("etVal").value);
-    if (!desc || !rawVal) return toast("Preencha descrição e valor.");
+    if (!desc || !rawVal) return toast("Preencha descrição e valor.", null, "warn");
     const tagMatch = String(tx.desc || "").match(/^(\[.*?\]\s*)/);
     tx.desc = (tagMatch ? tagMatch[1] : "") + desc;
     tx.val = document.getElementById("etCredit").checked ? -rawVal : rawVal;
@@ -3604,15 +3776,15 @@ function saveEditedTx(txId) {
     tx.dueDate = document.getElementById("etDue").value || "";
     document.getElementById("editTxSheet")?.remove();
     saveStore(); renderAll(); checkNotifications();
-    toast("✅ Lançamento atualizado.");
+    toast("Lançamento atualizado.", null, "ok");
 }
 
 function importBackup(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(evt) {
-        try { store = sanitizeStore(JSON.parse(evt.target.result)); saveStore(); init(); toast("✅ Backup restaurado com sucesso!"); }
-        catch (err) { toast("⚠️ Erro ao processar arquivo de backup."); }
+        try { store = sanitizeStore(JSON.parse(evt.target.result)); saveStore(); init(); toast("Backup restaurado com sucesso!", null, "ok"); }
+        catch (err) { toast("Erro ao processar arquivo de backup.", null, "warn"); }
     };
     reader.readAsText(file); e.target.value = "";
 }
@@ -3690,16 +3862,34 @@ async function sendChatMessage() {
     } catch (err) { lastError = err; }
     loadingDiv.remove();
     if (!lastError && replyText) { chatHistory.push({ role: "model", parts: [{ text: replyText }] }); appendMessage('model', replyText); }
-    else { chatHistory.pop(); inputEl.value = text; appendMessage('model', `⚠️ Erro: ${lastError?.message || "desconhecido"}`); }
+    else { chatHistory.pop(); inputEl.value = text; appendMessage('model', `Erro: ${lastError?.message || "desconhecido"}`); }
     chatBusy = false;
 }
 
-function toast(msg, undoFn) {
+function toast(msg, undoFn, kind) {
     let box = document.getElementById("toastBox");
     if (!box) { box = document.createElement("div"); box.id = "toastBox"; document.body.appendChild(box); }
     const t = document.createElement("div"); t.className = "toast";
-    const span = document.createElement("span"); span.textContent = msg; t.appendChild(span);
-    if (undoFn) { const b = document.createElement("button"); b.textContent = "↩ Desfazer"; b.onclick = () => { undoFn(); t.remove(); }; t.appendChild(b); }
+    const s = String(msg || "").trim();
+    let cls = kind || "info", icName = "info";
+    if (!kind) {
+        if (/exclu|remov|limp/i.test(s)) { cls = "del"; icName = "trash"; }
+        else if (/erro|falha|inv[aá]lid|bloquead|negad|zere|aten[cç][aã]o/i.test(s)) { cls = "warn"; icName = "alert"; }
+        else if (/criad|salvo|atualizad|importad|lan[cç]ad|paga|conectad|restaurad|copiad|ativad/i.test(s)) { cls = "ok"; icName = "check"; }
+    } else {
+        icName = cls === "ok" ? "check" : cls === "warn" ? "alert" : cls === "del" ? "trash" : "info";
+    }
+    const main = document.createElement("div");
+    main.className = "toast-main";
+    main.innerHTML = `<span class="toast-ico ${cls}">${ico(icName, 15)}</span><span>${esc(s)}</span>`;
+    t.appendChild(main);
+    if (undoFn) {
+        const b = document.createElement("button");
+        b.style.cssText = "display:inline-flex;align-items:center;gap:5px;white-space:nowrap;";
+        b.innerHTML = `${ico("undo", 13)} Desfazer`;
+        b.onclick = () => { undoFn(); t.remove(); };
+        t.appendChild(b);
+    }
     box.appendChild(t);
     setTimeout(() => t.remove(), undoFn ? 9000 : 4500);
 }
@@ -3731,22 +3921,23 @@ function renderEvolution() {
 async function hashPin(p) { try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("fin:" + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return btoa("fin:" + p); } }
 async function configurePin() {
     const p = await uiPrompt({
-        title: "🔒 PIN de Acesso · FinEly",
+        title: "PIN de Acesso · FinEly",
         message: "Defina um PIN numérico (4 ou mais dígitos). Deixe em branco para desativar o bloqueio:",
         placeholder: "Ex.: 1234",
-        confirmText: "Salvar PIN"
+        confirmText: "Salvar PIN",
+        icon: "lock"
     });
     if (p === null) return;
-    if (!p) { localStorage.removeItem("fin_pin_hash"); return toast("🔓 PIN removido."); }
-    if (p.length < 4) return toast("⚠️ Use pelo menos 4 dígitos.");
+    if (!p) { localStorage.removeItem("fin_pin_hash"); return toast("PIN de bloqueio removido.", null, "info"); }
+    if (p.length < 4) return toast("Use pelo menos 4 dígitos.", null, "warn");
     localStorage.setItem("fin_pin_hash", await hashPin(p));
-    toast("🔒 PIN ativado com sucesso.");
+    toast("PIN ativado com sucesso.", null, "ok");
 }
 function showLock() {
     const h = localStorage.getItem("fin_pin_hash"); if (!h) return;
     const o = document.createElement("div"); o.id = "lockScreen";
     o.style.cssText = "position:fixed;inset:0;z-index:3000;background:#090b12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#e2e8f0";
-    o.innerHTML = '<h2 style="font-weight:800;letter-spacing:-.02em;">🔒 FinEly</h2><p style="font-size:.84rem;color:#94a3b8;margin-top:-6px;">Digite seu PIN para desbloquear</p><input id="pinInput" type="password" inputmode="numeric" placeholder="••••" autocomplete="off" style="text-align:center;font-size:1.3rem;padding:11px;border-radius:12px;width:180px;background:#131726;border:1px solid rgba(255,255,255,.12);color:#fff;"><div id="pinErr" style="color:#f87171;font-size:.85rem;min-height:1.2em"></div>';
+    o.innerHTML = `<div style="width:52px;height:52px;border-radius:16px;background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.32);color:#c4b5fd;display:grid;place-items:center;">${ico("lock", 24)}</div><h2 style="font-weight:800;letter-spacing:-.02em;">FinEly</h2><p style="font-size:.84rem;color:#94a3b8;margin-top:-6px;">Digite seu PIN para desbloquear</p><input id="pinInput" type="password" inputmode="numeric" placeholder="••••" autocomplete="off" style="text-align:center;font-size:1.3rem;padding:11px;border-radius:12px;width:180px;background:#131726;border:1px solid rgba(255,255,255,.12);color:#fff;"><div id="pinErr" style="color:#f87171;font-size:.85rem;min-height:1.2em"></div>`;
     document.body.appendChild(o);
     const inp = o.querySelector("#pinInput"); inp.focus();
     const check = async (showErr) => { if (await hashPin(inp.value) === h) o.remove(); else if (showErr) { o.querySelector("#pinErr").textContent = "PIN incorreto"; inp.value = ""; } };
@@ -3826,7 +4017,6 @@ function getDueList() {
         (md.transactions || []).forEach(tx => {
             const val = Number(tx.val) || 0;
             if (tx.paid || val <= 0 || !tx.dueDate) return;
-            // Se a fatura inteira já está marcada como Paga, ignora
             if (tx.bank && getEffectivePaymentStatus(store.profiles[currentProfile], key, tx.bank) === "Pago") return;
             const due = parseExpenseDueDate(tx.dueDate, key); if (!due) return;
             const diff = Math.round((due - today) / 86400000);
@@ -3847,20 +4037,20 @@ function getAlerts(includeDismissed) {
         const when = x.diff < 0 ? `${isFem ? "Vencida" : "Vencido"} há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
         const rem = x.diff <= 0 || x.diff === 5 || x.diff === 3 || x.diff === 1;
         const kindTag = x.kind === "fixa" ? "Fixa · " : x.kind === "variavel" ? "Variável · " : x.kind === "avulsa" ? "Avulsa · " : "";
-        const icon = x.kind === "fixa" || x.kind === "variavel" ? "📋" : x.kind === "avulsa" ? "🧾" : "💳";
+        const icon = x.kind === "fixa" || x.kind === "variavel" ? "copy" : x.kind === "avulsa" ? "receipt" : "card";
         const tab = (x.kind === "fixa" || x.kind === "variavel") ? "visao" : "cartoes";
         const uKey = `due_${x.kind}_${x.bank}_${x.iso}`;
         al.push({ due: true, level: x.diff < 0 ? "danger" : x.diff <= 3 ? "warn" : "info", icon, title: `${kindTag}${x.bank} · ${fmtBRL(x.total)}`, text: `${when} (${x.iso.split("-").reverse().join("/")})`, key: uKey, notifyKey: `${uKey}_d${x.diff}`, notify: rem, tab });
     });
     const cur = calcMonthTotals(currentMonth);
-    if (cur.falta > 0) al.push({ level: "danger", icon: "📉", title: "Saídas maiores que as entradas", text: `${currentMonth}: faltam ${fmtBRL(cur.falta)}`, key: `neg_${currentMonth}`, tab: "visao" });
+    if (cur.falta > 0) al.push({ level: "danger", icon: "trend", title: "Saídas maiores que as entradas", text: `${currentMonth}: faltam ${fmtBRL(cur.falta)}`, key: `neg_${currentMonth}`, tab: "visao" });
     return includeDismissed ? al : al.filter(a => !dis[a.key]);
 }
 function clearNotifications() {
     const dis = getDismissed();
     getAlerts(true).forEach(a => { dis[a.key] = 1; });
     try { localStorage.setItem("fin_dismissed", JSON.stringify(dis)); localStorage.setItem("fin_notified", "{}"); } catch (e) {}
-    renderNotifications(); toast("Notificações zeradas. Os lembretes de vencimento continuam ativos para os próximos dias.");
+    renderNotifications(); toast("Notificações zeradas. Os lembretes de vencimento continuam ativos para os próximos dias.", null, "info");
 }
 
 // ===== Faturas, Despesas Fixas/Variáveis e Contas Avulsas vencidas / a vencer =====
@@ -3924,22 +4114,22 @@ function duePayItem(kind, ref, key) {
         item.paid = true;
         markSessionPaid();
         saveStore(); renderAll(); checkNotifications();
-        toast(`✅ "${item.nome}" marcada como paga.`, () => {
+        toast(`"${item.nome}" marcada como paga.`, () => {
             item.paid = false;
             saveStore(); renderAll(); checkNotifications();
             if (document.getElementById("dueSheet")) openDueSheet();
-        });
+        }, "ok");
     } else if (kind === "avulsa") {
         const tx = (md.transactions || []).find(t => String(t.id) === String(ref));
         if (!tx) return;
         tx.paid = true;
         markSessionPaid();
         saveStore(); renderAll(); checkNotifications();
-        toast(`✅ "${cleanDisplayDesc(stripCatTag(tx.desc))}" marcada como paga.`, () => {
+        toast(`"${cleanDisplayDesc(stripCatTag(tx.desc))}" marcada como paga.`, () => {
             tx.paid = false;
             saveStore(); renderAll(); checkNotifications();
             if (document.getElementById("dueSheet")) openDueSheet();
-        });
+        }, "ok");
     }
     if (getDueList().length) openDueSheet(); else { const sh = document.getElementById("dueSheet"); if (sh) sh.remove(); }
 }
@@ -3953,7 +4143,7 @@ function duePay(bank, key) {
         try { unpairCard(bank); } finally { currentMonth = k2; }
         saveStore(); renderAll(); checkNotifications();
         if (document.getElementById("dueSheet")) openDueSheet();
-    });
+    }, "ok");
     if (getDueList().length) openDueSheet(); else { const sh = document.getElementById("dueSheet"); if (sh) sh.remove(); }
 }
 function openDueSheet() {
@@ -3978,12 +4168,12 @@ function openDueSheet() {
             <div class="due-when">${when(x)} · ${br(x.iso)}<span class="due-ref">${kindLabel}</span></div>
             <div class="due-actions">
                 <button class="btn-outline" onclick="dueOpenItem('${jsq(x.kind)}','${jsq(refArg)}','${x.key}')">${openBtnLabel}</button>
-                <button class="btn" onclick="duePayItem('${jsq(x.kind)}','${jsq(refArg)}','${x.key}')">Marcar como paga</button>
+                <button class="btn" onclick="duePayItem('${jsq(x.kind)}','${jsq(refArg)}','${x.key}')">${ico("check", 13)} Marcar como paga</button>
             </div>
         </div>`;
     };
     const title = od.length ? (od.length > 1 ? `${od.length} contas/faturas vencidas` : "1 conta/fatura vencida") : "Próximos vencimentos";
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><b style="font-size:1.05rem;">${title}</b><button class="btn-icon" style="color:var(--text-muted);" onclick="document.getElementById('dueSheet').remove()" aria-label="Fechar">✖</button></div>`
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><b style="font-size:1.05rem;display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} ${title}</b><button class="btn-icon" style="color:var(--text-muted);" onclick="document.getElementById('dueSheet').remove()" aria-label="Fechar">${ico("x", 16)}</button></div>`
         + od.map(row).join("")
         + (up.length ? (od.length ? `<div class="grp-title" style="margin-top:16px;"><span>A vencer nos próximos 7 dias</span></div>` : "") + up.map(row).join("") : "")
         + (!od.length && !up.length ? `<div class="np-empty">Nenhuma conta ou fatura vencida. Tudo em dia!</div>` : "")
@@ -4015,7 +4205,7 @@ function renderMonthSummary() {
     let cmp = "—";
     if (prev && prev.saidas > 0) { const d = t.saidas - prev.saidas; cmp = `<span style="color:${d > 0 ? "#f87171" : "#4ade80"};">${d > 0 ? "▲" : "▼"} ${fmtBRL(Math.abs(d))}</span>`; }
     const tile = (l, v) => `<div class="sum-tile"><small>${l}</small><div>${v}</div></div>`;
-    el.innerHTML = `<div class="sum-grid">${tile("Gasto no mês", fmtBRL(t.saidas))}${tile("Maior categoria", top ? esc(top.name) + "<br>" + fmtBRL(top.val) : "—")}${tile("Compras no cartão", n)}${tile("Vs. mês anterior", cmp)}</div>`;
+    el.innerHTML = `<div class="sum-grid">${tile("Gasto no mês", fmtBRL(t.saidas))}${tile("Maior categoria", top ? esc(cleanCatLabel(top.name)) + "<br>" + fmtBRL(top.val) : "—")}${tile("Compras no cartão", n)}${tile("Vs. mês anterior", cmp)}</div>`;
 }
 if (localStorage.getItem("fin_hide") === "1") document.body.classList.add("hide-values");
 function togglePrivacy(force) {
@@ -4031,7 +4221,7 @@ function openQuickAdd() {
     const old = document.getElementById("quickSheet"); if (old) old.remove();
     const o = document.createElement("div"); o.id = "quickSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span>＋ Novo lançamento · ${esc(currentMonth)}</span><button class="btn-icon" onclick="document.getElementById('quickSheet').remove()">✖</button></div>
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("plus", 16)} Novo lançamento · ${esc(currentMonth)}</span><button class="btn-icon" onclick="document.getElementById('quickSheet').remove()">${ico("x", 16)}</button></div>
         <input id="qaDesc" class="qa-field" type="text" placeholder="Descrição">
         <input id="qaVal" class="qa-field" type="text" inputmode="numeric" placeholder="R$ 0,00" oninput="maskCurrencyInput(this)">
         <select id="qaBank" class="qa-field">${store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("")}</select>
@@ -4039,14 +4229,14 @@ function openQuickAdd() {
             <input id="qaParc" class="qa-field" type="text" placeholder="Parcela (ex.: 1/3)">
             <input id="qaDue" class="qa-field" type="date" title="Vencimento avulso (opcional para Outros)">
         </div>
-        <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;">💡 Data acima é opcional para vencimento avulso (contas em Outros).</div>
+        <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;display:inline-flex;align-items:center;gap:5px;">${ico("info", 13)} A data acima é opcional para vencimento avulso (contas em Outros).</div>
         <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.85rem;color:var(--text-muted);"><input type="checkbox" id="qaCredit"> É crédito/estorno</label>
         <button class="btn" style="width:100%;margin-top:12px;padding:12px;" onclick="submitQuickAdd()">Lançar</button></div>`;
     document.body.appendChild(o); setTimeout(() => document.getElementById("qaDesc").focus(), 250);
 }
 function submitQuickAdd() {
     const desc = document.getElementById("qaDesc").value.trim(), v = parseInputCurrency(document.getElementById("qaVal").value);
-    if (!desc || !v) return toast("Informe descrição e valor.");
+    if (!desc || !v) return toast("Informe descrição e valor.", null, "warn");
     const bank = document.getElementById("qaBank").value, d = new Date(), z = n => String(n).padStart(2, "0");
     const dueDate = document.getElementById("qaDue") ? document.getElementById("qaDue").value : "";
     store.profiles[currentProfile][currentMonth].transactions.push({
@@ -4064,59 +4254,9 @@ function submitQuickAdd() {
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bank);
     if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bank)) prof.enabledBanks.push(bank);
     saveStore(); updateBankSelects(); renderAll(); checkNotifications();
-    document.getElementById("quickSheet").remove(); toast(`✅ ${desc} lançado.`);
+    document.getElementById("quickSheet").remove(); toast(`${desc} lançado.`, null, "ok");
 }
 
-// ---------- Ícones (SVG, sem emojis) ----------
-const ICONS = {
-    cart: '<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2.5 3h2.4l2.5 11.2a1.8 1.8 0 0 0 1.8 1.4h8.3a1.8 1.8 0 0 0 1.8-1.4L20.8 7H5.6"/>',
-    car: '<path d="M5 16V12l1.6-4.2A2 2 0 0 1 8.5 6.5h7a2 2 0 0 1 1.9 1.3L19 12v4"/><path d="M3.5 12h17v4a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/>',
-    utensils: '<path d="M6 3v7a2 2 0 0 0 2 2v9"/><path d="M10 3v7a2 2 0 0 1-2 2"/><path d="M6 3v5M18 21V3c-2.2 1.2-3.5 3.6-3.5 6.5V13H18"/>',
-    tv: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
-    heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.600C19.500 15.400 12 20 12 20Z"/>',
-    paw: '<circle cx="6" cy="10" r="1.7"/><circle cx="10" cy="5.800" r="1.7"/><circle cx="14" cy="5.800" r="1.7"/><circle cx="18" cy="10" r="1.7"/><path d="M12 11.500c-3 0-5.200 2.800-5.200 5 0 1.700 1.400 2.500 2.800 2.500.9 0 1.500-.4 2.400-.4s1.500.4 2.400.4c1.400 0 2.800-.8 2.800-2.500 0-2.200-2.200-5-5.200-5Z"/>',
-    bag: '<path d="M5.500 7h13l1 13h-15z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/>',
-    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
-    loan: '<path d="M3 10 12 4l9 6"/><path d="M5 10v8M9.500 10v8M14.500 10v8M19 10v8"/><path d="M3 20h18"/>',
-    dots: '<circle cx="6" cy="12" r="1.500"/><circle cx="12" cy="12" r="1.500"/><circle cx="18" cy="12" r="1.500"/>',
-    layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
-    card: '<rect x="3" y="5.500" width="18" height="13" rx="2.200"/><path d="M3 10h18M7 15h3"/>',
-    trash: '<path d="M4 7h16M9 7V4.500h6V7M6.500 7l1 13h9l1-13M10 11v6M14 11v6"/>',
-    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 20.500a2 2 0 0 0 4 0"/>',
-    sparkles: '<path d="m12 3 1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800z"/><path d="m19 15 .9 2.100L22 18l-2.100.9L19 21l-.9-2.100L16 18l2.100-.9z"/>',
-    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
-    home: '<path d="M4 11 12 4l8 7v8.500a.5.5 0 0 1-.5.5H15v-5.500H9V20H4.500a.5.5 0 0 1-.5-.5z"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>',
-    search: '<circle cx="11" cy="11" r="6.500"/><path d="m20 20-4.200-4.200"/>',
-    x: '<path d="M6 6l12 12M18 6 6 18"/>',
-    chart: '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
-    refresh: '<path d="M20 11a8 8 0 0 0-14.500-3.500L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14.500 3.500L20 15"/><path d="M20 20v-5h-5"/>',
-    pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.500 6.500 4 4"/>',
-    copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
-    download: '<path d="M12 4v11M7.500 11 12 15.500 16.500 11M5 20h14"/>',
-    upload: '<path d="M12 16V5M7.500 9 12 4.500 16.500 9M5 20h14"/>',
-    printer: '<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v6H7z"/>',
-    clock: '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>',
-    folder: '<path d="M3.500 7.500a1.500 1.500 0 0 1 1.500-1.500h4l2 2.500H19a1.500 1.500 0 0 1 1.500 1.500V17.500A1.500 1.500 0 0 1 19 19H5a1.500 1.500 0 0 1-1.500-1.500z"/>',
-    cloud: '<path d="M7 18a4.500 4.500 0 0 1-.6-8.960A6 6 0 0 1 18 10.500a3.800 3.800 0 0 1-.5 7.500z"/>',
-    user: '<circle cx="12" cy="8.500" r="3.500"/><path d="M5 20a7 7 0 0 1 14 0"/>',
-    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
-    save: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
-    alert: '<path d="M12 4 3 19.500h18z"/><path d="M12 10v4.500M12 17.300v.2"/>',
-    trend: '<path d="M4 7l6 6 3-3 7 7"/><path d="M15 17h5v-5"/>',
-    target: '<circle cx="12" cy="12" r="8.500"/><circle cx="12" cy="12" r="4.500"/><circle cx="12" cy="12" r="1"/>',
-    check: '<path d="m5 12.500 4.500 4.500L19 7.500"/>',
-    dot: '<circle cx="12" cy="12" r="3"/>'
-};
-const EMO2ICO = { "✏️": "pencil", "➕": "plus", "🗑️": "trash", "📋": "copy", "⬇️": "download", "🖨️": "printer", "🔄": "refresh", "📤": "upload", "🕘": "clock", "📂": "folder", "☁️": "cloud", "👤": "user", "🔒": "lock", "🔔": "bell", "✨": "sparkles", "💾": "save", "🛒": "cart", "💳": "card", "📉": "trend", "🎯": "target", "📊": "chart", "🧾": "receipt" };
-function ico(name, size = 20) { return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.dot}</svg>`; }
-function hydrateIcons(root) { (root || document).querySelectorAll("[data-i]").forEach(el => { if (!el.firstChild) el.innerHTML = ico(el.dataset.i, +el.dataset.s || 20); }); }
-function txIconFor(tag) {
-    const t = normText(tag);
-    if (t.includes("SUPERMERC")) return "cart"; if (t.includes("TRANSP")) return "car"; if (t.includes("ALIMENT")) return "utensils";
-    if (t.includes("ASSINAT")) return "tv"; if (t.includes("SAUDE")) return "heart"; if (t.includes("PET")) return "paw"; if (t.includes("COMPRAS")) return "bag";
-    return "card";
-}
 const RING_COLORS = ["#8b5cf6", "#ec4899", "#38bdf8", "#34d399", "#fbbf24", "#6366f1", "#f472b6", "#2dd4bf"];
 function fmtCompact(v) { return v >= 1000 ? (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: v >= 10000 ? 0 : 1 }) + " mil" : fmtBRL(v); }
 function ringSVG(cats, total, size) {
@@ -4144,15 +4284,15 @@ function renderHomeSpend() {
     const paidN = fixed.filter(i => i.paid).length;
     const fixedHtml = `<details class="fix-box" ${window._fixOpen ? "open" : ""} ontoggle="window._fixOpen=this.open"><summary><span>Despesas fixas</span><span class="fix-count">${paidN}/${fixed.length} pagas</span></summary>${fixed.length ? fixed.map((item, i) => {
         const bInfo = getExpenseDueBadgeInfo(item, currentMonth);
-        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', ${i}, event)">📅 ${esc(bInfo.label)}</button>`;
+        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', ${i}, event)">${ico("calendar", 11)} ${esc(bInfo.label)}</button>`;
         return `<label style="display:flex;align-items:center;gap:8px;padding:9px 2px;border-top:1px solid var(--border);opacity:${item.paid ? '.68' : '1'};"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:var(--success);width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;${item.paid ? 'text-decoration:line-through;' : ''}">${esc(item.nome)}</span>${dueBtn}<b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`;
     }).join('') : `<div style="color:var(--text-muted);font-size:.8rem;padding:6px 2px;">Nenhuma despesa fixa.</div>`}</details>`;
     const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((x, y) => y.val - x.val);
     const total = cats.reduce((acc, c) => acc + c.val, 0);
-    if (!total) { el.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:10px;">Sem gastos em ${esc(currentMonth)}. Toque em ＋ para lançar.</div>${fixedHtml}`; return; }
+    if (!total) { el.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:10px;">Sem gastos em ${esc(currentMonth)}. Toque em + para lançar.</div>${fixedHtml}`; return; }
     const rows = cats.slice(0, 3).map((c, i) => {
-        const parts = c.name.match(/^(\S+)\s+(.*)$/), emoji = parts ? parts[1] : "•", label = parts ? parts[2] : c.name, col = RING_COLORS[i % 8];
-        return `<div class="home-row" onclick="goAlert('openfinance')"><div class="home-ico" style="background:${col}33;">${emoji}</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(label)}</div><div style="font-size:.74rem;color:var(--text-muted);">${(c.val / total * 100).toFixed(0)}%</div></div><div class="hv" style="font-weight:700;font-size:.88rem;">${fmtBRL(c.val)}</div></div>`;
+        const label = cleanCatLabel(c.name), col = RING_COLORS[i % 8];
+        return `<div class="home-row" onclick="goAlert('openfinance')"><div class="home-ico" style="background:${col}24;color:${col};">${ico(txIconFor(label), 18)}</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(label)}</div><div style="font-size:.74rem;color:var(--text-muted);">${(c.val / total * 100).toFixed(0)}%</div></div><div class="hv" style="font-weight:700;font-size:.88rem;">${fmtBRL(c.val)}</div></div>`;
     }).join("");
     el.innerHTML = `<div style="display:flex;justify-content:center;">${ringSVG(cats, total, 150)}</div><div style="margin-top:6px;font-size:.82rem;color:var(--text-muted);">Gastos em ${esc(currentMonth)}</div>${rows}<a class="home-link" onclick="goAlert('openfinance')">Ver todas as categorias ›</a>${fixedHtml}`;
 }
@@ -4174,7 +4314,8 @@ function renderNotifications() {
     const sub = document.getElementById("abSub"); if (sub) sub.textContent = `${currentProfile} · ${currentMonth}`;
     const n = al.filter(a => a.level !== "info").length;
     badge.textContent = n; badge.style.display = n ? "grid" : "none";
-    panel.innerHTML = `<div class="np-head"><span>Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">✖</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="${a.due ? "goAlert('');openDueSheet()" : `goAlert('${a.tab || ""}')`}"><div class="np-ico">${ico(EMO2ICO[a.icon] || "bell", 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;" onclick="toggleNotifications()">${("Notification" in window && Notification.permission === "granted") ? "🔔 Ativados" : "🔔 Ativar avisos"}</button></div></div>`;
+    const notifGranted = ("Notification" in window && Notification.permission === "granted");
+    panel.innerHTML = `<div class="np-head"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("bell", 16)} Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">${ico("x", 15)}</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="${a.due ? "goAlert('');openDueSheet()" : `goAlert('${a.tab || ""}')`}"><div class="np-ico">${ico(ICONS[a.icon] ? a.icon : (EMO2ICO[a.icon] || "bell"), 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;display:inline-flex;align-items:center;justify-content:center;gap:6px;" onclick="toggleNotifications()">${ico("bell", 14)} ${notifGranted ? "Avisos ativados" : "Ativar avisos"}</button></div></div>`;
 }
 function toggleNotifPanel(e) { if (e) e.stopPropagation(); document.getElementById("notifPanel").classList.toggle("open"); }
 function goAlert(tab) {
@@ -4201,7 +4342,7 @@ async function notifyDue() {
         const nk = a.notifyKey || a.key;
         if (seen[nk] === today) continue;
         seen[nk] = today;
-        await showSysNotif(`${a.icon} FinEly · ${a.title}`, a.text, nk);
+        await showSysNotif(`FinEly · ${a.title}`, a.text, nk);
     }
     Object.keys(seen).forEach(k => { if (seen[k] !== today) delete seen[k]; });
     localStorage.setItem("fin_notified", JSON.stringify(seen));
@@ -4211,27 +4352,27 @@ async function registerSW() {
     try { await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready; } catch (e) {}
 }
 async function toggleNotifications() {
-    if (!("Notification" in window)) return toast("Sem suporte.");
-    if (Notification.permission === "denied") return toast("Bloqueado.");
+    if (!("Notification" in window)) return toast("Sem suporte neste navegador.", null, "warn");
+    if (Notification.permission === "denied") return toast("Permissão bloqueada nas configurações do aparelho.", null, "warn");
     const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
-    if (perm !== "granted") return toast("Negado.");
+    if (perm !== "granted") return toast("Permissão de notificações negada.", null, "warn");
     await registerSW();
-    await showSysNotif("🔔 FinEly · Avisos ativados", "Você será lembrado dos vencimentos de faturas, despesas fixas/variáveis e contas avulsas.", "test");
+    await showSysNotif("FinEly · Avisos ativados", "Você será lembrado dos vencimentos de faturas, despesas fixas/variáveis e contas avulsas.", "test");
     notifyDue(); renderNotifications();
 }
 function toggleDrawer(open) { if (open) renderDrawer(); document.body.classList.toggle("drawer-open", !!open); }
 function renderDrawer() {
     const notif = ("Notification" in window && Notification.permission === "granted") ? "Ativados" : "Desativados";
     const groups = [
-        ["Atalhos", [["🛒", "Lista do mercado", "Itens e check-list", "openMarket()"], ["💳", "Gerenciar faturas", "Ocultar, mostrar ou criar faturas", "openManageBanksSheet()"]]],
-        ["Perfil", [["✏️", "Editar perfil", "Nome e cor", "openProfileModal()"], ["➕", "Novo perfil", "Separar contas", "promptNewProfile()"], ["🗑️", "Excluir perfil", "Remove o perfil", "deleteProfile()"]]],
-        ["Mês atual", [["📋", "Copiar mês anterior", "Entradas e despesas fixas", "copyFixedFromPrev()"], ["⬇️", "Exportar CSV", "Planilha do mês", "exportMonthCSV()"], ["🖨️", "Salvar PDF", "Aba aberta", "window.print()"], ["🔄", "Atualizar dados", "Recalcular", "manualRefresh()"]]],
-        ["Backups", [["📤", "Salvar backup agora", "Arquivo .json", "exportBackup()"], ["🕘", "Backups automáticos", snapCount() + " cópia(s)", "openBackups()"], ["📂", "Importar de arquivo", "Restaurar .json", "document.getElementById('importFile').click()"]]],
-        ["Nuvem e segurança", [["☁️", "Configurar Firebase", "Sincronização", "openFirebaseModal()"], ["👤", "Conta da nuvem", cloudUser ? cloudUser.email : "Não conectado", "cloudAccount()"], ["🔒", "PIN de acesso", localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado", "configurePin()"], ["🔔", "Avisos de vencimento", notif, "toggleNotifications()"]]],
-        ["Inteligência", [["✨", "Consultor IA", "Gemini", "openChat()"]]],
-        ["Avançado", [["🎯", "Ferramentas avançadas", "Mover contas de mês · backup da nuvem", "openAdvanced()"]]]
+        ["Atalhos", [["cart", "Lista do mercado", "Itens e check-list", "openMarket()"], ["card", "Gerenciar faturas", "Ocultar, mostrar ou criar faturas", "openManageBanksSheet()"]]],
+        ["Perfil", [["pencil", "Editar perfil", "Nome e cor", "openProfileModal()"], ["plus", "Novo perfil", "Separar contas", "promptNewProfile()"], ["trash", "Excluir perfil", "Remove o perfil", "deleteProfile()"]]],
+        ["Mês atual", [["copy", "Copiar mês anterior", "Entradas e despesas fixas", "copyFixedFromPrev()"], ["download", "Exportar CSV", "Planilha do mês", "exportMonthCSV()"], ["printer", "Salvar PDF", "Aba aberta", "window.print()"], ["refresh", "Atualizar dados", "Recalcular", "manualRefresh()"]]],
+        ["Backups", [["upload", "Salvar backup agora", "Arquivo .json", "exportBackup()"], ["clock", "Backups automáticos", snapCount() + " cópia(s)", "openBackups()"], ["folder", "Importar de arquivo", "Restaurar .json", "document.getElementById('importFile').click()"]]],
+        ["Nuvem e segurança", [["cloud", "Configurar Firebase", "Sincronização", "openFirebaseModal()"], ["user", "Conta da nuvem", cloudUser ? cloudUser.email : "Não conectado", "cloudAccount()"], ["lock", "PIN de acesso", localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado", "configurePin()"], ["bell", "Avisos de vencimento", notif, "toggleNotifications()"]]],
+        ["Inteligência", [["sparkles", "Consultor IA", "Gemini", "openChat()"]]],
+        ["Avançado", [["target", "Ferramentas avançadas", "Mover contas de mês · backup da nuvem", "openAdvanced()"]]]
     ];
-    document.getElementById("drawer").innerHTML = `<div class="dr-head"><span>Menu · FinEly</span><button class="btn-icon" onclick="toggleDrawer(false)">✖</button></div>` + groups.map(([t, items]) => `<div class="dr-sec">${t}</div>` + items.map(([i, n, d, f]) => `<button class="dr-item" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-ico">${ico(EMO2ICO[i] || "dot", 18)}</span><span><div class="dr-t">${n}</div><div class="dr-s">${esc(d)}</div></span></button>`).join("")).join("");
+    document.getElementById("drawer").innerHTML = `<div class="dr-head"><span>Menu · FinEly</span><button class="btn-icon" onclick="toggleDrawer(false)">${ico("x", 16)}</button></div>` + groups.map(([t, items]) => `<div class="dr-sec">${t}</div>` + items.map(([i, n, d, f]) => `<button class="dr-item" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-ico">${ico(i, 18)}</span><span><div class="dr-t">${n}</div><div class="dr-s">${esc(d)}</div></span></button>`).join("")).join("");
 }
 // ---------- Ferramentas avançadas (uso pontual) ----------
 function openAdvanced() {
@@ -4239,7 +4380,7 @@ function openAdvanced() {
     const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1];
     const o = document.createElement("div"); o.id = "advSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span>Ferramentas avançadas</span><button class="btn-icon" onclick="document.getElementById('advSheet').remove()">✖</button></div>
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("settings", 17)} Ferramentas avançadas</span><button class="btn-icon" onclick="document.getElementById('advSheet').remove()">${ico("x", 16)}</button></div>
         <div style="font-size:.8rem;color:var(--text-muted);margin:10px 0 4px;">Mover do mês aberto (<b>${esc(currentMonth)}</b>) para ${next ? "<b>" + esc(next) + "</b>" : "—"}. Use quando lançou tudo no mês errado.</div>
         ${[["essenciais", "Despesas fixas (contas)", 1], ["naoEssenciais", "Despesas variáveis", 1], ["receitas", "Entradas", 0], ["tx", "Lançamentos das faturas (compras)", 0]].map(([k, l, on]) => `<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:.9rem;"><input type="checkbox" class="mv-chk" value="${k}" ${on ? "checked" : ""} style="width:18px;height:18px;accent-color:var(--accent);">${l}</label>`).join("")}
         <button class="btn" style="width:100%;margin-top:10px;padding:12px;" ${next ? "" : "disabled"} onclick="moveToNextMonth()">Mover para ${next ? esc(next) : "o próximo mês"}</button>
@@ -4249,9 +4390,9 @@ function openAdvanced() {
     document.body.appendChild(o);
 }
 async function moveToNextMonth() {
-    const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1]; if (!next) return toast("Não há mês seguinte.");
+    const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1]; if (!next) return toast("Não há mês seguinte.", null, "warn");
     const kinds = Array.from(document.querySelectorAll("#advSheet .mv-chk:checked")).map(c => c.value);
-    if (!kinds.length) return toast("Marque o que deseja mover.");
+    if (!kinds.length) return toast("Marque o que deseja mover.", null, "warn");
     const ok = await uiConfirm({
         title: "Mover itens de mês?",
         message: `Deseja mover os itens selecionados de ${currentMonth} para ${next}?`,
@@ -4276,10 +4417,10 @@ async function moveToNextMonth() {
     saveStore(); renderAll(); checkNotifications();
     document.getElementById("advSheet")?.remove();
     const undo = () => { const [a, b] = JSON.parse(before); prof[currentMonth] = a; prof[next] = b; saveStore(); renderAll(); checkNotifications(); };
-    toast(`✅ ${n} item(ns) movido(s) para ${next}.`, undo);
+    toast(`${n} item(ns) movido(s) para ${next}.`, undo, "ok");
 }
 async function loadCloudBackup() {
-    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro.");
+    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro.", null, "warn");
     if (typeof firebase === "undefined" || !firebase.apps.length || !firebase.auth().currentUser) { document.getElementById("advSheet")?.remove(); return showCloudLogin("Entre na nuvem para carregar o backup."); }
     const ok = await uiConfirm({
         title: "Carregar backup da nuvem?",
@@ -4291,7 +4432,7 @@ async function loadCloudBackup() {
     try {
         const snap = await firebase.database().ref("financeStore").once("value");
         const data = await decodeCloud(snap.val());
-        if (!data || !data.profiles) return toast("Nenhum backup válido encontrado na nuvem.");
+        if (!data || !data.profiles) return toast("Nenhum backup válido encontrado na nuvem.", null, "warn");
         await takeSnapshot("antes-carregar-nuvem", true);
         const fb = store.config.firebaseConfig, gk = store.config.geminiApiKey;
         delete data._syncId; delete data._updatedAt;
@@ -4301,8 +4442,8 @@ async function loadCloudBackup() {
         Object.keys(u).forEach(k => { store.meta[k] = now; }); _unitHash = u;
         if (!store.config.profilesList.includes(currentProfile)) currentProfile = store.config.profilesList[0];
         saveStore(); document.getElementById("advSheet")?.remove();
-        init(); toast("✅ Backup da nuvem carregado.");
-    } catch (e) { toast(e && e.message === "NEEDKEY" ? "Informe a senha de criptografia (Entrar na nuvem)." : e && e.message === "BADKEY" ? "Senha de criptografia incorreta." : "Falha ao carregar: " + (e.message || e)); }
+        init(); toast("Backup da nuvem carregado.", null, "ok");
+    } catch (e) { toast(e && e.message === "NEEDKEY" ? "Informe a senha de criptografia (Entrar na nuvem)." : e && e.message === "BADKEY" ? "Senha de criptografia incorreta." : "Falha ao carregar: " + (e.message || e), null, "warn"); }
 }
 function backupName(tag) { const d = new Date(), z = n => String(n).padStart(2, "0"); return `finely_backup_${isoDate(d)}_${z(d.getHours())}h${z(d.getMinutes())}${tag ? "_" + tag : ""}.json`; }
 async function saveBackupFile(json, name) {
@@ -4310,7 +4451,7 @@ async function saveBackupFile(json, name) {
     try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e.name === "AbortError") return; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
 }
-function exportBackup() { saveBackupFile(JSON.stringify(store, null, 2), backupName()); toast("Salve em Arquivos."); }
+function exportBackup() { saveBackupFile(JSON.stringify(store, null, 2), backupName()); toast("Salve em Arquivos.", null, "ok"); }
 let _snapN = 0, _snapsCache = [];
 const idb = () => new Promise((res, rej) => { const r = indexedDB.open("fin_db", 1); r.onupgradeneeded = () => r.result.createObjectStore("snaps", { keyPath: "ts" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 async function getSnaps() {
@@ -4335,7 +4476,7 @@ async function openBackups() {
     const snaps = _snapsCache = await getSnaps();
     const o = document.createElement("div"); o.id = "backupSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:6px;"><span>🕘 Backups</span><button class="btn-icon" onclick="document.getElementById('backupSheet').remove()">✖</button></div><button class="btn" style="width:100%;margin-bottom:6px;" onclick="takeSnapshot('manual', true).then(openBackups)">➕ Criar cópia agora</button>${snaps.length ? snaps.map((x, i) => `<div class="snap-row"><div><div style="font-weight:600;">${esc(x.name)}</div><div style="color:var(--text-muted);">${new Date(x.ts).toLocaleString("pt-BR")}</div></div><div style="display:flex;gap:6px;"><button class="btn-outline" onclick="restoreSnap(${i})">Restaurar</button></div></div>`).join("") : `<p style="color:var(--text-muted);padding:14px 0;">Nenhuma cópia.</p>`}</div>`;
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:6px;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("clock", 18)} Backups</span><button class="btn-icon" onclick="document.getElementById('backupSheet').remove()">${ico("x", 16)}</button></div><button class="btn" style="width:100%;margin-bottom:6px;" onclick="takeSnapshot('manual', true).then(openBackups)">${ico("plus", 15)} Criar cópia agora</button>${snaps.length ? snaps.map((x, i) => `<div class="snap-row"><div><div style="font-weight:600;">${esc(x.name)}</div><div style="color:var(--text-muted);">${new Date(x.ts).toLocaleString("pt-BR")}</div></div><div style="display:flex;gap:6px;"><button class="btn-outline" onclick="restoreSnap(${i})">Restaurar</button></div></div>`).join("") : `<p style="color:var(--text-muted);padding:14px 0;">Nenhuma cópia.</p>`}</div>`;
     document.body.appendChild(o);
 }
 async function restoreSnap(i) {
@@ -4356,11 +4497,11 @@ async function restoreSnap(i) {
     Object.keys(u).forEach(k => { store.meta[k] = now; }); _unitHash = u;
     saveStore(); document.getElementById("backupSheet")?.remove();
     if (!store.config.profilesList.includes(currentProfile)) currentProfile = store.config.profilesList[0];
-    init(); toast("✅ Restaurado.");
+    init(); toast("Backup restaurado.", null, "ok");
 }
 async function deleteProfile() {
     const list = store.config.profilesList;
-    if (list.length < 2) return toast("Mantenha pelo menos um perfil.");
+    if (list.length < 2) return toast("Mantenha pelo menos um perfil.", null, "warn");
     const ok = await uiConfirm({
         title: "Excluir perfil?",
         message: `Tem certeza que deseja excluir o perfil "${currentProfile}" e todos os dados dele?`,
@@ -4372,7 +4513,7 @@ async function deleteProfile() {
     store.config.profilesList = list.filter(p => p !== gone);
     delete store.profiles[gone]; if (store.meta) Object.keys(store.meta).forEach(k => { if (k.startsWith(gone + "|")) delete store.meta[k]; });
     currentProfile = store.config.profilesList[0];
-    saveStore(); init(); toast(`Perfil "${gone}" excluído.`);
+    saveStore(); init(); toast(`Perfil "${gone}" excluído.`, null, "del");
 }
 async function copyFixedFromPrev() {
     if (!prevMonthStr) return alert("Sem mês anterior.");
@@ -4403,7 +4544,7 @@ async function copyFixedFromPrev() {
         cur.paymentStatus[b] = { status: "Pendente", updatedAt: stamp, monthKey: currentMonth, paidAt: null };
     });
     saveStore(); renderAll(); checkNotifications();
-    toast(`✅ Dados copiados de ${prevMonthStr} para ${currentMonth}.`);
+    toast(`Dados copiados de ${prevMonthStr} para ${currentMonth}.`, null, "ok");
 }
 function exportMonthCSV() {
     const d = store.profiles[currentProfile][currentMonth];

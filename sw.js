@@ -13,9 +13,9 @@ async function checkDue() {
     const diff = Math.round((new Date(y, m - 1, d) - now) / 86400000);
     if (diff > 3 || diff < -5) continue;
     const when = diff < 0 ? `venceu há ${-diff} dia(s)` : diff === 0 ? "vence hoje" : diff === 1 ? "vence amanhã" : `vence em ${diff} dias`;
-    const prefix = x.kind === "fixa" ? "🏠" : x.kind === "variavel" ? "💸" : x.kind === "avulsa" ? "📌" : "💳";
+    const prefix = x.kind === "fixa" ? "Fixa" : x.kind === "variavel" ? "Variável" : x.kind === "avulsa" ? "Avulsa" : "Fatura";
     const label = x.subtitle ? `${x.subtitle} (${x.bank})` : x.bank;
-    await self.registration.showNotification(`${prefix} FinEly · ${x.bank}: ${when}`, {
+    await self.registration.showNotification(`FinEly · ${prefix} ${x.bank}: ${when}`, {
       body: `${label} no valor de ${Number(x.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} está pendente.`,
       tag: `due_${x.bank}_${x.iso}`, icon: "icon-192.png", badge: "icon-192.png"
     });
