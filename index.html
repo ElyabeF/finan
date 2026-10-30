@@ -976,39 +976,103 @@
         /* Corrige colspan="3" das subcategorias (td nunca deve ter display:flex direto) */
         td.subcat-label {
             display: table-cell !important;
-            padding: 12px 12px 6px !important;
-            background: rgba(255, 255, 255, 0.02);
+            padding: 10px 10px 8px !important;
+            background: rgba(255, 255, 255, 0.025);
             border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease;
+        }
+        td.subcat-label:hover {
+            background: rgba(255, 255, 255, 0.045);
         }
         .subcat-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
             flex-wrap: nowrap;
         }
         .subcat-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 0.76rem;
             font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 0.02em;
+            color: var(--text-main);
+            letter-spacing: 0.01em;
             white-space: nowrap;
+            min-width: 0;
+        }
+        .subcat-chev {
+            font-style: normal;
+            display: inline-block;
+            color: #c4b5fd;
+            font-size: 0.82rem;
+            transition: transform 0.2s ease;
+            transform: rotate(90deg);
+            line-height: 1;
+        }
+        tbody.subcat-head.sub-closed .subcat-chev {
+            transform: rotate(0deg);
+            color: var(--text-muted);
+        }
+        tbody.subcat-head.sub-closed .subcat-title {
+            color: var(--text-muted);
+        }
+        tbody.subcat-head.sub-closed .subcat-only-open {
+            display: none !important;
+        }
+        tbody[data-sub-body].sub-closed {
+            display: none !important;
+        }
+        .subcat-sum {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .subcat-min-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 650;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1.1;
+        }
+        .subcat-min-btn:hover {
+            color: var(--text-main);
+            border-color: rgba(139, 124, 246, 0.5);
+            background: rgba(139, 124, 246, 0.12);
         }
         .subcat-actions {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             flex-shrink: 0;
         }
         .subcat-pill-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            padding: 5px 10px;
+            gap: 4px;
+            padding: 4px 9px;
             border-radius: 999px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 650;
             white-space: nowrap;
             background: rgba(255, 255, 255, 0.04);
@@ -1531,14 +1595,14 @@
 
                 <div class="panel acc"><div class="panel-header acc-head" data-k="des" onclick="toggleAcc(this)"><span>Despesas</span><span class="acc-sum"><b class="hv" id="accDesTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
                         <thead><tr><th>Descrição / Venc.</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
-                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Custo Essencial (Fixas)</span></div></td></tr></tbody>
-                        <tbody id="essenciaisBody"></tbody>
-                        <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Faturas</span><div class="subcat-actions"><button type="button" class="subcat-pill-btn" onclick="openManageBanksSheet()"><span data-i="eye" data-s="13"></span> Escolher / Ocultar</button><button type="button" class="subcat-pill-btn primary" onclick="promptNewBank()"><span data-i="plus" data-s="13"></span> Nova Fatura</button></div></div></td></tr></tbody>
-                        <tbody id="cartoesResumoBody"></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Variáveis / Não Essenciais</span></div></td></tr></tbody>
-                        <tbody id="naoEssenciaisBody"></tbody>
-                        <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('naoEssenciais')">+ Despesa Variável</button></td></tr></tbody>
+                        <tbody class="subcat-head" data-sub="ess"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('ess')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Custo Essencial (Fixas)</span><div class="subcat-actions"><span class="subcat-sum hv" id="subSumEss">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_ess" onclick="event.stopPropagation();toggleDespSub('ess')">Minimizar</button></div></div></td></tr></tbody>
+                        <tbody id="essenciaisBody" data-sub-body="ess"></tbody>
+                        <tbody data-sub-body="ess"><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
+                        <tbody class="subcat-head" data-sub="fat"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('fat')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Faturas</span><div class="subcat-actions" onclick="event.stopPropagation()"><button type="button" class="subcat-pill-btn subcat-only-open" onclick="openManageBanksSheet()" title="Escolher ou ocultar faturas"><span data-i="eye" data-s="12"></span> Escolher</button><button type="button" class="subcat-pill-btn primary subcat-only-open" onclick="promptNewBank()" title="Criar nova fatura"><span data-i="plus" data-s="12"></span> Fatura</button><span class="subcat-sum hv" id="subSumFat">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_fat" onclick="toggleDespSub('fat')">Minimizar</button></div></div></td></tr></tbody>
+                        <tbody id="cartoesResumoBody" data-sub-body="fat"></tbody>
+                        <tbody class="subcat-head" data-sub="var"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('var')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Variáveis / Não Essenciais</span><div class="subcat-actions"><span class="subcat-sum hv" id="subSumVar">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_var" onclick="event.stopPropagation();toggleDespSub('var')">Minimizar</button></div></div></td></tr></tbody>
+                        <tbody id="naoEssenciaisBody" data-sub-body="var"></tbody>
+                        <tbody data-sub-body="var"><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('naoEssenciais')">+ Despesa Variável</button></td></tr></tbody>
                         <tfoot>
                             <tr class="total-row"><td>Essenciais</td><td class="val-col" id="totalEssenciaisCell">R$ 0,00</td><td></td></tr>
                             <tr class="total-row"><td>Faturas e variáveis</td><td class="val-col" id="totalNaoEssenciaisCell">R$ 0,00</td><td></td></tr>
@@ -3480,6 +3544,8 @@ function renderGroupTabs() {
 }
 function updateBankColor(bank, colorHex) { store.config.bankColors[bank] = colorHex; saveStore(); renderAll(); }
 function addRow(group) {
+    if (group === "essenciais") toggleDespSub("ess", true);
+    if (group === "naoEssenciais") toggleDespSub("var", true);
     const defaultName = group === "receitas" ? "Nova Receita" : group === "essenciais" ? "Nova Despesa Fixa" : "Nova Despesa Variável";
     store.profiles[currentProfile][currentMonth][group].push({ nome: defaultName, valor: 0, paid: false, venc: "" });
     saveStore(); renderAll();
@@ -3688,6 +3754,10 @@ function updateTotalsOnly() {
     document.getElementById("totalEssenciaisCell").textContent = fmtBRL(curTot.ess);
     document.getElementById("totalNaoEssenciaisCell").textContent = fmtBRL(curTot.cards + curTot.out);
     document.getElementById("totalGeralDespesasCell").textContent = fmtBRL(curTot.saidas);
+    const sEss = document.getElementById("subSumEss"), sFat = document.getElementById("subSumFat"), sVar = document.getElementById("subSumVar");
+    if (sEss) sEss.textContent = fmtBRL(curTot.ess);
+    if (sFat) sFat.textContent = fmtBRL(curTot.cards);
+    if (sVar) sVar.textContent = fmtBRL(curTot.out);
     document.getElementById("kpiEntradas").textContent = fmtBRL(curTot.rec);
     document.getElementById("kpiSaidas").textContent = fmtBRL(curTot.saidas);
     updateSaldoKPI(curTot);
@@ -4046,6 +4116,10 @@ function renderAll() {
     document.getElementById("totalEssenciaisCell").textContent = fmtBRL(curTot.ess);
     document.getElementById("totalNaoEssenciaisCell").textContent = fmtBRL(curTot.cards + curTot.out);
     document.getElementById("totalGeralDespesasCell").textContent = fmtBRL(curTot.saidas);
+    const sEss = document.getElementById("subSumEss"), sFat = document.getElementById("subSumFat"), sVar = document.getElementById("subSumVar");
+    if (sEss) sEss.textContent = fmtBRL(curTot.ess);
+    if (sFat) sFat.textContent = fmtBRL(curTot.cards);
+    if (sVar) sVar.textContent = fmtBRL(curTot.out);
     document.getElementById("kpiEntradas").textContent = fmtBRL(curTot.rec);
     document.getElementById("kpiSaidas").textContent = fmtBRL(curTot.saidas);
     updateSaldoKPI(curTot);
@@ -4561,8 +4635,9 @@ function dueOpenItem(kind, ref, key) {
     } else if (kind === "fixa" || kind === "variavel") {
         bnGo("visao");
         setTimeout(() => {
-            const acc = document.querySelector('.acc-head[data-k="r_des"]');
+            const acc = document.querySelector('.acc-head[data-k="des"]');
             if (acc && !acc.parentElement.classList.contains("open")) acc.parentElement.classList.add("open");
+            toggleDespSub(kind === "fixa" ? "ess" : "var", true);
             const tbId = kind === "fixa" ? "essenciaisBody" : "naoEssenciaisBody";
             const el = document.getElementById(tbId);
             if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -4878,7 +4953,33 @@ function initAcc() {
     let st = {}; try { st = JSON.parse(localStorage.getItem("fin_acc") || "{}"); } catch (e) {}
     const DEF = { r_sum: 1 }; document.querySelectorAll(".acc-head").forEach(h => h.parentElement.classList.toggle("open", st[h.dataset.k] === undefined ? !!DEF[h.dataset.k] : !!st[h.dataset.k]));
 }
+function applyDespSubDOM(key, isOpen) {
+    const head = document.querySelector(`tbody.subcat-head[data-sub="${key}"]`);
+    if (head) head.classList.toggle("sub-closed", !isOpen);
+    document.querySelectorAll(`tbody[data-sub-body="${key}"]`).forEach(tb => tb.classList.toggle("sub-closed", !isOpen));
+    const btn = document.getElementById(`btnMinSub_${key}`);
+    if (btn) btn.textContent = isOpen ? "Minimizar" : "Expandir";
+}
+function toggleDespSub(key, forceOpen) {
+    let st = {}; try { st = JSON.parse(localStorage.getItem("fin_des_sub") || "{}"); } catch (e) {}
+    const head = document.querySelector(`tbody.subcat-head[data-sub="${key}"]`);
+    const curOpen = head ? !head.classList.contains("sub-closed") : true;
+    const nextOpen = typeof forceOpen === "boolean" ? forceOpen : !curOpen;
+    st[key] = nextOpen ? 1 : 0;
+    try { localStorage.setItem("fin_des_sub", JSON.stringify(st)); } catch (e) {}
+    applyDespSubDOM(key, nextOpen);
+}
+function initDespSubs() {
+    let st = {}; try { st = JSON.parse(localStorage.getItem("fin_des_sub") || "{}"); } catch (e) {}
+    // Por padrão Essenciais e Variáveis começam abertos (1) e Faturas pode ser minimizada/expandida quando quiser
+    const DEF = { ess: 1, fat: 1, var: 1 };
+    ["ess", "fat", "var"].forEach(k => {
+        const isOpen = st[k] === undefined ? !!DEF[k] : !!st[k];
+        applyDespSubDOM(k, isOpen);
+    });
+}
 initAcc();
+initDespSubs();
 function renderNotifications() {
     renderMarket();
     renderGreeting(); renderMonthSummary();
