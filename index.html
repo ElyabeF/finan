@@ -55,16 +55,23 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             overscroll-behavior-x: contain;
+            align-items: flex-start;
         }
         .tabs-viewport::-webkit-scrollbar { display: none; }
-        .tabs-viewport { align-items: flex-start; }
-        .tab-content:not(.active) { max-height: 100vh; max-height: 100svh; overflow: hidden; }
         .tab-content {
-            flex: 0 0 100%;
-            width: 100%;
-            min-width: 0;
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
             scroll-snap-align: start;
             scroll-snap-stop: always;
+            overflow-x: hidden;
+        }
+        .tab-content:not(.active) {
+            max-height: 100vh;
+            max-height: 100svh;
+            overflow: hidden;
         }
         /* Bloqueia arrasto horizontal do viewport em elementos internos roláveis */
         .tabs-viewport [style*="overflow-x:auto"],
@@ -2549,69 +2556,185 @@ function init() {
     initTabsViewport();
 }
 
-// ===== SWIPE NATIVO POR SCROLL-SNAP =====
+// ===== CONTROLE PRECISO DE SWIPE E ABAS =====
 let programmaticScroll = false;
 let programmaticScrollTimer = null;
-let _scrollRafId = null;
 let _lastSyncedIdx = 0;
+let _scrollEndTimer = null;
+
+function updateNavIndicatorsOnly(tabId) {
+    const newIdx = TAB_ORDER.indexOf(tabId);
+    if (newIdx >= 0) _lastSyncedIdx = newIdx;
+    document.querySelectorAll("#bottomNav button").forEach(el => {
+        el.classList.toggle("active", el.dataset.t === tabId);
+    });
+    document.querySelectorAll(".tab-btn").forEach(el => {
+        el.classList.toggle("active", el.getAttribute("onclick") && el.getAttribute("onclick").includes(`'${tabId}'`));
+    });
+}
+
+function finalizeTabActivation(tabId) {
+    const newIdx = TAB_ORDER.indexOf(tabId);
+    if (newIdx >= 0) _lastSyncedIdx = newIdx;
+    document.querySelectorAll(".tab-content").forEach(el => {
+        el.classList.toggle("active", el.id === "tab-" + tabId);
+    });
+    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
+    if (btn && btn.scrollIntoView) {
+        try { btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }); } catch (e) {}
+    }
+}
+
+function applyActiveTab(tabId) {
+    updateNavIndicatorsOnly(tabId);
+    finalizeTabActivation(tabId);
+}
 
 function initTabsViewport() {
     const viewport = document.getElementById("tabsViewport");
     if (!viewport || viewport.dataset.bound === "1") return;
     viewport.dataset.bound = "1";
 
-    const syncActiveFromScroll = () => {
-        if (programmaticScroll) return;
-        const scrollLeft = viewport.scrollLeft;
-        const width = viewport.clientWidth;
-        if (width <= 0) return;
-        const idx = Math.round(scrollLeft / width);
-        const safeIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, idx));
-        if (safeIdx !== _lastSyncedIdx) {
-            _lastSyncedIdx = safeIdx;
-            applyActiveTab(TAB_ORDER[safeIdx]);
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let startIdx = 0;
+    let isTouchActive = false;
+    let isHorizontalGesture = false;
+    let gestureDecided = false;
+
+    // Alinhamento exato e finalização quando a rolagem cessa
+    const snapToExactStop = () => {
+        if (programmaticScroll || isTouchActive) return;
+        const w = viewport.clientWidth;
+        if (w <= 0) return;
+        const safeIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
+        const targetLeft = safeIdx * w;
+        if (Math.abs(viewport.scrollLeft - targetLeft) > 1) {
+            try { viewport.scrollTo({ left: targetLeft, behavior: "smooth" }); } catch (e) { viewport.scrollLeft = targetLeft; }
         }
+        updateNavIndicatorsOnly(TAB_ORDER[safeIdx]);
+        finalizeTabActivation(TAB_ORDER[safeIdx]);
     };
 
-    // Sincronização em tempo real (60/120fps via requestAnimationFrame) enquanto arrasta o dedo
+    // Sincronização visual em tempo real (sem layout thrash)
     viewport.addEventListener("scroll", () => {
         if (programmaticScroll) return;
-        if (!_scrollRafId) {
-            _scrollRafId = requestAnimationFrame(() => {
-                _scrollRafId = null;
-                syncActiveFromScroll();
-            });
+        const w = viewport.clientWidth;
+        if (w <= 0) return;
+        const curIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
+        if (curIdx !== _lastSyncedIdx) {
+            _lastSyncedIdx = curIdx;
+            updateNavIndicatorsOnly(TAB_ORDER[curIdx]);
         }
+        clearTimeout(_scrollEndTimer);
+        _scrollEndTimer = setTimeout(snapToExactStop, 85);
     }, { passive: true });
 
     if ("onscrollend" in viewport) {
         viewport.addEventListener("scrollend", () => {
-            if (_scrollRafId) { cancelAnimationFrame(_scrollRafId); _scrollRafId = null; }
-            syncActiveFromScroll();
+            clearTimeout(_scrollEndTimer);
+            snapToExactStop();
         });
     }
-}
 
-function applyActiveTab(tabId) {
-    const newIdx = TAB_ORDER.indexOf(tabId);
-    if (newIdx >= 0) _lastSyncedIdx = newIdx;
-    document.querySelectorAll(".tab-content").forEach(el => el.classList.toggle("active", el.id === "tab-" + tabId));
-    document.querySelectorAll(".tab-btn").forEach(el => {
-        el.classList.toggle("active", el.getAttribute("onclick") && el.getAttribute("onclick").includes(`'${tabId}'`));
-    });
-    document.querySelectorAll("#bottomNav button").forEach(el => {
-        const isActive = el.dataset.t === tabId;
-        el.classList.toggle("active", isActive);
-    });
-    // Rolar botão tab para aparecer
-    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
-    if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    // Gesto de toque: controle para NUNCA passar mais de 1 tela e NUNCA parar na metade
+    viewport.addEventListener("touchstart", e => {
+        if (!e.touches || e.touches.length !== 1) return;
+        const target = e.target;
+        if (target && target.closest && target.closest(".cat-items, #evolutionChart, input, select, textarea")) return;
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTime = Date.now();
+        const w = viewport.clientWidth || 1;
+        startIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
+        isTouchActive = true;
+        isHorizontalGesture = false;
+        gestureDecided = false;
+    }, { passive: true });
+
+    viewport.addEventListener("touchmove", e => {
+        if (!isTouchActive || !e.touches || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        if (!gestureDecided) {
+            if (Math.abs(dx) < 7 && Math.abs(dy) < 7) return;
+            gestureDecided = true;
+            isHorizontalGesture = Math.abs(dx) > Math.abs(dy);
+        }
+        if (isHorizontalGesture) {
+            const w = viewport.clientWidth || 1;
+            const curIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
+            if (curIdx !== _lastSyncedIdx) {
+                _lastSyncedIdx = curIdx;
+                updateNavIndicatorsOnly(TAB_ORDER[curIdx]);
+            }
+        }
+    }, { passive: true });
+
+    const handleTouchEnd = e => {
+        if (!isTouchActive) return;
+        isTouchActive = false;
+        if (!isHorizontalGesture) {
+            snapToExactStop();
+            return;
+        }
+        const t = e.changedTouches ? e.changedTouches[0] : null;
+        if (!t) { snapToExactStop(); return; }
+        const dx = t.clientX - touchStartX;
+        const dt = Math.max(1, Date.now() - touchStartTime);
+        const vx = dx / dt;
+        const w = viewport.clientWidth || 1;
+
+        // Decide próxima aba: trava estritamente em startIdx - 1, startIdx ou startIdx + 1
+        let targetIdx = startIdx;
+        if (vx < -0.28 || dx < -w * 0.20) {
+            targetIdx = Math.min(TAB_ORDER.length - 1, startIdx + 1);
+        } else if (vx > 0.28 || dx > w * 0.20) {
+            targetIdx = Math.max(0, startIdx - 1);
+        } else {
+            targetIdx = startIdx;
+        }
+
+        const targetLeft = targetIdx * w;
+        programmaticScroll = true;
+        clearTimeout(programmaticScrollTimer);
+        updateNavIndicatorsOnly(TAB_ORDER[targetIdx]);
+
+        // Cancela fling nativo desabilitando temporariamente scroll-snap durante o deslizamento suave
+        viewport.style.scrollSnapType = "none";
+        try {
+            viewport.scrollTo({ left: targetLeft, behavior: "smooth" });
+        } catch (err) {
+            viewport.scrollLeft = targetLeft;
+        }
+
+        programmaticScrollTimer = setTimeout(() => {
+            viewport.scrollLeft = targetLeft; // Trava milimétrica exata
+            viewport.style.scrollSnapType = "";
+            programmaticScroll = false;
+            finalizeTabActivation(TAB_ORDER[targetIdx]);
+        }, 280);
+    };
+
+    viewport.addEventListener("touchend", handleTouchEnd, { passive: true });
+    viewport.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    window.addEventListener("resize", () => {
+        const w = viewport.clientWidth;
+        if (w > 0 && _lastSyncedIdx >= 0) {
+            viewport.scrollLeft = _lastSyncedIdx * w;
+        }
+    }, { passive: true });
 }
 
 function markTabMoving() {
     document.body.classList.add("tab-moving"); clearTimeout(markTabMoving.t);
-    markTabMoving.t = setTimeout(() => document.body.classList.remove("tab-moving"), 520);
+    markTabMoving.t = setTimeout(() => document.body.classList.remove("tab-moving"), 420);
 }
+
 function switchTab(tabId, btn) {
     const viewport = document.getElementById("tabsViewport"), target = document.getElementById("tab-" + tabId);
     const newIdx = TAB_ORDER.indexOf(tabId);
@@ -2620,18 +2743,26 @@ function switchTab(tabId, btn) {
     const oldIdx = cur ? TAB_ORDER.indexOf(cur.id.replace("tab-", "")) : newIdx;
     if (oldIdx === newIdx) { window.scrollTo(0, 0); return; }
     programmaticScroll = true; clearTimeout(programmaticScrollTimer);
-    programmaticScrollTimer = setTimeout(() => { programmaticScroll = false; }, 700);
-    markTabMoving(); applyActiveTab(tabId); window.scrollTo(0, 0);
+    programmaticScrollTimer = setTimeout(() => { programmaticScroll = false; }, 600);
+    markTabMoving();
+    updateNavIndicatorsOnly(tabId);
+    window.scrollTo(0, 0);
     const left = newIdx * viewport.clientWidth;
     if (Math.abs(newIdx - oldIdx) > 1) {
-        // salto de várias abas: não passa pelas abas do meio (era isso que "piscava")
-        viewport.style.scrollSnapType = "none"; viewport.scrollLeft = left;
+        // salto de várias abas: não passa pelas abas do meio (evita piscar)
+        viewport.style.scrollSnapType = "none";
+        viewport.scrollLeft = left;
         requestAnimationFrame(() => { viewport.style.scrollSnapType = ""; });
         target.classList.remove("pop-l", "pop-r"); void target.offsetWidth;
         target.classList.add(newIdx > oldIdx ? "pop-r" : "pop-l");
-        setTimeout(() => target.classList.remove("pop-l", "pop-r"), 420);
+        setTimeout(() => target.classList.remove("pop-l", "pop-r"), 380);
+        finalizeTabActivation(tabId);
     } else {
         try { viewport.scrollTo({ left, behavior: "smooth" }); } catch (e) { viewport.scrollLeft = left; }
+        setTimeout(() => {
+            viewport.scrollLeft = left;
+            finalizeTabActivation(tabId);
+        }, 300);
     }
 }
 
