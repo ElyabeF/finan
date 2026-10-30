@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FinEly</title>
     <meta name="application-name" content="FinEly">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FinEly">
-    <meta name="mobile-web-app-capable" content="yes">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -730,10 +727,22 @@
         .sp-name { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 30%, #c4b5fd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .sp-tagline { font-size: 0.78rem; color: var(--text-muted); margin-top: -12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
         .ab-title { font-weight: 800; letter-spacing: -0.02em; font-size: 1.05rem; }
+        header.appbar {
+            padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+        }
+        #drawer .dr-head {
+            padding-top: calc(16px + env(safe-area-inset-top, 0px));
+        }
+        #notifPanel {
+            top: calc(68px + env(safe-area-inset-top, 0px));
+        }
         @media (max-width: 700px) {
-            .ab-left { display: flex !important; margin-right: 4px; }
-            .ab-left .ab-title, .ab-left .ab-sub { display: none; }
-            .ab-left .ab-logo { width: 34px; height: 34px; border-radius: 11px; }
+            header.appbar {
+                padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+            }
+            #appbarSpacer {
+                height: calc(68px + env(safe-area-inset-top, 0px));
+            }
         }
 
         /* Pop-ups / Dialogs Profissionais (Substituem confirm/prompt nativos) */
