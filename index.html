@@ -990,9 +990,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            gap: 8px;
             width: 100%;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
         }
         .subcat-title {
             display: inline-flex;
@@ -1003,7 +1003,7 @@
             color: var(--text-main);
             letter-spacing: 0.01em;
             white-space: nowrap;
-            min-width: 0;
+            flex-shrink: 0;
         }
         .subcat-chev {
             font-style: normal;
@@ -1064,6 +1064,37 @@
             align-items: center;
             gap: 5px;
             flex-shrink: 0;
+            margin-left: auto;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        /* Alças visuais de arraste (swipe-down em sheets e swipe-right no menu lateral) */
+        .sheet {
+            touch-action: pan-y;
+            will-change: transform;
+        }
+        .sheet::before {
+            width: 44px;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.24);
+            margin: 2px auto 14px;
+        }
+        #drawer {
+            touch-action: pan-y;
+            will-change: transform;
+        }
+        #drawer::before {
+            content: "";
+            position: fixed;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 44px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            pointer-events: none;
         }
         .subcat-pill-btn {
             display: inline-flex;
@@ -1735,7 +1766,7 @@
                         <tbody class="subcat-head" data-sub="ess"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('ess')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Custo Essencial (Fixas)</span><div class="subcat-actions"><span class="subcat-sum hv" id="subSumEss">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_ess" onclick="event.stopPropagation();toggleDespSub('ess')">Minimizar</button></div></div></td></tr></tbody>
                         <tbody id="essenciaisBody" data-sub-body="ess"></tbody>
                         <tbody data-sub-body="ess"><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
-                        <tbody class="subcat-head" data-sub="fat"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('fat')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Faturas</span><div class="subcat-actions" onclick="event.stopPropagation()"><button type="button" class="subcat-pill-btn subcat-only-open" onclick="openManageBanksSheet()" title="Escolher ou ocultar faturas"><span data-i="eye" data-s="12"></span> Escolher</button><button type="button" class="subcat-pill-btn primary subcat-only-open" onclick="promptNewBank()" title="Criar nova fatura"><span data-i="plus" data-s="12"></span> Fatura</button><span class="subcat-sum hv" id="subSumFat">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_fat" onclick="toggleDespSub('fat')">Minimizar</button></div></div></td></tr></tbody>
+                        <tbody class="subcat-head" data-sub="fat"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('fat')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Faturas</span><div class="subcat-actions" onclick="event.stopPropagation()"><button type="button" class="subcat-pill-btn subcat-only-open" onclick="openManageBanksSheet()" title="Escolher ou ocultar faturas"><span data-i="eye" data-s="12"></span> Escolher</button><span class="subcat-sum hv" id="subSumFat">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_fat" onclick="toggleDespSub('fat')">Minimizar</button></div></div></td></tr></tbody>
                         <tbody id="cartoesResumoBody" data-sub-body="fat"></tbody>
                         <tbody class="subcat-head" data-sub="var"><tr><td colspan="3" class="subcat-label" onclick="toggleDespSub('var')"><div class="subcat-bar"><span class="subcat-title"><i class="subcat-chev">▸</i> Variáveis / Não Essenciais</span><div class="subcat-actions"><span class="subcat-sum hv" id="subSumVar">R$ 0,00</span><button type="button" class="subcat-min-btn" id="btnMinSub_var" onclick="event.stopPropagation();toggleDespSub('var')">Minimizar</button></div></div></td></tr></tbody>
                         <tbody id="naoEssenciaisBody" data-sub-body="var"></tbody>
@@ -5528,7 +5559,167 @@ async function toggleNotifications() {
     await showSysNotif("FinEly · Avisos ativados", "Você será lembrado dos vencimentos de faturas, despesas fixas/variáveis e contas avulsas.", "test");
     notifyDue(); renderNotifications();
 }
-function toggleDrawer(open) { if (open) renderDrawer(); document.body.classList.toggle("drawer-open", !!open); }
+function toggleDrawer(open) {
+    const dr = document.getElementById("drawer"), ov = document.getElementById("drawerOverlay");
+    if (dr) { dr.style.transform = ""; dr.style.transition = ""; }
+    if (ov) { ov.style.opacity = ""; ov.style.transition = ""; }
+    if (open) renderDrawer();
+    document.body.classList.toggle("drawer-open", !!open);
+}
+
+// Gestos de arrastar para fechar:
+// 1. Puxar para baixo nas folhas inferiores (.sheet-ov > .sheet, incluindo #dueSheet de contas vencendo)
+// 2. Puxar para a direita no menu lateral (#drawer)
+(function initSwipeToCloseGestures() {
+    let gesture = null;
+
+    document.addEventListener("touchstart", e => {
+        if (!e.touches || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const target = e.target;
+        if (target && target.closest && target.closest("input[type='range'], select")) return;
+
+        // Prioridade 1: Folha inferior (.sheet dentro de .sheet-ov, ex.: #dueSheet)
+        const sheet = target && target.closest ? target.closest(".sheet-ov > .sheet") : null;
+        if (sheet) {
+            const ov = sheet.parentElement;
+            const rect = sheet.getBoundingClientRect();
+            const inTopHandleArea = (t.clientY - rect.top) <= 64;
+            gesture = {
+                kind: "sheet",
+                sheet,
+                ov,
+                startX: t.clientX,
+                startY: t.clientY,
+                startScrollTop: sheet.scrollTop || 0,
+                inTopHandleArea,
+                startTime: Date.now(),
+                dx: 0,
+                dy: 0,
+                locked: null
+            };
+            return;
+        }
+
+        // Prioridade 2: Menu lateral (#drawer aberto) -> puxar para a direita
+        if (document.body.classList.contains("drawer-open")) {
+            const dr = document.getElementById("drawer");
+            const ov = document.getElementById("drawerOverlay");
+            if (dr && (dr.contains(target) || target === ov)) {
+                gesture = {
+                    kind: "drawer",
+                    dr,
+                    ov,
+                    startX: t.clientX,
+                    startY: t.clientY,
+                    startTime: Date.now(),
+                    dx: 0,
+                    dy: 0,
+                    locked: null
+                };
+            }
+        }
+    }, { passive: true });
+
+    document.addEventListener("touchmove", e => {
+        if (!gesture || !e.touches || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - gesture.startX;
+        const dy = t.clientY - gesture.startY;
+        gesture.dx = dx;
+        gesture.dy = dy;
+
+        if (gesture.kind === "sheet") {
+            const { sheet, ov, inTopHandleArea } = gesture;
+            if (!gesture.locked) {
+                if (Math.abs(dx) < 7 && Math.abs(dy) < 7) return;
+                const atTop = (sheet.scrollTop || 0) <= 2 && gesture.startScrollTop <= 2;
+                if (dy > 0 && dy > Math.abs(dx) * 1.15 && (inTopHandleArea || atTop)) {
+                    gesture.locked = "drag";
+                } else {
+                    gesture.locked = "scroll";
+                }
+            }
+            if (gesture.locked === "drag") {
+                const pullY = Math.max(0, dy);
+                if (e.cancelable) e.preventDefault();
+                sheet.style.transition = "none";
+                sheet.style.transform = `translate3d(0, ${pullY}px, 0)`;
+                if (ov) {
+                    const alpha = Math.max(0.15, 0.68 * (1 - pullY / 360));
+                    ov.style.backgroundColor = `rgba(5, 7, 15, ${alpha.toFixed(2)})`;
+                }
+            }
+        } else if (gesture.kind === "drawer") {
+            const { dr, ov } = gesture;
+            if (!gesture.locked) {
+                if (Math.abs(dx) < 7 && Math.abs(dy) < 7) return;
+                if (dx > 0 && dx > Math.abs(dy) * 1.15) {
+                    gesture.locked = "drag";
+                } else {
+                    gesture.locked = "scroll";
+                }
+            }
+            if (gesture.locked === "drag") {
+                const pullX = Math.max(0, dx);
+                if (e.cancelable) e.preventDefault();
+                dr.style.transition = "none";
+                dr.style.transform = `translate3d(${pullX}px, 0, 0)`;
+                if (ov) {
+                    const w = dr.offsetWidth || 320;
+                    ov.style.opacity = String(Math.max(0.1, 1 - pullX / w));
+                }
+            }
+        }
+    }, { passive: false });
+
+    const finishGesture = () => {
+        if (!gesture) return;
+        const g = gesture;
+        gesture = null;
+        if (g.locked !== "drag") return;
+        const dt = Math.max(1, Date.now() - g.startTime);
+
+        if (g.kind === "sheet") {
+            const { sheet, ov, dy } = g;
+            const vy = dy / dt;
+            if (dy > 75 || (vy > 0.45 && dy > 28)) {
+                sheet.style.transition = "transform 0.18s ease-out";
+                sheet.style.transform = "translate3d(0, 105%, 0)";
+                if (ov) {
+                    ov.style.transition = "opacity 0.18s ease-out";
+                    ov.style.opacity = "0";
+                    setTimeout(() => ov.remove(), 180);
+                }
+            } else {
+                sheet.style.transition = "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)";
+                sheet.style.transform = "";
+                if (ov) ov.style.backgroundColor = "";
+                setTimeout(() => { if (sheet) sheet.style.transition = ""; }, 210);
+            }
+        } else if (g.kind === "drawer") {
+            const { dr, ov, dx } = g;
+            const vx = dx / dt;
+            if (dx > 68 || (vx > 0.42 && dx > 26)) {
+                dr.style.transition = "transform 0.18s ease-out";
+                dr.style.transform = "translate3d(100%, 0, 0)";
+                if (ov) {
+                    ov.style.transition = "opacity 0.18s ease-out";
+                    ov.style.opacity = "0";
+                }
+                setTimeout(() => toggleDrawer(false), 180);
+            } else {
+                dr.style.transition = "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)";
+                dr.style.transform = "";
+                if (ov) ov.style.opacity = "";
+                setTimeout(() => { if (dr) dr.style.transition = ""; }, 210);
+            }
+        }
+    };
+
+    document.addEventListener("touchend", finishGesture, { passive: true });
+    document.addEventListener("touchcancel", finishGesture, { passive: true });
+})();
 function renderDrawer() {
     const notif = ("Notification" in window && Notification.permission === "granted") ? "Ativados" : "Desativados";
     const pinActive = localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado";
