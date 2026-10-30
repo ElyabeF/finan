@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FinEly</title>
     <meta name="application-name" content="FinEly">
     <meta name="apple-mobile-web-app-title" content="FinEly">
@@ -55,23 +55,16 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             overscroll-behavior-x: contain;
-            align-items: flex-start;
         }
         .tabs-viewport::-webkit-scrollbar { display: none; }
+        .tabs-viewport { align-items: flex-start; }
+        .tab-content:not(.active) { max-height: 100vh; max-height: 100svh; overflow: hidden; }
         .tab-content {
-            flex: 0 0 100% !important;
-            width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
+            flex: 0 0 100%;
+            width: 100%;
+            min-width: 0;
             scroll-snap-align: start;
             scroll-snap-stop: always;
-            overflow-x: hidden;
-        }
-        .tab-content:not(.active) {
-            max-height: 100vh;
-            max-height: 100svh;
-            overflow: hidden;
         }
         /* Bloqueia arrasto horizontal do viewport em elementos internos roláveis */
         .tabs-viewport [style*="overflow-x:auto"],
@@ -342,17 +335,8 @@
             #btnBackToTop { bottom: 96px; }
         }
 
-        .sheet-ov {
-            position: fixed; inset: 0; background: rgba(2,6,23,.7); z-index: 2200;
-            display: grid; place-items: end center;
-            overscroll-behavior: contain;
-            touch-action: none;
-        }
-        .sheet {
-            background: var(--bg-card); width: min(520px, 100%); max-height: 82vh;
-            overflow-y: auto; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
-            border-radius: 20px 20px 0 0; padding: 16px; border: 1px solid var(--border);
-        }
+        .sheet-ov { position: fixed; inset: 0; background: rgba(2,6,23,.7); z-index: 2200; display: grid; place-items: end center; }
+        .sheet { background: var(--bg-card); width: min(520px, 100%); max-height: 82vh; overflow: auto; border-radius: 20px 20px 0 0; padding: 16px; border: 1px solid var(--border); }
         .snap-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border); font-size: .82rem; }
         #fab { position: fixed; right: 16px; bottom: 22px; z-index: 940; width: 54px; height: 54px; border-radius: 18px; border: 0; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 8px 24px rgba(99,102,241,.5); }
         @media (max-width: 700px) { #fab { bottom: 96px; } }
@@ -713,32 +697,13 @@
                 box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
                 align-items: center;
                 justify-content: space-around;
-                position: fixed !important;
-                z-index: 120 !important;
             }
-            #bottomNav button {
-                flex: 1;
-                padding: 2px 2px 1px !important;
-                font-size: .64rem !important;
-                line-height: 1.05;
-                border-radius: 14px;
-                gap: 1px !important;
-                transition: color 0.1s ease !important;
-            }
-            #bottomNav button span {
-                width: 40px;
-                height: 23px;
-                border-radius: 11px;
-                transition: background-color 0.1s ease, color 0.1s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
-            }
+            #bottomNav button { flex: 1; padding: 2px 2px 1px !important; font-size: .64rem !important; line-height: 1.05; border-radius: 14px; gap: 1px !important; }
+            #bottomNav button span { width: 40px; height: 23px; border-radius: 11px; transition: background .2s, color .2s; }
             #bottomNav button.active { background: transparent; color: #fff; }
-            #bottomNav button.active span {
-                background: var(--brand-soft);
-                color: #c4b5fd;
-                transform: scale(1.04);
-            }
+            #bottomNav button.active span { background: var(--brand-soft); color: #c4b5fd; }
             #bottomNav .bn-add { flex: 0 0 48px; width: 48px; height: 48px; margin-top: -16px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0 !important; justify-content: center; border: 3px solid var(--bg-main); box-shadow: 0 10px 22px -6px rgba(139,92,246,.85); position: relative; }
-            #bottomNav .bn-add span { width: 24px; height: 24px; background: transparent; transform: none !important; }
+            #bottomNav .bn-add span { width: 24px; height: 24px; background: transparent; }
             #fab { display: none !important; }
             #btnBackToTop { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
         }
@@ -1252,143 +1217,67 @@
             }
         }
 
-        /* Conta / Despesa Paga: escurecer + verde suave + riscar texto com animação fluida */
-        @keyframes paidPop {
-            0% { transform: scale(1); }
-            40% { transform: scale(0.975); background: rgba(34, 197, 94, 0.18); }
-            100% { transform: scale(1); }
-        }
-        .paid-pulse {
-            animation: paidPop 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
-        }
-
+        /* Conta / Despesa Paga: escurecer + riscar texto (em vez de ficar apenas verde) */
         tr.row-paid {
-            background: rgba(16, 185, 129, 0.08) !important;
-            border-left: 3px solid #10b981 !important;
-            opacity: 0.72 !important;
-            transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(6, 8, 16, 0.58) !important;
+            opacity: 0.44 !important;
+            transition: opacity 0.18s ease, background 0.18s ease;
         }
         tr.row-paid td input[type="text"],
         tr.row-paid td.val-col,
-        tr.row-paid td.val-col input,
         tr.row-paid td span {
             text-decoration: line-through !important;
-            color: #10b981 !important;
-            -webkit-text-fill-color: #10b981 !important;
-            transition: color 0.25s ease;
+            color: #64748b !important;
+            -webkit-text-fill-color: #64748b !important;
         }
         tr.row-paid .pay-chk {
-            accent-color: #10b981 !important;
-            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
-            transform: scale(1.05);
-            transition: transform 0.2s ease;
+            accent-color: #475569 !important;
+            filter: brightness(0.8);
         }
         tr.row-paid .due-pill-btn,
         .due-pill-btn.due-paid {
-            background: rgba(16, 185, 129, 0.14) !important;
-            border-color: rgba(16, 185, 129, 0.35) !important;
-            color: #34d399 !important;
-            text-decoration: none !important;
+            background: rgba(100, 116, 139, 0.12) !important;
+            border-color: rgba(100, 116, 139, 0.22) !important;
+            color: #64748b !important;
+            text-decoration: line-through !important;
         }
         label.fix-paid-row {
-            background: rgba(16, 185, 129, 0.08);
-            border-left: 3px solid #10b981;
-            opacity: 0.78 !important;
+            background: rgba(6, 8, 16, 0.48);
+            opacity: 0.42 !important;
             border-radius: 8px;
-            padding-left: 6px !important;
-            transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         label.fix-paid-row span,
         label.fix-paid-row b.hv {
             text-decoration: line-through !important;
-            color: #10b981 !important;
-            transition: color 0.25s ease;
+            color: #64748b !important;
         }
         label.fix-paid-row input[type="checkbox"] {
-            accent-color: #10b981 !important;
-            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+            accent-color: #475569 !important;
         }
         #txLedgerTable tbody tr.tx-row.is-paid {
-            background: rgba(16, 185, 129, 0.07) !important;
-            border-left: 3px solid #10b981 !important;
-            opacity: 0.75 !important;
-            transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(6, 8, 16, 0.52) !important;
+            opacity: 0.44 !important;
         }
         #txLedgerTable tbody tr.tx-row.is-paid .tx-desc,
         #txLedgerTable tbody tr.tx-row.is-paid .tx-val {
             text-decoration: line-through !important;
-            color: #10b981 !important;
+            color: #64748b !important;
         }
         .bank-card.is-paid-card {
-            background: rgba(16, 185, 129, 0.08) !important;
-            border-color: rgba(16, 185, 129, 0.3) !important;
-            border-left: 4px solid #10b981 !important;
-            transition: all 0.28s ease;
+            background: rgba(11, 14, 24, 0.78) !important;
+            border-color: rgba(255, 255, 255, 0.04) !important;
         }
         .bank-card.is-paid-card .bank-total {
             text-decoration: line-through;
-            color: #10b981 !important;
+            color: #64748b !important;
         }
         .status-pill.paid {
-            background: rgba(16, 185, 129, 0.18) !important;
-            color: #34d399 !important;
-            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(100, 116, 139, 0.18) !important;
+            color: #94a3b8 !important;
+            border: 1px solid rgba(148, 163, 184, 0.2);
         }
 
-        /* Microinterações e feedback tátil/visual suave nos toques */
-        .btn, .btn-outline, .btn-add, .btn-danger, .icon-btn, .tab-btn, .subcat-min-btn, .subcat-pill-btn, .due-chip, .dr-tile, .due-pill-btn, .row-del-btn, .bank-card, #bottomNav button {
-            transition: transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease !important;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .btn:active, .btn-outline:active, .btn-add:active, .btn-danger:active, .icon-btn:active, .subcat-min-btn:active, .subcat-pill-btn:active, .due-chip:active, .dr-tile:active, .row-del-btn:active, #bottomNav button:active {
-            transform: scale(0.95) !important;
-        }
-        .avatar:active {
-            transform: scale(0.92);
-            box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.4);
-        }
-        .pay-chk {
-            cursor: pointer;
-            transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .pay-chk:active {
-            transform: scale(0.85);
-        }
-
-        .prof-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 12px 14px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--brand);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.16s ease;
-        }
-        .prof-card:hover {
-            border-color: rgba(139, 124, 246, 0.5);
-            background: rgba(139, 124, 246, 0.08);
-        }
-        .prof-card.active {
-            background: rgba(139, 124, 246, 0.14);
-            border-color: rgba(139, 124, 246, 0.6);
-            box-shadow: 0 4px 14px -4px rgba(139, 124, 246, 0.4);
-        }
-        .prof-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            color: #fff;
-            font-weight: 800;
-            font-size: 0.92rem;
-            flex-shrink: 0;
-            box-shadow: 0 4px 10px -3px rgba(0,0,0,0.5);
-        }
+        /* Menu Lateral (#drawer) Compactado por Assuntos + Firebase em Destaque */
         .dr-body {
             padding: 10px 12px 22px;
             display: flex;
@@ -1802,8 +1691,7 @@
             </div>
         </div>
         <div class="ab-right">
-            <div class="avatar" title="Gerenciar perfis" onclick="openProfileSheet()" aria-label="Gerenciar perfis"><span id="avatarLetter">M</span></div>
-            <select id="profileSelect" style="display:none;" onchange="changeProfile()"></select>
+            <label class="avatar" title="Trocar perfil"><span id="avatarLetter">M</span><select id="profileSelect" onchange="changeProfile()" aria-label="Perfil"></select></label>
             <div class="month-nav">
                 <button class="mn-btn" onclick="stepMonth(-1)" aria-label="Mês anterior">‹</button>
                 <label class="mn-label"><span id="monthLabel">—</span><select id="monthSelect" onchange="changeMonth()" aria-label="Mês"></select></label>
@@ -2556,185 +2444,52 @@ function init() {
     initTabsViewport();
 }
 
-// ===== CONTROLE PRECISO DE SWIPE E ABAS =====
+// ===== SWIPE NATIVO POR SCROLL-SNAP =====
 let programmaticScroll = false;
 let programmaticScrollTimer = null;
-let _lastSyncedIdx = 0;
-let _scrollEndTimer = null;
-
-function updateNavIndicatorsOnly(tabId) {
-    const newIdx = TAB_ORDER.indexOf(tabId);
-    if (newIdx >= 0) _lastSyncedIdx = newIdx;
-    document.querySelectorAll("#bottomNav button").forEach(el => {
-        el.classList.toggle("active", el.dataset.t === tabId);
-    });
-    document.querySelectorAll(".tab-btn").forEach(el => {
-        el.classList.toggle("active", el.getAttribute("onclick") && el.getAttribute("onclick").includes(`'${tabId}'`));
-    });
-}
-
-function finalizeTabActivation(tabId) {
-    const newIdx = TAB_ORDER.indexOf(tabId);
-    if (newIdx >= 0) _lastSyncedIdx = newIdx;
-    document.querySelectorAll(".tab-content").forEach(el => {
-        el.classList.toggle("active", el.id === "tab-" + tabId);
-    });
-    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
-    if (btn && btn.scrollIntoView) {
-        try { btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }); } catch (e) {}
-    }
-}
-
-function applyActiveTab(tabId) {
-    updateNavIndicatorsOnly(tabId);
-    finalizeTabActivation(tabId);
-}
+let scrollSyncTimer = null;
 
 function initTabsViewport() {
     const viewport = document.getElementById("tabsViewport");
     if (!viewport || viewport.dataset.bound === "1") return;
     viewport.dataset.bound = "1";
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    let startIdx = 0;
-    let isTouchActive = false;
-    let isHorizontalGesture = false;
-    let gestureDecided = false;
-
-    // Alinhamento exato e finalização quando a rolagem cessa
-    const snapToExactStop = () => {
-        if (programmaticScroll || isTouchActive) return;
-        const w = viewport.clientWidth;
-        if (w <= 0) return;
-        const safeIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
-        const targetLeft = safeIdx * w;
-        if (Math.abs(viewport.scrollLeft - targetLeft) > 1) {
-            try { viewport.scrollTo({ left: targetLeft, behavior: "smooth" }); } catch (e) { viewport.scrollLeft = targetLeft; }
-        }
-        updateNavIndicatorsOnly(TAB_ORDER[safeIdx]);
-        finalizeTabActivation(TAB_ORDER[safeIdx]);
-    };
-
-    // Sincronização visual em tempo real (sem layout thrash)
-    viewport.addEventListener("scroll", () => {
+    const syncActiveFromScroll = () => {
         if (programmaticScroll) return;
-        const w = viewport.clientWidth;
-        if (w <= 0) return;
-        const curIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
-        if (curIdx !== _lastSyncedIdx) {
-            _lastSyncedIdx = curIdx;
-            updateNavIndicatorsOnly(TAB_ORDER[curIdx]);
-        }
-        clearTimeout(_scrollEndTimer);
-        _scrollEndTimer = setTimeout(snapToExactStop, 85);
-    }, { passive: true });
+        const scrollLeft = viewport.scrollLeft;
+        const width = viewport.clientWidth;
+        if (width <= 0) return;
+        const idx = Math.round(scrollLeft / width);
+        const safeIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, idx));
+        const tabId = TAB_ORDER[safeIdx];
+        applyActiveTab(tabId);
+    };
 
     if ("onscrollend" in viewport) {
-        viewport.addEventListener("scrollend", () => {
-            clearTimeout(_scrollEndTimer);
-            snapToExactStop();
-        });
+        viewport.addEventListener("scrollend", syncActiveFromScroll);
+    } else {
+        viewport.addEventListener("scroll", () => {
+            clearTimeout(scrollSyncTimer);
+            scrollSyncTimer = setTimeout(syncActiveFromScroll, 100);
+        }, { passive: true });
     }
+}
 
-    // Gesto de toque: controle para NUNCA passar mais de 1 tela e NUNCA parar na metade
-    viewport.addEventListener("touchstart", e => {
-        if (!e.touches || e.touches.length !== 1) return;
-        const target = e.target;
-        if (target && target.closest && target.closest(".cat-items, #evolutionChart, input, select, textarea")) return;
-        const t = e.touches[0];
-        touchStartX = t.clientX;
-        touchStartY = t.clientY;
-        touchStartTime = Date.now();
-        const w = viewport.clientWidth || 1;
-        startIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
-        isTouchActive = true;
-        isHorizontalGesture = false;
-        gestureDecided = false;
-    }, { passive: true });
-
-    viewport.addEventListener("touchmove", e => {
-        if (!isTouchActive || !e.touches || e.touches.length !== 1) return;
-        const t = e.touches[0];
-        const dx = t.clientX - touchStartX;
-        const dy = t.clientY - touchStartY;
-        if (!gestureDecided) {
-            if (Math.abs(dx) < 7 && Math.abs(dy) < 7) return;
-            gestureDecided = true;
-            isHorizontalGesture = Math.abs(dx) > Math.abs(dy);
-        }
-        if (isHorizontalGesture) {
-            const w = viewport.clientWidth || 1;
-            const curIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, Math.round(viewport.scrollLeft / w)));
-            if (curIdx !== _lastSyncedIdx) {
-                _lastSyncedIdx = curIdx;
-                updateNavIndicatorsOnly(TAB_ORDER[curIdx]);
-            }
-        }
-    }, { passive: true });
-
-    const handleTouchEnd = e => {
-        if (!isTouchActive) return;
-        isTouchActive = false;
-        if (!isHorizontalGesture) {
-            snapToExactStop();
-            return;
-        }
-        const t = e.changedTouches ? e.changedTouches[0] : null;
-        if (!t) { snapToExactStop(); return; }
-        const dx = t.clientX - touchStartX;
-        const dt = Math.max(1, Date.now() - touchStartTime);
-        const vx = dx / dt;
-        const w = viewport.clientWidth || 1;
-
-        // Decide próxima aba: trava estritamente em startIdx - 1, startIdx ou startIdx + 1
-        let targetIdx = startIdx;
-        if (vx < -0.28 || dx < -w * 0.20) {
-            targetIdx = Math.min(TAB_ORDER.length - 1, startIdx + 1);
-        } else if (vx > 0.28 || dx > w * 0.20) {
-            targetIdx = Math.max(0, startIdx - 1);
-        } else {
-            targetIdx = startIdx;
-        }
-
-        const targetLeft = targetIdx * w;
-        programmaticScroll = true;
-        clearTimeout(programmaticScrollTimer);
-        updateNavIndicatorsOnly(TAB_ORDER[targetIdx]);
-
-        // Cancela fling nativo desabilitando temporariamente scroll-snap durante o deslizamento suave
-        viewport.style.scrollSnapType = "none";
-        try {
-            viewport.scrollTo({ left: targetLeft, behavior: "smooth" });
-        } catch (err) {
-            viewport.scrollLeft = targetLeft;
-        }
-
-        programmaticScrollTimer = setTimeout(() => {
-            viewport.scrollLeft = targetLeft; // Trava milimétrica exata
-            viewport.style.scrollSnapType = "";
-            programmaticScroll = false;
-            finalizeTabActivation(TAB_ORDER[targetIdx]);
-        }, 280);
-    };
-
-    viewport.addEventListener("touchend", handleTouchEnd, { passive: true });
-    viewport.addEventListener("touchcancel", handleTouchEnd, { passive: true });
-
-    window.addEventListener("resize", () => {
-        const w = viewport.clientWidth;
-        if (w > 0 && _lastSyncedIdx >= 0) {
-            viewport.scrollLeft = _lastSyncedIdx * w;
-        }
-    }, { passive: true });
+function applyActiveTab(tabId) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.toggle("active", el.id === "tab-" + tabId));
+    document.querySelectorAll(".tab-btn").forEach(el => {
+        el.classList.toggle("active", el.getAttribute("onclick") && el.getAttribute("onclick").includes(`'${tabId}'`));
+    });
+    document.querySelectorAll("#bottomNav button").forEach(el => el.classList.toggle("active", el.dataset.t === tabId));
+    // Rolar botão tab para aparecer
+    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
+    if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 }
 
 function markTabMoving() {
     document.body.classList.add("tab-moving"); clearTimeout(markTabMoving.t);
-    markTabMoving.t = setTimeout(() => document.body.classList.remove("tab-moving"), 420);
+    markTabMoving.t = setTimeout(() => document.body.classList.remove("tab-moving"), 520);
 }
-
 function switchTab(tabId, btn) {
     const viewport = document.getElementById("tabsViewport"), target = document.getElementById("tab-" + tabId);
     const newIdx = TAB_ORDER.indexOf(tabId);
@@ -2743,26 +2498,18 @@ function switchTab(tabId, btn) {
     const oldIdx = cur ? TAB_ORDER.indexOf(cur.id.replace("tab-", "")) : newIdx;
     if (oldIdx === newIdx) { window.scrollTo(0, 0); return; }
     programmaticScroll = true; clearTimeout(programmaticScrollTimer);
-    programmaticScrollTimer = setTimeout(() => { programmaticScroll = false; }, 600);
-    markTabMoving();
-    updateNavIndicatorsOnly(tabId);
-    window.scrollTo(0, 0);
+    programmaticScrollTimer = setTimeout(() => { programmaticScroll = false; }, 700);
+    markTabMoving(); applyActiveTab(tabId); window.scrollTo(0, 0);
     const left = newIdx * viewport.clientWidth;
     if (Math.abs(newIdx - oldIdx) > 1) {
-        // salto de várias abas: não passa pelas abas do meio (evita piscar)
-        viewport.style.scrollSnapType = "none";
-        viewport.scrollLeft = left;
+        // salto de várias abas: não passa pelas abas do meio (era isso que "piscava")
+        viewport.style.scrollSnapType = "none"; viewport.scrollLeft = left;
         requestAnimationFrame(() => { viewport.style.scrollSnapType = ""; });
         target.classList.remove("pop-l", "pop-r"); void target.offsetWidth;
         target.classList.add(newIdx > oldIdx ? "pop-r" : "pop-l");
-        setTimeout(() => target.classList.remove("pop-l", "pop-r"), 380);
-        finalizeTabActivation(tabId);
+        setTimeout(() => target.classList.remove("pop-l", "pop-r"), 420);
     } else {
         try { viewport.scrollTo({ left, behavior: "smooth" }); } catch (e) { viewport.scrollLeft = left; }
-        setTimeout(() => {
-            viewport.scrollLeft = left;
-            finalizeTabActivation(tabId);
-        }, 300);
     }
 }
 
@@ -3127,129 +2874,43 @@ function saveFirebaseConfig() {
 }
 
 // === Perfis ===
-function openProfileSheet() {
-    const old = document.getElementById("profileSheet"); if (old) old.remove();
-    const o = document.createElement("div"); o.id = "profileSheet"; o.className = "sheet-ov";
-    if (typeof lockBodyScroll === "function") lockBodyScroll(true);
-    const closeThis = () => { if (typeof lockBodyScroll === "function") lockBodyScroll(false); o.remove(); };
-    o.onclick = e => { if (e.target === o) closeThis(); };
-
-    const profiles = store.config.profilesList || [];
-    const profCards = profiles.map(p => {
-        const isCurrent = p === currentProfile;
-        const color = store.config.profileColors[p] || "#6366f1";
-        const tot = calcMonthTotals(currentMonth, p);
-        const letter = (p[0] || "P").toUpperCase();
-        return `<div class="prof-card ${isCurrent ? 'active' : ''}" style="border-left-color:${color};" onclick="switchProfileTo('${jsq(p)}')">
-            <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-                <div class="prof-avatar" style="background:${color};">${letter}</div>
-                <div style="min-width:0;flex:1;">
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <b style="font-size:.95rem;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p)}</b>
-                        ${isCurrent ? `<span class="badge" style="background:rgba(139,124,246,.2);color:#c4b5fd;font-size:.68rem;padding:1px 6px;">Ativo</span>` : ''}
-                    </div>
-                    <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">
-                        ${currentMonth}: Gastos ${fmtBRL(tot.saidas)}
-                    </div>
-                </div>
-            </div>
-            <button type="button" class="btn-outline" style="padding:6px 10px;font-size:.74rem;display:inline-flex;align-items:center;gap:4px;" onclick="event.stopPropagation();openProfileModalFor('${jsq(p)}')">
-                ${ico("settings", 13)} Ajustes
-            </button>
-        </div>`;
-    }).join("");
-
-    o.innerHTML = `<div class="sheet">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <div style="display:inline-flex;align-items:center;gap:8px;">
-                <span class="toast-ico" style="background:rgba(139,124,246,.2);color:#c4b5fd;width:32px;height:32px;">${ico("user", 17)}</span>
-                <div>
-                    <b style="font-size:1.05rem;display:block;line-height:1.15;">Selecione o Perfil</b>
-                    <span style="font-size:.74rem;color:var(--text-muted);">Alterne contas ou configure nome e cor</span>
-                </div>
-            </div>
-            <button class="btn-icon" style="color:var(--text-muted);" onclick="document.getElementById('profileSheet')?.remove(); if(typeof lockBodyScroll==='function')lockBodyScroll(false);" aria-label="Fechar">${ico("x", 16)}</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
-            ${profCards}
-        </div>
-        <button type="button" class="btn" style="width:100%;padding:12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:.88rem;" onclick="document.getElementById('profileSheet')?.remove(); if(typeof lockBodyScroll==='function')lockBodyScroll(false); promptNewProfile();">
-            ${ico("plus", 16)} Criar Novo Perfil
-        </button>
-    </div>`;
-    document.body.appendChild(o);
-}
-
-function switchProfileTo(profName) {
-    if (!store.config.profilesList.includes(profName)) return;
-    currentProfile = profName;
-    const sel = document.getElementById("profileSelect");
-    if (sel) sel.value = profName;
-    document.documentElement.style.setProperty('--profile-color', store.config.profileColors[currentProfile] || '#6366f1');
-    const avLetter = document.getElementById("avatarLetter");
-    if (avLetter) avLetter.textContent = (currentProfile[0] || "P").toUpperCase();
-    selectedFilterBanks.clear();
-    saveStore();
-    updateBankSelects();
-    renderAll();
-    checkNotifications();
-    document.getElementById("profileSheet")?.remove();
-    if (typeof lockBodyScroll === "function") lockBodyScroll(false);
-    toast(`Perfil alterado para "${profName}".`, null, "ok");
-}
-
-let _editingProfileTarget = null;
-function openProfileModalFor(profName) {
-    _editingProfileTarget = profName || currentProfile;
-    document.getElementById("profileSheet")?.remove();
-    if (typeof lockBodyScroll === "function") lockBodyScroll(false);
-    document.getElementById("editProfileName").value = _editingProfileTarget;
-    document.getElementById("editProfileColor").value = store.config.profileColors[_editingProfileTarget] || "#6366f1";
-    document.getElementById("profileModal").style.display = "flex";
-}
-
-function openProfileModal() {
-    openProfileModalFor(currentProfile);
-}
-
+function openProfileModal() { document.getElementById("editProfileName").value = currentProfile; document.getElementById("editProfileColor").value = store.config.profileColors[currentProfile] || "#6366f1"; document.getElementById("profileModal").style.display = "flex"; }
 function closeProfileModal() { document.getElementById("profileModal").style.display = "none"; }
 function saveProfileSettings() {
-    const target = _editingProfileTarget || currentProfile;
     const newName = document.getElementById("editProfileName").value.trim();
     const newColor = document.getElementById("editProfileColor").value;
     if (!newName) return toast("Informe um nome para o perfil.", null, "warn");
-    if (newName !== target) {
+    if (newName !== currentProfile) {
         if (store.config.profilesList.includes(newName)) return toast("Já existe um perfil com este nome.", null, "warn");
-        const idx = store.config.profilesList.indexOf(target);
+        const idx = store.config.profilesList.indexOf(currentProfile);
         store.config.profilesList[idx] = newName;
-        store.profiles[newName] = store.profiles[target];
-        delete store.profiles[target];
+        store.profiles[newName] = store.profiles[currentProfile];
+        delete store.profiles[currentProfile];
         store.config.profileColors[newName] = newColor;
-        delete store.config.profileColors[target];
-        if (currentProfile === target) currentProfile = newName;
-    } else { store.config.profileColors[target] = newColor; }
+        delete store.config.profileColors[currentProfile];
+        currentProfile = newName;
+    } else { store.config.profileColors[currentProfile] = newColor; }
     document.documentElement.style.setProperty('--profile-color', store.config.profileColors[currentProfile] || '#6366f1');
     saveStore(); closeProfileModal(); init();
-    toast(`Perfil "${newName}" atualizado!`, null, "ok");
 }
 async function deleteCurrentProfile() {
-    const target = _editingProfileTarget || currentProfile;
     if (store.config.profilesList.length <= 1) return toast("É necessário manter pelo menos um perfil.", null, "warn");
+    const gone = currentProfile;
     const ok = await uiConfirm({
-        title: `Excluir perfil "${target}"?`,
-        message: `Todos os dados e lançamentos exclusivos do perfil "${target}" serão removidos. Esta ação não pode ser desfeita.`,
+        title: `Excluir perfil "${gone}"?`,
+        message: `Todos os dados e lançamentos exclusivos do perfil "${gone}" serão removidos. Esta ação não pode ser desfeita.`,
         confirmText: "Excluir perfil",
         danger: true,
         icon: "trash"
     });
     if (ok) {
-        store.config.profilesList = store.config.profilesList.filter(p => p !== target);
-        delete store.profiles[target];
-        if (store.config.profileColors) delete store.config.profileColors[target];
-        if (store.meta) Object.keys(store.meta).forEach(k => { if (k.startsWith(target + "|")) delete store.meta[k]; });
-        if (currentProfile === target) currentProfile = store.config.profilesList[0];
+        store.config.profilesList = store.config.profilesList.filter(p => p !== gone);
+        delete store.profiles[gone];
+        if (store.config.profileColors) delete store.config.profileColors[gone];
+        if (store.meta) Object.keys(store.meta).forEach(k => { if (k.startsWith(gone + "|")) delete store.meta[k]; });
+        currentProfile = store.config.profilesList[0];
         saveStore(); closeProfileModal(); init();
-        toast(`Perfil "${target}" excluído.`, null, "del");
+        toast(`Perfil "${gone}" excluído.`, null, "del");
     }
 }
 const deleteProfile = deleteCurrentProfile;
@@ -4424,16 +4085,7 @@ function saveItemDueDate(group, idOrIdx, val) {
 function updateItem(group, idOrIdx, field, val) {
     const { item } = resolveRowItem(group, idOrIdx);
     if (!item) return;
-    item[field] = val;
-    if (field === "paid") {
-        if (val) markSessionPaid();
-        const tr = document.getElementById(`row_${group}_${item.id}`);
-        if (tr) {
-            tr.classList.add("paid-pulse");
-            setTimeout(() => tr.classList.remove("paid-pulse"), 400);
-        }
-    }
-    saveStore();
+    item[field] = val; if (field === "paid" && val) markSessionPaid(); saveStore();
     if ((group === "essenciais" || group === "naoEssenciais") && field === "paid") renderAll(); else updateTotalsOnly();
     checkNotifications();
 }
@@ -5558,29 +5210,11 @@ function duePay(bank, key) {
     }, "ok");
     if (getDueList().length) openDueSheet(); else { const sh = document.getElementById("dueSheet"); if (sh) sh.remove(); }
 }
-function lockBodyScroll(locked) {
-    if (locked) {
-        if (!document.body.dataset.scrollLocked) {
-            document.body.dataset.scrollLocked = "1";
-            document.body.style.overflow = "hidden";
-        }
-    } else {
-        setTimeout(() => {
-            if (!document.querySelector(".sheet-ov, .ui-dialog-ov, .modal-overlay[style*='flex']")) {
-                delete document.body.dataset.scrollLocked;
-                document.body.style.overflow = "";
-            }
-        }, 50);
-    }
-}
-
 function openDueSheet() {
     const old = document.getElementById("dueSheet"); if (old) old.remove();
     const due = getDueList(), od = due.filter(x => x.diff < 0), up = due.filter(x => x.diff >= 0);
     const o = document.createElement("div"); o.id = "dueSheet"; o.className = "sheet-ov";
-    lockBodyScroll(true);
-    const closeThis = () => { lockBodyScroll(false); o.remove(); };
-    o.onclick = e => { if (e.target === o) closeThis(); };
+    o.onclick = e => { if (e.target === o) o.remove(); };
     const when = x => x.diff < 0 ? `Venceu há ${-x.diff} dia${-x.diff > 1 ? "s" : ""}` : x.diff === 0 ? "Vence hoje" : x.diff === 1 ? "Vence amanhã" : `Vence em ${x.diff} dias`;
     const br = iso => iso.split("-").reverse().join("/");
     const row = x => {
@@ -5603,7 +5237,7 @@ function openDueSheet() {
         </div>`;
     };
     const title = od.length ? (od.length > 1 ? `${od.length} contas/faturas vencidas` : "1 conta/fatura vencida") : "Próximos vencimentos";
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><b style="font-size:1.05rem;display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} ${title}</b><button class="btn-icon" style="color:var(--text-muted);" onclick="lockBodyScroll(false);document.getElementById('dueSheet')?.remove()" aria-label="Fechar">${ico("x", 16)}</button></div>`
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><b style="font-size:1.05rem;display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} ${title}</b><button class="btn-icon" style="color:var(--text-muted);" onclick="document.getElementById('dueSheet').remove()" aria-label="Fechar">${ico("x", 16)}</button></div>`
         + od.map(row).join("")
         + (up.length ? (od.length ? `<div class="grp-title" style="margin-top:16px;"><span>A vencer nos próximos 7 dias</span></div>` : "") + up.map(row).join("") : "")
         + (!od.length && !up.length ? `<div class="np-empty">Nenhuma conta ou fatura vencida. Tudo em dia!</div>` : "")
@@ -5810,11 +5444,6 @@ function toggleHomeFixedPaid(idOrIdx, checked) {
     const { item } = resolveRowItem("essenciais", idOrIdx);
     if (!item) return;
     item.paid = !!checked; if (checked) markSessionPaid();
-    const rowEl = document.querySelector(`label.fix-paid-row, [data-row-id='${item.id}']`);
-    if (rowEl) {
-        rowEl.classList.add("paid-pulse");
-        setTimeout(() => rowEl.classList.remove("paid-pulse"), 400);
-    }
     saveStore(); renderAll(); checkNotifications();
 }
 function renderHomeSpend() {
@@ -6020,9 +5649,6 @@ function toggleDrawer(open) {
                     const alpha = Math.max(0.15, 0.68 * (1 - pullY / 360));
                     ov.style.backgroundColor = `rgba(5, 7, 15, ${alpha.toFixed(2)})`;
                 }
-            } else if (gesture.locked === "scroll") {
-                // Impede que a rolagem do sheet propague para a página de trás
-                e.stopPropagation();
             }
         } else if (gesture.kind === "drawer") {
             const { dr, ov } = gesture;
@@ -6063,7 +5689,7 @@ function toggleDrawer(open) {
                 if (ov) {
                     ov.style.transition = "opacity 0.18s ease-out";
                     ov.style.opacity = "0";
-                    setTimeout(() => { ov.remove(); if (typeof lockBodyScroll === "function") lockBodyScroll(false); }, 180);
+                    setTimeout(() => ov.remove(), 180);
                 }
             } else {
                 sheet.style.transition = "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)";
@@ -6151,12 +5777,12 @@ function renderDrawer() {
             </div>
 
             <div class="dr-topic-card">
-                <div class="dr-topic-head"><span>Sistema & Atalhos</span></div>
+                <div class="dr-topic-head"><span>Perfil (${esc(currentProfile)}) & Sistema</span></div>
                 <div class="dr-grid">
-                    ${tile("user", "Perfis", store.config.profilesList.length + " perfil(is)", "openProfileSheet()")}
+                    ${tile("pencil", "Editar perfil", "Nome e cor", "openProfileModal()")}
+                    ${tile("plus", "Novo perfil", "Separar contas", "promptNewProfile()")}
                     ${tile("refresh", "Recalcular", "Atualizar tela", "manualRefresh()")}
-                    ${tile("plus", "Novo lançamento", "Lançar fatura", "openQuickAdd('tx')")}
-                    ${tile("card", "Gerenciar faturas", "Ocultar / reativar", "openManageBanksSheet()")}
+                    ${tile("trash", "Excluir perfil", "Remover atual", "deleteCurrentProfile()", true)}
                 </div>
             </div>
         </div>`;
