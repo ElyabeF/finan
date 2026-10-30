@@ -427,9 +427,8 @@
         .search-ico, .clear-ico { display: grid; place-items: center; line-height: 0; }
 
         /* Despesa fixa: caixa de pago ao lado da descrição */
-        td.has-chk { display: flex; align-items: center; gap: 8px; }
-        td.has-chk input[type=text] { flex: 1; min-width: 0; }
-        .pay-chk { accent-color: var(--success); width: 20px; height: 20px; flex: none; padding: 0; }
+        td.has-chk { vertical-align: middle; }
+        .pay-chk { accent-color: #64748b; width: 18px; height: 18px; flex: 0 0 18px; padding: 0; cursor: pointer; }
 
         /* Lançamentos do mês */
         #txLedgerTable { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0 8px; padding: 0 12px 6px; }
@@ -682,31 +681,31 @@
         #btnBackToTop { background: var(--bg-card); color: #fff; border: 1px solid var(--border); }
         #fab { background: var(--brand); border-radius: 50%; }
 
-        /* Barra inferior encaixada na borda inferior (celular) */
+        /* Barra inferior encaixada rente à borda inferior (celular) */
         @media (max-width: 700px) {
-            body { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
+            body { padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important; }
             #bottomNav {
                 left: 0 !important;
                 right: 0 !important;
                 bottom: 0 !important;
                 width: 100%;
-                padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
-                border-radius: 22px 22px 0 0 !important;
-                background: rgba(16, 20, 35, 0.98) !important;
+                padding: 3px 6px max(2px, calc(env(safe-area-inset-bottom, 0px) - 10px)) !important;
+                border-radius: 18px 18px 0 0 !important;
+                background: rgba(14, 18, 32, 0.98) !important;
                 border: 0 !important;
                 border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
-                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6) !important;
+                box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
                 align-items: center;
                 justify-content: space-around;
             }
-            #bottomNav button { flex: 1; padding: 5px 2px; font-size: .67rem; border-radius: 16px; gap: 3px; }
-            #bottomNav button span { width: 44px; height: 28px; border-radius: 14px; transition: background .2s, color .2s; }
+            #bottomNav button { flex: 1; padding: 2px 2px 1px !important; font-size: .64rem !important; line-height: 1.05; border-radius: 14px; gap: 1px !important; }
+            #bottomNav button span { width: 40px; height: 23px; border-radius: 11px; transition: background .2s, color .2s; }
             #bottomNav button.active { background: transparent; color: #fff; }
             #bottomNav button.active span { background: var(--brand-soft); color: #c4b5fd; }
-            #bottomNav .bn-add { flex: 0 0 54px; width: 54px; height: 54px; margin-top: -24px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0; justify-content: center; border: 4px solid var(--bg-main); box-shadow: 0 12px 24px -6px rgba(139,92,246,.85); }
-            #bottomNav .bn-add span { width: 26px; height: 26px; background: transparent; }
+            #bottomNav .bn-add { flex: 0 0 48px; width: 48px; height: 48px; margin-top: -16px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0 !important; justify-content: center; border: 3px solid var(--bg-main); box-shadow: 0 10px 22px -6px rgba(139,92,246,.85); position: relative; }
+            #bottomNav .bn-add span { width: 24px; height: 24px; background: transparent; }
             #fab { display: none !important; }
-            #btnBackToTop { bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important; }
+            #btnBackToTop { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
         }
 
         /* Compras futuras: cartões no celular */
@@ -947,6 +946,478 @@
             .fo-card { padding: 9px 10px; border-radius: 14px; }
             .fo-val { font-size: .88rem; }
         }
+
+        /* ======================================================================
+           REFINAMENTOS DE TABELAS (DESPESAS FIXAS / VARIÁVEIS), ESTADO PAGO,
+           BOTÕES DE SUBCATEGORIA, MENU COMPACTO POR ASSUNTOS E QUICK-ADD (+)
+           ====================================================================== */
+        table.acc-body {
+            table-layout: fixed;
+            width: 100%;
+        }
+        table.acc-body th:first-child,
+        table.acc-body td:first-child {
+            width: auto;
+        }
+        table.acc-body th.val-col,
+        table.acc-body td.val-col {
+            width: 112px;
+            text-align: right;
+        }
+        table.acc-body th.action-col,
+        table.acc-body td.action-col {
+            width: 34px;
+            min-width: 34px;
+            max-width: 34px;
+            text-align: center;
+            padding: 4px 6px 4px 0 !important;
+            vertical-align: middle;
+        }
+        /* Corrige colspan="3" das subcategorias (td nunca deve ter display:flex direto) */
+        td.subcat-label {
+            display: table-cell !important;
+            padding: 12px 12px 6px !important;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+        }
+        .subcat-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+        .subcat-title {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .subcat-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .subcat-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 650;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            cursor: pointer;
+            line-height: 1.1;
+        }
+        .subcat-pill-btn:hover {
+            border-color: rgba(139, 124, 246, 0.55);
+            background: rgba(139, 124, 246, 0.12);
+            color: #ddd6fe;
+        }
+        .subcat-pill-btn.primary {
+            background: rgba(139, 124, 246, 0.16);
+            border-color: rgba(139, 124, 246, 0.42);
+            color: #ddd6fe;
+        }
+        .subcat-pill-btn.primary:hover {
+            background: var(--brand);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        /* Botão de deletar (lixeira/x) sempre visível em Fixas, Variáveis e Entradas */
+        .row-del-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: rgba(251, 113, 133, 0.09);
+            border: 1px solid rgba(251, 113, 133, 0.2);
+            color: #fda4af;
+            padding: 0;
+            cursor: pointer;
+            transition: background .15s, transform .12s;
+        }
+        .row-del-btn:hover, .row-del-btn:active {
+            background: rgba(251, 113, 133, 0.22);
+            color: #fff;
+        }
+
+        /* Melhor espaçamento do nome do custo em Despesas Fixas e Variáveis */
+        .item-row-main {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            min-width: 0;
+        }
+        .item-row-main input[type="text"] {
+            flex: 1 1 auto;
+            min-width: 0 !important;
+            width: 100%;
+            padding: 5px 4px !important;
+            font-size: 0.85rem;
+            text-overflow: ellipsis;
+        }
+        .due-pill-btn {
+            padding: 3px 6px;
+            font-size: 0.67rem;
+            gap: 3px;
+        }
+        .due-pill-btn.due-empty {
+            padding: 4px 5px;
+            opacity: 0.7;
+        }
+        .due-pill-btn.due-empty:hover {
+            opacity: 1;
+        }
+        @media (max-width: 560px) {
+            table.acc-body th, table.acc-body td {
+                padding: 5px 3px 5px 7px;
+            }
+            table.acc-body th.val-col,
+            table.acc-body td.val-col {
+                width: 92px !important;
+                min-width: 86px !important;
+                max-width: 96px !important;
+                padding: 4px 2px !important;
+            }
+            table.acc-body td.val-col input {
+                font-size: 0.82rem !important;
+                padding: 5px 2px !important;
+                letter-spacing: -0.03em;
+            }
+            table.acc-body th.action-col,
+            table.acc-body td.action-col {
+                width: 30px !important;
+                min-width: 30px !important;
+                max-width: 30px !important;
+                padding: 4px 4px 4px 0 !important;
+            }
+            .item-row-main {
+                gap: 4px;
+            }
+            .item-row-main .pay-chk {
+                width: 16px;
+                height: 16px;
+                flex: 0 0 16px;
+            }
+            .item-row-main input[type="text"] {
+                font-size: 0.82rem !important;
+                padding: 4px 2px !important;
+                letter-spacing: -0.015em;
+            }
+            .subcat-pill-btn {
+                padding: 4px 8px;
+                font-size: 0.69rem;
+            }
+        }
+
+        /* Conta / Despesa Paga: escurecer + riscar texto (em vez de ficar apenas verde) */
+        tr.row-paid {
+            background: rgba(6, 8, 16, 0.58) !important;
+            opacity: 0.44 !important;
+            transition: opacity 0.18s ease, background 0.18s ease;
+        }
+        tr.row-paid td input[type="text"],
+        tr.row-paid td.val-col,
+        tr.row-paid td span {
+            text-decoration: line-through !important;
+            color: #64748b !important;
+            -webkit-text-fill-color: #64748b !important;
+        }
+        tr.row-paid .pay-chk {
+            accent-color: #475569 !important;
+            filter: brightness(0.8);
+        }
+        tr.row-paid .due-pill-btn,
+        .due-pill-btn.due-paid {
+            background: rgba(100, 116, 139, 0.12) !important;
+            border-color: rgba(100, 116, 139, 0.22) !important;
+            color: #64748b !important;
+            text-decoration: line-through !important;
+        }
+        label.fix-paid-row {
+            background: rgba(6, 8, 16, 0.48);
+            opacity: 0.42 !important;
+            border-radius: 8px;
+        }
+        label.fix-paid-row span,
+        label.fix-paid-row b.hv {
+            text-decoration: line-through !important;
+            color: #64748b !important;
+        }
+        label.fix-paid-row input[type="checkbox"] {
+            accent-color: #475569 !important;
+        }
+        #txLedgerTable tbody tr.tx-row.is-paid {
+            background: rgba(6, 8, 16, 0.52) !important;
+            opacity: 0.44 !important;
+        }
+        #txLedgerTable tbody tr.tx-row.is-paid .tx-desc,
+        #txLedgerTable tbody tr.tx-row.is-paid .tx-val {
+            text-decoration: line-through !important;
+            color: #64748b !important;
+        }
+        .bank-card.is-paid-card {
+            background: rgba(11, 14, 24, 0.78) !important;
+            border-color: rgba(255, 255, 255, 0.04) !important;
+        }
+        .bank-card.is-paid-card .bank-total {
+            text-decoration: line-through;
+            color: #64748b !important;
+        }
+        .status-pill.paid {
+            background: rgba(100, 116, 139, 0.18) !important;
+            color: #94a3b8 !important;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        /* Menu Lateral (#drawer) Compactado por Assuntos + Firebase em Destaque */
+        .dr-body {
+            padding: 10px 12px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .dr-cloud-box {
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-radius: 16px;
+            padding: 11px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .dr-cloud-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .dr-cloud-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            font-weight: 750;
+            color: #e0f2fe;
+        }
+        .dr-cloud-status {
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            max-width: 145px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .dr-cloud-load-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 9px 12px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #0284c7, #4f46e5);
+            color: #fff;
+            border: 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 18px -8px rgba(14, 165, 233, 0.7);
+        }
+        .dr-cloud-sub-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .dr-cloud-sub-btns button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 8px;
+            border-radius: 9px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            color: var(--text-main);
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .dr-topic-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 9px 10px 10px;
+        }
+        .dr-topic-head {
+            font-size: 0.68rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            padding: 0 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dr-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .dr-grid.cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .dr-tile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 9px;
+            border-radius: 11px;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            min-width: 0;
+            transition: border-color .15s, background .15s;
+        }
+        .dr-tile:hover {
+            border-color: rgba(139, 124, 246, 0.5);
+            background: rgba(139, 124, 246, 0.1);
+        }
+        .dr-tile.danger:hover {
+            border-color: rgba(251, 113, 133, 0.5);
+            background: rgba(251, 113, 133, 0.1);
+        }
+        .dr-tile-ico {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--brand-soft);
+            color: #c4b5fd;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+        .dr-tile.danger .dr-tile-ico {
+            background: rgba(251, 113, 133, 0.14);
+            color: #fda4af;
+        }
+        .dr-tile-txt {
+            min-width: 0;
+            flex: 1;
+        }
+        .dr-tile-t {
+            font-size: 0.76rem;
+            font-weight: 650;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dr-tile-s {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+
+        /* Botão + com ícone de carrinho integrado e seletor no QuickAdd */
+        .bn-add-wrap {
+            position: relative;
+            display: inline-grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        .bn-cart-mini {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #101423;
+            color: #c4b5fd;
+            border: 1px solid rgba(196, 181, 253, 0.5);
+            display: grid;
+            place-items: center;
+            pointer-events: none;
+        }
+        .qa-mode-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: var(--bg-input);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin: 10px 0 6px;
+        }
+        .qa-mode-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .qa-mode-btn.active {
+            background: var(--brand);
+            color: #fff;
+            box-shadow: 0 6px 16px -6px rgba(139, 92, 246, 0.8);
+        }
+        .qa-sub-tabs {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0 4px;
+        }
+        .qa-sub-btn {
+            flex: 1;
+            padding: 7px 8px;
+            border-radius: 10px;
+            font-size: 0.74rem;
+            font-weight: 650;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .qa-sub-btn.active {
+            background: var(--brand-soft);
+            border-color: rgba(139, 124, 246, 0.55);
+            color: #ddd6fe;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -1060,12 +1531,12 @@
 
                 <div class="panel acc"><div class="panel-header acc-head" data-k="des" onclick="toggleAcc(this)"><span>Despesas</span><span class="acc-sum"><b class="hv" id="accDesTotal"></b><i class="acc-chev">▸</i></span></div><table class="acc-body">
                         <thead><tr><th>Descrição / Venc.</th><th class="val-col">Valor</th><th class="action-col"></th></tr></thead>
-                        <tbody><tr><td colspan="3" class="subcat-label"><span>Custo Essencial (Fixas)</span></td></tr></tbody>
+                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Custo Essencial (Fixas)</span></div></td></tr></tbody>
                         <tbody id="essenciaisBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('essenciais')">+ Despesa Essencial</button></td></tr></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><span>Faturas</span><div style="display:flex;gap:6px;"><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="openManageBanksSheet()"><span data-i="eye" data-s="13"></span> Escolher / Ocultar</button><button class="btn-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="promptNewBank()"><span data-i="plus" data-s="13"></span> Nova Fatura</button></div></td></tr></tbody>
+                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Faturas</span><div class="subcat-actions"><button type="button" class="subcat-pill-btn" onclick="openManageBanksSheet()"><span data-i="eye" data-s="13"></span> Escolher / Ocultar</button><button type="button" class="subcat-pill-btn primary" onclick="promptNewBank()"><span data-i="plus" data-s="13"></span> Nova Fatura</button></div></div></td></tr></tbody>
                         <tbody id="cartoesResumoBody"></tbody>
-                        <tbody><tr><td colspan="3" class="subcat-label"><span>Variáveis / Não Essenciais</span></td></tr></tbody>
+                        <tbody><tr><td colspan="3" class="subcat-label"><div class="subcat-bar"><span class="subcat-title">Variáveis / Não Essenciais</span></div></td></tr></tbody>
                         <tbody id="naoEssenciaisBody"></tbody>
                         <tbody><tr><td colspan="3" style="padding:6px;"><button class="btn-add" onclick="addRow('naoEssenciais')">+ Despesa Variável</button></td></tr></tbody>
                         <tfoot>
@@ -1293,13 +1764,13 @@
 </div>
 
 <nav id="bottomNav">
-    <button data-t="visao" onclick="bnGo('visao')"><span data-i="home" data-s="22"></span>Início</button>
-    <button data-t="cartoes" onclick="bnGo('cartoes')"><span data-i="receipt" data-s="22"></span>Faturas</button>
-    <button class="bn-add" onclick="openQuickAdd()" aria-label="Novo lançamento"><span data-i="plus" data-s="26"></span></button>
-    <button data-t="futuras" onclick="bnGo('futuras')"><span data-i="cart" data-s="22"></span>Compras</button>
-    <button data-t="openfinance" onclick="bnGo('openfinance')"><span data-i="chart" data-s="22"></span>Relatórios</button>
+    <button data-t="visao" onclick="bnGo('visao')"><span data-i="home" data-s="21"></span>Início</button>
+    <button data-t="cartoes" onclick="bnGo('cartoes')"><span data-i="receipt" data-s="21"></span>Faturas</button>
+    <button class="bn-add" onclick="openQuickAdd()" aria-label="Novo lançamento ou compra"><div class="bn-add-wrap"><span data-i="plus" data-s="24"></span><i class="bn-cart-mini" data-i="cart" data-s="10"></i></div></button>
+    <button data-t="futuras" onclick="bnGo('futuras')"><span data-i="cart" data-s="21"></span>Compras</button>
+    <button data-t="openfinance" onclick="bnGo('openfinance')"><span data-i="chart" data-s="21"></span>Relatórios</button>
 </nav>
-<button id="fab" onclick="openQuickAdd()" aria-label="Novo lançamento"><span data-i="plus" data-s="26"></span></button>
+<button id="fab" onclick="openQuickAdd()" aria-label="Novo lançamento ou compra"><div class="bn-add-wrap"><span data-i="plus" data-s="24"></span><i class="bn-cart-mini" data-i="cart" data-s="11"></i></div></button>
 <button id="btnBackToTop" onclick="scrollToTopFast()" title="Voltar ao topo"><span data-i="arrowUp" data-s="20"></span></button>
 
 <script>
@@ -2627,7 +3098,7 @@ function renderTransactionsOnly() {
                     dueBadgeHtml += `<button type="button" class="due-pill-btn ${t.paid ? 'due-paid' : ''}" onclick="toggleAvulsoTxPaid('${jsq(t.id)}', event)" title="Marcar conta avulsa como paga">${t.paid ? `${ico("check", 11)} Paga` : `${ico("clock", 11)} Pendente`}</button>`;
                 }
             }
-            txBody.innerHTML += `<tr class="tx-row ${Number(t.val) < 0 ? "is-credit" : ""}" style="${t.paid ? 'opacity:0.65;' : ''}">
+            txBody.innerHTML += `<tr class="tx-row ${Number(t.val) < 0 ? "is-credit" : ""} ${t.paid ? "is-paid" : ""}">
                 <td class="c-chk"><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td>
                 <td class="c-ico"><span class="tx-ico" style="--c:${col}">${ico(txIconFor(tag || rawTag), 18)}</span></td>
                 <td class="c-main"><div class="tx-desc" style="${t.paid ? 'text-decoration:line-through;' : ''}">${esc(cleanDisplayDesc(stripCatTag(t.desc)))}</div>
@@ -3103,18 +3574,18 @@ function parseExpenseDueDate(vencRaw, monthKey = currentMonth) {
     return null;
 }
 function getExpenseDueBadgeInfo(item, monthKey = currentMonth) {
-    if (!item || !item.venc) return { label: "Venc.", cls: "", empty: true };
+    if (!item || !item.venc) return { label: "", shortLabel: "", cls: "due-empty", empty: true };
     const dt = parseExpenseDueDate(item.venc, monthKey);
-    if (!dt) return { label: String(item.venc), cls: "has-due", empty: false };
+    if (!dt) return { label: String(item.venc), shortLabel: String(item.venc), cls: "has-due", empty: false };
     const dd = String(dt.getDate()).padStart(2, "0");
     const mm = String(dt.getMonth() + 1).padStart(2, "0");
-    if (item.paid) return { label: `${dd}/${mm}`, cls: "due-paid", empty: false };
+    if (item.paid) return { label: `${dd}/${mm}`, shortLabel: `${dd}/${mm}`, cls: "due-paid", empty: false };
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const diff = Math.round((dt - today) / 86400000);
-    if (diff < 0) return { label: `${dd}/${mm} · Vencida`, cls: "due-late", empty: false };
-    if (diff === 0) return { label: `${dd}/${mm} · Hoje`, cls: "due-soon", empty: false };
-    if (diff <= 3) return { label: `${dd}/${mm} · ${diff}d`, cls: "due-soon", empty: false };
-    return { label: `${dd}/${mm}`, cls: "has-due", empty: false };
+    if (diff < 0) return { label: `${dd}/${mm} · Vencida`, shortLabel: `${dd}/${mm}`, cls: "due-late", empty: false };
+    if (diff === 0) return { label: `${dd}/${mm} · Hoje`, shortLabel: `${dd}/${mm}`, cls: "due-soon", empty: false };
+    if (diff <= 3) return { label: `${dd}/${mm} · ${diff}d`, shortLabel: `${dd}/${mm}`, cls: "due-soon", empty: false };
+    return { label: `${dd}/${mm}`, shortLabel: `${dd}/${mm}`, cls: "has-due", empty: false };
 }
 function getAvulsoDueStatus(tx) {
     if (!tx || !tx.dueDate) return { label: "Vencimento", cls: "" };
@@ -3239,16 +3710,17 @@ function renderTableRows(group, containerId) {
     const isExpense = group === "essenciais" || group === "naoEssenciais";
     store.profiles[currentProfile][currentMonth][group].forEach((item, i) => {
         const dueInfo = isExpense ? getExpenseDueBadgeInfo(item, currentMonth) : null;
-        body.innerHTML += `<tr id="row_${group}_${i}" style="${isExpense && item.paid ? 'opacity:.65;' : ''}">
+        const isPaid = isExpense && !!item.paid;
+        body.innerHTML += `<tr id="row_${group}_${i}" class="${isPaid ? 'row-paid' : ''}">
             <td class="${isExpense ? 'has-chk' : ''}">
                 <div class="item-row-main">
-                    ${isExpense ? `<input type="checkbox" class="pay-chk" title="Marcar como paga neste mês" ${item.paid ? 'checked' : ''} onchange="updateItem('${group}', ${i}, 'paid', this.checked)">` : ''}
-                    <input type="text" value="${esc(item.nome)}" oninput="updateItem('${group}', ${i}, 'nome', this.value)" onchange="updateItem('${group}', ${i}, 'nome', this.value)">
-                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', ${i}, event)" title="Data de vencimento">${ico("calendar", 11)} ${esc(dueInfo.label)}</button>` : ''}
+                    ${isExpense ? `<input type="checkbox" class="pay-chk" title="Marcar como paga neste mês" ${isPaid ? 'checked' : ''} onchange="updateItem('${group}', ${i}, 'paid', this.checked)">` : ''}
+                    <input type="text" value="${esc(item.nome)}" title="${esc(item.nome)}" oninput="updateItem('${group}', ${i}, 'nome', this.value)" onchange="updateItem('${group}', ${i}, 'nome', this.value)">
+                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', ${i}, event)" title="${dueInfo.empty ? 'Definir data de vencimento' : 'Vencimento: ' + esc(dueInfo.label)}">${ico("calendar", 11)}${dueInfo.shortLabel ? ' ' + esc(dueInfo.shortLabel) : ''}</button>` : ''}
                 </div>
             </td>
             <td class="val-col"><input type="text" inputmode="numeric" value="${fmtBRL(item.valor)}" oninput="maskCurrencyInput(this); updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))" onchange="updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))"></td>
-            <td class="action-col"><button class="btn-icon" onclick="removeRow('${group}', ${i})" aria-label="Remover">${ico("x", 15)}</button></td>
+            <td class="action-col"><button type="button" class="row-del-btn" onclick="removeRow('${group}', ${i})" title="Excluir item" aria-label="Excluir item">${ico("trash", 13)}</button></td>
         </tr>`;
     });
 }
@@ -3469,13 +3941,16 @@ function renderAll() {
     } else {
         profileVisibleBanks.forEach(bank => {
             const tot = getBankTotal(bank);
-            cardBody.innerHTML += `<tr>
-                <td style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                    ${createBankBadgeHTML(bank, true)}
-                    ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="color:var(--text-muted);" title="Ocultar fatura zerada" onclick="hideBankCard('${jsq(bank)}', event)">${ico("eyeOff", 14)}</button>` : ""}
+            const isPaidCard = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, bank) === "Pago" && Math.abs(tot) > 0.009;
+            cardBody.innerHTML += `<tr class="${isPaidCard ? 'row-paid' : ''}">
+                <td>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                        ${createBankBadgeHTML(bank, true)}
+                        ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="color:var(--text-muted);" title="Ocultar fatura zerada" onclick="hideBankCard('${jsq(bank)}', event)">${ico("eyeOff", 14)}</button>` : ""}
+                    </div>
                 </td>
                 <td class="val-col" style="font-weight:700;">${fmtBRL(tot)}</td>
-                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button class="btn-icon" title="Excluir ou ocultar fatura zerada" onclick="deleteBankCard('${jsq(bank)}', event)">${ico("x", 14)}</button>` : ""}</td>
+                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button type="button" class="row-del-btn" title="Excluir ou ocultar fatura zerada" onclick="deleteBankCard('${jsq(bank)}', event)">${ico("trash", 13)}</button>` : ""}</td>
             </tr>`;
         });
     }
@@ -3534,7 +4009,7 @@ function renderAll() {
             ? `<span>Venc. Avulso: <input type="date" value="${dueDt ? isoDate(dueDt) : ''}" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:128px;padding:2px 5px;font-size:.74rem;"></span>`
             : `<span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">${ico("calendar", 12)} ${dueLabel}</button></span>`;
 
-        bankContainer.innerHTML += `<div class="bank-card" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')">
+        bankContainer.innerHTML += `<div class="bank-card ${effectiveStatus === 'Pago' ? 'is-paid-card' : ''}" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')">
             <div class="bank-card-strip" style="background:${getBankColor(bank)};"></div>
             <div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?`${ico("check", 12)} Pago`:`${ico("clock", 12)} Pendente`}</button></div>
             <div class="bank-total">${fmtBRL(bankTotalVal)}</div>
@@ -4217,24 +4692,121 @@ function togglePrivacy(force) {
             : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 }
-function openQuickAdd() {
+let _qaMode = "tx"; // "tx" (Lançamento na Fatura) | "cart" (Lista de Compras)
+let _qaCartSub = "market"; // "market" (Lista do Mercado) | "plan" (Compra Futura Planejada)
+
+function openQuickAdd(initialMode) {
+    if (initialMode === "tx" || initialMode === "cart") _qaMode = initialMode;
     const old = document.getElementById("quickSheet"); if (old) old.remove();
     const o = document.createElement("div"); o.id = "quickSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("plus", 16)} Novo lançamento · ${esc(currentMonth)}</span><button class="btn-icon" onclick="document.getElementById('quickSheet').remove()">${ico("x", 16)}</button></div>
-        <input id="qaDesc" class="qa-field" type="text" placeholder="Descrição">
-        <input id="qaVal" class="qa-field" type="text" inputmode="numeric" placeholder="R$ 0,00" oninput="maskCurrencyInput(this)">
-        <select id="qaBank" class="qa-field">${store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("")}</select>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <input id="qaParc" class="qa-field" type="text" placeholder="Parcela (ex.: 1/3)">
-            <input id="qaDue" class="qa-field" type="date" title="Vencimento avulso (opcional para Outros)">
-        </div>
-        <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;display:inline-flex;align-items:center;gap:5px;">${ico("info", 13)} A data acima é opcional para vencimento avulso (contas em Outros).</div>
-        <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.85rem;color:var(--text-muted);"><input type="checkbox" id="qaCredit"> É crédito/estorno</label>
-        <button class="btn" style="width:100%;margin-top:12px;padding:12px;" onclick="submitQuickAdd()">Lançar</button></div>`;
-    document.body.appendChild(o); setTimeout(() => document.getElementById("qaDesc").focus(), 250);
+    document.body.appendChild(o);
+    renderQuickAddContent();
 }
+
+function setQuickAddMode(mode, sub) {
+    if (mode) _qaMode = mode;
+    if (sub) _qaCartSub = sub;
+    renderQuickAddContent();
+}
+
+function renderQuickAddContent() {
+    const o = document.getElementById("quickSheet"); if (!o) return;
+    const vis = getProfileVisibleBanks(currentProfile, currentMonth);
+    const banksList = vis.length ? vis : store.config.banks;
+    const mkPend = marketList().filter(x => !x.done).length;
+
+    let bodyHtml = "";
+    if (_qaMode === "tx") {
+        bodyHtml = `
+            <input id="qaDesc" class="qa-field" type="text" placeholder="Descrição da compra ou conta">
+            <input id="qaVal" class="qa-field" type="text" inputmode="numeric" placeholder="R$ 0,00" oninput="maskCurrencyInput(this)">
+            <select id="qaBank" class="qa-field">${banksList.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("")}</select>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <input id="qaParc" class="qa-field" type="text" placeholder="Parcela (ex.: 1/3)">
+                <input id="qaDue" class="qa-field" type="date" title="Vencimento avulso (opcional para Outros)">
+            </div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px;display:inline-flex;align-items:center;gap:5px;">${ico("info", 13)} Data opcional para vencimento avulso (contas em Outros).</div>
+            <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.85rem;color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="qaCredit"> É crédito / estorno</label>
+            <button class="btn" style="width:100%;margin-top:12px;padding:12px;" onclick="submitQuickAdd()">${ico("check", 16)} Lançar na Fatura</button>
+        `;
+    } else {
+        const subTabs = `<div class="qa-sub-tabs">
+            <button type="button" class="qa-sub-btn ${_qaCartSub === 'market' ? 'active' : ''}" onclick="setQuickAddMode('cart','market')">${ico("cart", 14)} Lista do Mercado ${mkPend ? `(${mkPend})` : ''}</button>
+            <button type="button" class="qa-sub-btn ${_qaCartSub === 'plan' ? 'active' : ''}" onclick="setQuickAddMode('cart','plan')">${ico("bag", 14)} Compra Planejada</button>
+        </div>`;
+        if (_qaCartSub === "market") {
+            bodyHtml = subTabs + `
+                <input id="qaMkItems" class="qa-field" type="text" placeholder="Ex.: Arroz, Leite, Café (separe por vírgula)" onkeydown="if(event.key==='Enter')submitQuickAdd()">
+                <div style="font-size:.73rem;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:5px;">${ico("cart", 13)} Você pode digitar vários itens de uma vez separados por vírgula.</div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button type="button" class="btn-outline" style="padding:12px;" onclick="document.getElementById('quickSheet').remove();openMarket()">Ver lista (${marketList().length})</button>
+                    <button type="button" class="btn" style="flex:1;padding:12px;" onclick="submitQuickAdd()">${ico("plus", 15)} Adicionar à Lista</button>
+                </div>
+            `;
+        } else {
+            bodyHtml = subTabs + `
+                <input id="qaFutDesc" class="qa-field" type="text" placeholder="O que você planeja comprar?">
+                <input id="qaFutVal" class="qa-field" type="text" inputmode="numeric" placeholder="Valor estimado (R$ 0,00)" oninput="maskCurrencyInput(this)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <select id="qaFutBank" class="qa-field">
+                        <option value="À Vista">À Vista (Pix/Dinheiro)</option>
+                        ${store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("")}
+                    </select>
+                    <select id="qaFutPrio" class="qa-field">
+                        <option value="Alta">Prioridade Alta</option>
+                        <option value="Média" selected>Prioridade Média</option>
+                        <option value="Baixa">Prioridade Baixa</option>
+                    </select>
+                </div>
+                <button type="button" class="btn" style="width:100%;margin-top:12px;padding:12px;" onclick="submitQuickAdd()">${ico("plus", 15)} Salvar Compra Planejada</button>
+            `;
+        }
+    }
+
+    o.innerHTML = `<div class="sheet">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1rem;">
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico(_qaMode === 'tx' ? 'plus' : 'cart', 17)} ${_qaMode === 'tx' ? 'Novo lançamento · ' + esc(currentMonth) : 'Adicionar às Compras'}</span>
+            <button class="btn-icon" onclick="document.getElementById('quickSheet').remove()">${ico("x", 16)}</button>
+        </div>
+        <div class="qa-mode-tabs">
+            <button type="button" class="qa-mode-btn ${_qaMode === 'tx' ? 'active' : ''}" onclick="setQuickAddMode('tx')">${ico("receipt", 15)} Lançamento</button>
+            <button type="button" class="qa-mode-btn ${_qaMode === 'cart' ? 'active' : ''}" onclick="setQuickAddMode('cart')">${ico("cart", 15)} Lista de Compras</button>
+        </div>
+        ${bodyHtml}
+    </div>`;
+
+    setTimeout(() => {
+        const focusId = _qaMode === "tx" ? "qaDesc" : (_qaCartSub === "market" ? "qaMkItems" : "qaFutDesc");
+        document.getElementById(focusId)?.focus();
+    }, 120);
+}
+
 function submitQuickAdd() {
+    if (_qaMode === "cart") {
+        if (_qaCartSub === "market") {
+            const inp = document.getElementById("qaMkItems");
+            const parts = (inp ? inp.value : "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean);
+            if (!parts.length) return toast("Digite pelo menos um item para a lista.", null, "warn");
+            const l = marketList();
+            parts.forEach(n => l.push({ id: Date.now() + "_" + Math.random().toString(36).slice(2, 7), nome: n.slice(0, 80), done: false }));
+            saveStore(); renderMarket();
+            document.getElementById("quickSheet")?.remove();
+            toast(`${parts.length} ${parts.length === 1 ? 'item adicionado' : 'itens adicionados'} à Lista do Mercado.`, null, "ok");
+            return;
+        } else {
+            const desc = (document.getElementById("qaFutDesc")?.value || "").trim();
+            const val = parseInputCurrency(document.getElementById("qaFutVal")?.value || "");
+            const bank = document.getElementById("qaFutBank")?.value || "À Vista";
+            const priority = document.getElementById("qaFutPrio")?.value || "Média";
+            if (!desc || val <= 0) return toast("Informe descrição e valor estimado.", null, "warn");
+            store.profiles[currentProfile].futurePurchases.push({ id: Date.now(), desc, val, bank, priority, status: "Pendente" });
+            saveStore(); renderAll();
+            document.getElementById("quickSheet")?.remove();
+            toast(`"${desc}" adicionado às Compras Planejadas.`, null, "ok");
+            return;
+        }
+    }
     const desc = document.getElementById("qaDesc").value.trim(), v = parseInputCurrency(document.getElementById("qaVal").value);
     if (!desc || !v) return toast("Informe descrição e valor.", null, "warn");
     const bank = document.getElementById("qaBank").value, d = new Date(), z = n => String(n).padStart(2, "0");
@@ -4284,8 +4856,8 @@ function renderHomeSpend() {
     const paidN = fixed.filter(i => i.paid).length;
     const fixedHtml = `<details class="fix-box" ${window._fixOpen ? "open" : ""} ontoggle="window._fixOpen=this.open"><summary><span>Despesas fixas</span><span class="fix-count">${paidN}/${fixed.length} pagas</span></summary>${fixed.length ? fixed.map((item, i) => {
         const bInfo = getExpenseDueBadgeInfo(item, currentMonth);
-        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', ${i}, event)">${ico("calendar", 11)} ${esc(bInfo.label)}</button>`;
-        return `<label style="display:flex;align-items:center;gap:8px;padding:9px 2px;border-top:1px solid var(--border);opacity:${item.paid ? '.68' : '1'};"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:var(--success);width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;${item.paid ? 'text-decoration:line-through;' : ''}">${esc(item.nome)}</span>${dueBtn}<b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`;
+        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', ${i}, event)">${ico("calendar", 11)}${bInfo.shortLabel ? ' ' + esc(bInfo.shortLabel) : ''}</button>`;
+        return `<label class="${item.paid ? 'fix-paid-row' : ''}" style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-top:1px solid var(--border);"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:${item.paid ? '#475569' : 'var(--accent)'};width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;">${esc(item.nome)}</span>${dueBtn}<b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`;
     }).join('') : `<div style="color:var(--text-muted);font-size:.8rem;padding:6px 2px;">Nenhuma despesa fixa.</div>`}</details>`;
     const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((x, y) => y.val - x.val);
     const total = cats.reduce((acc, c) => acc + c.val, 0);
@@ -4363,16 +4935,70 @@ async function toggleNotifications() {
 function toggleDrawer(open) { if (open) renderDrawer(); document.body.classList.toggle("drawer-open", !!open); }
 function renderDrawer() {
     const notif = ("Notification" in window && Notification.permission === "granted") ? "Ativados" : "Desativados";
-    const groups = [
-        ["Atalhos", [["cart", "Lista do mercado", "Itens e check-list", "openMarket()"], ["card", "Gerenciar faturas", "Ocultar, mostrar ou criar faturas", "openManageBanksSheet()"]]],
-        ["Perfil", [["pencil", "Editar perfil", "Nome e cor", "openProfileModal()"], ["plus", "Novo perfil", "Separar contas", "promptNewProfile()"], ["trash", "Excluir perfil", "Remove o perfil", "deleteProfile()"]]],
-        ["Mês atual", [["copy", "Copiar mês anterior", "Entradas e despesas fixas", "copyFixedFromPrev()"], ["download", "Exportar CSV", "Planilha do mês", "exportMonthCSV()"], ["printer", "Salvar PDF", "Aba aberta", "window.print()"], ["refresh", "Atualizar dados", "Recalcular", "manualRefresh()"]]],
-        ["Backups", [["upload", "Salvar backup agora", "Arquivo .json", "exportBackup()"], ["clock", "Backups automáticos", snapCount() + " cópia(s)", "openBackups()"], ["folder", "Importar de arquivo", "Restaurar .json", "document.getElementById('importFile').click()"]]],
-        ["Nuvem e segurança", [["cloud", "Configurar Firebase", "Sincronização", "openFirebaseModal()"], ["user", "Conta da nuvem", cloudUser ? cloudUser.email : "Não conectado", "cloudAccount()"], ["lock", "PIN de acesso", localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado", "configurePin()"], ["bell", "Avisos de vencimento", notif, "toggleNotifications()"]]],
-        ["Inteligência", [["sparkles", "Consultor IA", "Gemini", "openChat()"]]],
-        ["Avançado", [["target", "Ferramentas avançadas", "Mover contas de mês · backup da nuvem", "openAdvanced()"]]]
-    ];
-    document.getElementById("drawer").innerHTML = `<div class="dr-head"><span>Menu · FinEly</span><button class="btn-icon" onclick="toggleDrawer(false)">${ico("x", 16)}</button></div>` + groups.map(([t, items]) => `<div class="dr-sec">${t}</div>` + items.map(([i, n, d, f]) => `<button class="dr-item" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-ico">${ico(i, 18)}</span><span><div class="dr-t">${n}</div><div class="dr-s">${esc(d)}</div></span></button>`).join("")).join("");
+    const pinActive = localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado";
+    const cloudStatus = cloudUser ? cloudUser.email : (store.config.firebaseConfig ? "Desconectado" : "Não configurado");
+    const tile = (i, n, d, f, danger = false) => `<button type="button" class="dr-tile ${danger ? 'danger' : ''}" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-tile-ico">${ico(i, 15)}</span><span class="dr-tile-txt"><div class="dr-tile-t">${n}</div><div class="dr-tile-s">${esc(d)}</div></span></button>`;
+
+    document.getElementById("drawer").innerHTML = `
+        <div class="dr-head">
+            <span style="display:inline-flex;align-items:center;gap:7px;">${ico("layers", 17)} Menu · FinEly</span>
+            <button class="btn-icon" onclick="toggleDrawer(false)">${ico("x", 16)}</button>
+        </div>
+        <div class="dr-body">
+            <div class="dr-cloud-box">
+                <div class="dr-cloud-top">
+                    <span class="dr-cloud-title">${ico("cloud", 16)} Nuvem Firebase</span>
+                    <span class="dr-cloud-status" title="${esc(cloudStatus)}">${esc(cloudStatus)}</span>
+                </div>
+                <button type="button" class="dr-cloud-load-btn" onclick="toggleDrawer(false); loadCloudBackup()">
+                    ${ico("download", 16)} Carregar dados do Firebase
+                </button>
+                <div class="dr-cloud-sub-btns">
+                    <button type="button" onclick="toggleDrawer(false); cloudAccount()">${ico("user", 13)} ${cloudUser ? "Conta conectada" : "Entrar na nuvem"}</button>
+                    <button type="button" onclick="toggleDrawer(false); openFirebaseModal()">${ico("settings", 13)} Configurar JSON</button>
+                </div>
+            </div>
+
+            <div class="dr-topic-card">
+                <div class="dr-topic-head"><span>Atalhos & Inteligência</span></div>
+                <div class="dr-grid">
+                    ${tile("sparkles", "Consultor IA", "Assistente Gemini", "openChat()")}
+                    ${tile("cart", "Lista do mercado", "Checklist rápido", "openMarket()")}
+                    ${tile("card", "Gerenciar faturas", "Escolher / ocultar", "openManageBanksSheet()")}
+                    ${tile("bell", "Notificações", notif, "toggleNotifications()")}
+                </div>
+            </div>
+
+            <div class="dr-topic-card">
+                <div class="dr-topic-head"><span>Mês Atual (${esc(currentMonth)})</span></div>
+                <div class="dr-grid">
+                    ${tile("copy", "Copiar mês ant.", "Fixas e entradas", "copyFixedFromPrev()")}
+                    ${tile("target", "Mover de mês", "Transferir contas", "openAdvanced()")}
+                    ${tile("download", "Exportar CSV", "Planilha do mês", "exportMonthCSV()")}
+                    ${tile("printer", "Salvar PDF", "Imprimir visão", "window.print()")}
+                </div>
+            </div>
+
+            <div class="dr-topic-card">
+                <div class="dr-topic-head"><span>Backups & Segurança</span></div>
+                <div class="dr-grid">
+                    ${tile("upload", "Salvar .json", "Backup manual", "exportBackup()")}
+                    ${tile("folder", "Importar .json", "Restaurar arquivo", "document.getElementById('importFile').click()")}
+                    ${tile("clock", "Cópias auto", snapCount() + " salva(s)", "openBackups()")}
+                    ${tile("lock", "PIN de acesso", pinActive, "configurePin()")}
+                </div>
+            </div>
+
+            <div class="dr-topic-card">
+                <div class="dr-topic-head"><span>Perfil (${esc(currentProfile)}) & Sistema</span></div>
+                <div class="dr-grid">
+                    ${tile("pencil", "Editar perfil", "Nome e cor", "openProfileModal()")}
+                    ${tile("plus", "Novo perfil", "Separar contas", "promptNewProfile()")}
+                    ${tile("refresh", "Recalcular", "Atualizar tela", "manualRefresh()")}
+                    ${tile("trash", "Excluir perfil", "Remover atual", "deleteProfile()", true)}
+                </div>
+            </div>
+        </div>`;
 }
 // ---------- Ferramentas avançadas (uso pontual) ----------
 function openAdvanced() {
