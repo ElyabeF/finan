@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FinEly</title>
     <meta name="application-name" content="FinEly">
     <meta name="apple-mobile-web-app-title" content="FinEly">
@@ -543,7 +543,7 @@
            ====================================================================== */
         :root {
             --bg-main: #0a0c16; --bg-card: #131727; --bg-input: #1a2033;
-            --border: rgba(255,255,255,.07); --text-main: #f3f4fa; --text-muted: #8a93ad;
+            --border: rgba(255,255,255,.07); --text-main: #f3f4fa; --text-muted: #9ca6c2;
             --accent: #8b7cf6; --accent-hover: #7c6cf0;
             --success: #34d399; --danger: #fb7185; --warning: #fbbf24;
             --brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #d946ef 100%);
@@ -1482,6 +1482,135 @@
             border-color: rgba(139, 124, 246, 0.55);
             color: #ddd6fe;
         }
+        /* Saldo Em Caixa vs Previsto Fim do Mês + Busca Global + Calendário + Impressão PDF */
+        .greet-balances-row {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+            align-items: end;
+        }
+        .greet-prev-box {
+            background: rgba(10, 12, 22, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 14px;
+            padding: 8px 11px;
+            min-width: 0;
+        }
+        .greet-prev-box small {
+            display: block;
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.78);
+            font-weight: 600;
+        }
+        .greet-prev-box b {
+            display: block;
+            font-size: 1.08rem;
+            font-weight: 800;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+            overflow-wrap: anywhere;
+        }
+        body.hide-values #greetPrevisto { filter: blur(7px); }
+        @media (max-width: 420px) {
+            .greet-balances-row { grid-template-columns: 1fr; gap: 8px; }
+        }
+        .tx-global-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .15s ease;
+        }
+        .tx-global-btn.active {
+            background: var(--brand-soft);
+            border-color: rgba(139, 124, 246, 0.65);
+            color: #ddd6fe;
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .cal-dow {
+            text-align: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 4px 0;
+            text-transform: uppercase;
+        }
+        .cal-day {
+            min-height: 52px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            position: relative;
+        }
+        .cal-day.empty { background: transparent; border-color: transparent; min-height: 0; }
+        .cal-day.today { border-color: rgba(139, 124, 246, 0.7); box-shadow: inset 0 0 0 1px rgba(139, 124, 246, 0.35); }
+        .cal-day.has-due { cursor: pointer; }
+        .cal-day-num { font-weight: 700; font-size: 0.72rem; color: var(--text-muted); }
+        .cal-day.today .cal-day-num { color: #c4b5fd; }
+        .cal-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+        .cal-pill {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .cal-pill.pend { background: rgba(251, 191, 36, 0.18); color: #fcd34d; }
+        .cal-pill.late { background: rgba(251, 113, 133, 0.22); color: #fda4af; }
+        .cal-pill.paid { background: rgba(52, 211, 153, 0.18); color: #6ee7b7; }
+        .fb-rules-box {
+            margin-top: 14px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .fb-rules-box pre {
+            margin-top: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            background: #090b12;
+            color: #a5f3fc;
+            font-family: monospace;
+            font-size: 0.7rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        @media print {
+            body { background: #fff !important; color: #0f172a !important; padding: 0 !important; }
+            body::before, #splash, header.appbar, #appbarSpacer, .tabs, #bottomNav, #fabAdd, #notifPanel, #drawer, #drawerOverlay, .btn-add, .row-del-btn, .tx-entry-panel { display: none !important; }
+            .tabs-viewport { display: block !important; overflow: visible !important; }
+            .tab-content { display: block !important; max-height: none !important; overflow: visible !important; page-break-after: always; }
+            .panel, .panel.acc, #homeSpend, .kpi-card { background: #fff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; break-inside: avoid; }
+            .panel.acc > .acc-body, tbody[data-sub-body] { display: block !important; }
+            table.acc-body { display: table !important; }
+            tbody[data-sub-body] { display: table-row-group !important; }
+            th, td, input, .kpi-value, .panel-header { color: #0f172a !important; }
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -1562,14 +1691,22 @@
         <div id="tab-visao" class="tab-content active">
             <div class="panel" id="greetCard" style="padding:18px; margin-bottom:14px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                    <div style="min-width:0;">
+                    <div style="min-width:0; flex:1;">
                         <div id="greetHello" style="font-size:.92rem; color:var(--text-muted);"></div>
-                        <div style="font-size:.74rem; color:var(--text-muted); margin-top:8px;">Saldo previsto · <span id="greetMonth"></span></div>
-                        <div id="greetSaldo" style="font-size:1.9rem; font-weight:800; line-height:1.15;"></div>
+                        <div class="greet-balances-row">
+                            <div style="min-width:0;">
+                                <div style="font-size:.73rem; color:rgba(255,255,255,.8); margin-top:6px;">Em caixa agora · <span id="greetMonth"></span></div>
+                                <div id="greetSaldo" style="font-size:1.9rem; font-weight:800; line-height:1.15;"></div>
+                            </div>
+                            <div class="greet-prev-box" title="Entradas menos todas as saídas previstas do mês">
+                                <small>Previsto no fim do mês</small>
+                                <b id="greetPrevisto">R$ 0,00</b>
+                            </div>
+                        </div>
                     </div>
                     <button class="icon-btn" id="eyeBtn" onclick="togglePrivacy()" title="Ocultar valores" aria-label="Ocultar valores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
-                <div class="hero-stats"><div><small class="i">Entradas</small><b id="heroRec">R$ 0,00</b></div><div><small class="o">Saídas</small><b id="heroOut">R$ 0,00</b></div></div>
+                <div class="hero-stats"><div><small class="i">Entradas</small><b id="heroRec">R$ 0,00</b></div><div><small class="o">Saídas totais</small><b id="heroOut">R$ 0,00</b></div></div>
                 <div style="height:8px; border-radius:8px; background:rgba(255,255,255,.1); overflow:hidden; margin-top:12px;"><div id="greetBar" style="height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#22c55e,#facc15,#ef4444); transition:width .6s ease;"></div></div>
                 <div id="greetSub" style="font-size:.78rem; color:var(--text-muted); margin-top:8px;"></div>
                 <div id="greetDue" style="margin-top:8px; font-size:.84rem;"></div>
@@ -1579,7 +1716,7 @@
         <div class="kpi-card positive"><div class="kpi-title">Total de Entradas</div><div class="kpi-value" id="kpiEntradas">R$ 0,00</div><div class="kpi-compare" id="kpiCompEntradas"></div></div>
         <div class="kpi-card negative"><div class="kpi-title">Total de Saídas</div><div class="kpi-value" id="kpiSaidas">R$ 0,00</div><div class="kpi-compare" id="kpiCompSaidas"></div></div>
         <div class="kpi-card" id="kpiSaldoCard"><div class="kpi-title">Saídas − Entradas</div><div class="kpi-value" id="kpiSaldo">R$ 0,00</div><div class="kpi-compare" id="kpiSaldoSub"></div></div>
-        <div class="kpi-card"><div class="kpi-title">Reserva Ideal (6x)</div><div class="kpi-value" id="kpiReserva">R$ 0,00</div></div>
+        <div class="kpi-card" style="cursor:pointer;" onclick="cycleReserveMonths()" title="Toque para alternar entre 3, 6 ou 12 meses de reserva"><div class="kpi-title" id="kpiReservaTitle">Reserva Ideal (6x) ↻</div><div class="kpi-value" id="kpiReserva">R$ 0,00</div><div class="kpi-compare" id="kpiReservaSub" style="background:rgba(139,124,246,.14);color:#c4b5fd;">Toque p/ 3x, 6x ou 12x</div></div>
         <div class="kpi-card" style="border-left-color: #38bdf8;"><div class="kpi-title">Compras Futuras</div><div class="kpi-value" id="kpiFuturas" style="color:#38bdf8;">R$ 0,00</div></div>
     </div>
             </div></div>
@@ -1688,9 +1825,12 @@
                     <div class="tx-search-wrap">
                         <span class="search-ico" data-i="search" data-s="16"></span>
                         <input type="text" id="searchTxInput" placeholder="Pesquisar conta, loja, valor ou parcela..." oninput="renderTransactionsOnly()">
-                        <button class="clear-ico" id="clearSearchTxBtn" onclick="clearTxSearch()" title="Limpar"><span data-i="x" data-s="14"></span></button>
+                        <button class="clear-ico" id="clearSearchTxBtn" onclick="clearTxSearch()" title="Limpar" aria-label="Limpar busca"><span data-i="x" data-s="14"></span></button>
                     </div>
-                    <label class="tx-selall"><input type="checkbox" id="selectAllTx" onchange="toggleAllTx(this)"><span>Selecionar todos</span></label>
+                    <button type="button" class="tx-global-btn" id="btnGlobalTxSearch" onclick="toggleGlobalTxSearch()" title="Alternar entre buscar apenas neste mês ou em todos os meses">
+                        <span data-i="calendar" data-s="13"></span> <span id="lblGlobalTxSearch">Mês atual</span>
+                    </button>
+                    <label class="tx-selall"><input type="checkbox" id="selectAllTx" onchange="toggleAllTx(this)" aria-label="Selecionar todos os lançamentos"><span>Selecionar todos</span></label>
                     <span class="tx-filter-summary" id="txFilterSummary"></span>
                 </div>
                 <table id="txLedgerTable">
@@ -1780,6 +1920,8 @@
                 <div class="panel acc"><div class="panel-header acc-head" data-k="r_sum" onclick="toggleAcc(this)"><span>Resumo do mês</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="monthSummary" class="acc-body" style="padding:16px;"></div></div>
                 <div class="panel acc"><div class="panel-header acc-head" data-k="r_evo" onclick="toggleAcc(this)"><span>Evolução mensal</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="evolutionChart" class="acc-body" style="padding:16px; overflow-x:auto;"></div></div>
                 <div class="panel acc"><div class="panel-header acc-head" data-k="r_cat" onclick="toggleAcc(this)"><span>Gastos por categoria</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="chart-box acc-body" id="categoryReportBody"><p style="color:var(--text-muted); text-align:center;">Nenhum gasto para exibir.</p></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_fat" onclick="toggleAcc(this)"><span>Gastos por fatura / cartão</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div class="chart-box acc-body" id="invoiceReportBody"><p style="color:var(--text-muted); text-align:center;">Nenhuma fatura com gastos neste mês.</p></div></div>
+                <div class="panel acc"><div class="panel-header acc-head" data-k="r_cal" onclick="toggleAcc(this)"><span>Calendário de vencimentos</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="dueCalendarBody" class="acc-body" style="padding:16px;"></div></div>
                 <div class="panel acc"><div class="panel-header acc-head" data-k="r_inst" onclick="toggleAcc(this)"><span>Parcelas futuras</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div><div id="installmentsBody" class="acc-body" style="padding:16px; overflow-x:auto;"></div></div>
                 <div class="panel acc"><div class="panel-header acc-head" data-k="r_hist" onclick="toggleAcc(this)"><span>Histórico de meses</span><span class="acc-sum"><i class="acc-chev">▸</i></span></div>
                     <div class="acc-body" style="padding: 20px; overflow-x: auto;">
@@ -1796,10 +1938,24 @@
 
 <div class="modal-overlay" id="firebaseModal">
     <div class="modal" style="max-width: 500px; height: auto;">
-        <div class="modal-header"><h3 style="color:#38bdf8; display:flex; align-items:center; gap:8px;"><span data-i="cloud" data-s="20"></span> Firebase</h3><button class="btn-icon" onclick="closeFirebaseModal()"><span data-i="x" data-s="18"></span></button></div>
+        <div class="modal-header"><h3 style="color:#38bdf8; display:flex; align-items:center; gap:8px;"><span data-i="cloud" data-s="20"></span> Firebase</h3><button class="btn-icon" onclick="closeFirebaseModal()" aria-label="Fechar"><span data-i="x" data-s="18"></span></button></div>
         <div style="padding: 20px;">
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Cole o objeto <b>firebaseConfig</b> em JSON.</p>
-            <textarea id="firebaseConfigInput" rows="6" style="width:100%; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:monospace;" placeholder='{"apiKey": "..."}'></textarea>
+            <textarea id="firebaseConfigInput" rows="5" style="width:100%; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:monospace;" placeholder='{"apiKey": "..."}'></textarea>
+            <div class="fb-rules-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <strong style="color:#f3f4fa;">Regras de Segurança recomendadas (Realtime Database):</strong>
+                    <button type="button" class="btn-outline" style="padding:3px 8px;font-size:.68rem;" onclick="copyFirebaseRules()">Copiar regras</button>
+                </div>
+                <pre id="fbRulesPre">{
+  "rules": {
+    "financeStore": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}</pre>
+            </div>
             <div style="margin-top:15px; display:flex; justify-content:flex-end;"><button class="btn" style="background:#38bdf8; color:#0f172a;" onclick="saveFirebaseConfig()">Conectar</button></div>
         </div>
     </div>
@@ -1925,6 +2081,22 @@ function txIconFor(tag) {
     if (t.includes("VARIAVEL:")) return "wallet";
     return "card";
 }
+let _uidSeq = 0;
+function uid(prefix = "id") {
+    _uidSeq = (_uidSeq + 1) % 1000000;
+    return `${prefix}_${Date.now().toString(36)}_${_uidSeq.toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+}
+function resolveRowItem(group, idOrIdx, monthKey = currentMonth, profName = currentProfile) {
+    const list = store.profiles?.[profName]?.[monthKey]?.[group];
+    if (!Array.isArray(list)) return { item: null, index: -1, list: [] };
+    const s = String(idOrIdx ?? "");
+    let idx = list.findIndex(x => x && String(x.id) === s);
+    if (idx < 0 && /^\d+$/.test(s)) {
+        const n = Number(s);
+        if (n >= 0 && n < list.length) idx = n;
+    }
+    return { item: idx >= 0 ? list[idx] : null, index: idx, list };
+}
 function syncMonthLabel() {
     const l = document.getElementById("monthLabel"); if (l) l.textContent = currentMonth;
     const a = document.getElementById("avatarLetter"); if (a) a.textContent = String(currentProfile || "?").trim().charAt(0).toUpperCase() || "?";
@@ -1934,7 +2106,6 @@ function stepMonth(d) {
     const i = MONTHS.indexOf(currentMonth) + d; if (i < 0 || i >= MONTHS.length) return;
     const s = document.getElementById("monthSelect"); s.value = MONTHS[i]; changeMonth();
 }
-const _renderAll0 = renderAll; renderAll = function () { const r = _renderAll0.apply(this, arguments); syncMonthLabel(); return r; };
 const _mn = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const MONTHS = (() => {
     const now = new Date();
@@ -1948,9 +2119,9 @@ let chatHistory = [];
 
 function getDefaultMonthData() {
     const d = {
-        receitas: [{ nome: "Salário Líquido", valor: 0 }, { nome: "Vale-Alimentação", valor: 0 }, { nome: "Renda Extra", valor: 0 }],
-        essenciais: [{ nome: "Moradia (Aluguel/Cond.)", valor: 0 }, { nome: "Água", valor: 0 }, { nome: "Energia Elétrica", valor: 0 }, { nome: "Supermercado", valor: 0 }],
-        naoEssenciais: [{ nome: "Assinaturas", valor: 0 }, { nome: "Lazer / Restaurantes", valor: 0 }],
+        receitas: [{ id: uid("row"), nome: "Salário Líquido", valor: 0 }, { id: uid("row"), nome: "Vale-Alimentação", valor: 0 }, { id: uid("row"), nome: "Renda Extra", valor: 0 }],
+        essenciais: [{ id: uid("row"), nome: "Moradia (Aluguel/Cond.)", valor: 0, paid: false, venc: "" }, { id: uid("row"), nome: "Água", valor: 0, paid: false, venc: "" }, { id: uid("row"), nome: "Energia Elétrica", valor: 0, paid: false, venc: "" }, { id: uid("row"), nome: "Supermercado", valor: 0, paid: false, venc: "" }],
+        naoEssenciais: [{ id: uid("row"), nome: "Assinaturas", valor: 0, paid: false, venc: "" }, { id: uid("row"), nome: "Lazer / Restaurantes", valor: 0, paid: false, venc: "" }],
         cardStatus: {}, paymentStatus: {}, transactions: []
     };
     ["Nubank", "Itaú", "Shopee", "Mercado Pago", "Neon", "Santander"].forEach(b => {
@@ -2009,18 +2180,32 @@ function guardFutureMonth() {
     if (anyPaid) { resetMonthStatuses(pd, currentMonth, store.config.banks, Date.now(), true); saveStore(); }
 }
 function realMonthKey() { const d = new Date(); return `${_mn[d.getMonth()]}/${d.getFullYear()}`; }
-// Virou o mês (data real): tudo que estava pago no mês atual (e seguintes) volta a Pendente.
+// Virou o mês (data real): salva snapshot de segurança antes e reseta somente do mês atual em diante.
 function rolloverIfNeeded() {
     const todayKey = realMonthKey();
     if (!store.config) return false;
     if (!store.config.rolloverKey) { store.config.rolloverKey = todayKey; return true; }
     if (store.config.rolloverKey === todayKey) return false;
+    try { if (typeof takeSnapshot === "function") takeSnapshot("antes-virada-mes", true); } catch (e) {}
     const idx = MONTHS.indexOf(todayKey);
     if (idx >= 0) {
         const stamp = Date.now();
+        const prevKey = idx > 0 ? MONTHS[idx - 1] : null;
         Object.keys(store.profiles || {}).forEach(prof => {
+            const pObj = store.profiles[prof];
+            if (!pObj) return;
+            // Recorrência automática inteligente: se o novo mês está com receitas e fixas zeradas e o mês anterior tinha dados, copia a estrutura
+            if (prevKey && pObj[prevKey] && pObj[todayKey]) {
+                const curM = pObj[todayKey], prevM = pObj[prevKey];
+                const curEmpty = !(curM.receitas || []).some(r => Number(r.valor) > 0) && !(curM.essenciais || []).some(e => Number(e.valor) > 0);
+                const prevHas = (prevM.receitas || []).some(r => Number(r.valor) > 0) || (prevM.essenciais || []).some(e => Number(e.valor) > 0);
+                if (curEmpty && prevHas) {
+                    curM.receitas = (prevM.receitas || []).map(r => ({ ...r, id: uid("row") }));
+                    curM.essenciais = (prevM.essenciais || []).map(e => ({ ...e, id: uid("row"), paid: false }));
+                }
+            }
             MONTHS.forEach((m, i) => {
-                const pd = store.profiles[prof][m];
+                const pd = pObj[m];
                 if (i >= idx && pd && typeof pd === "object") resetMonthStatuses(pd, m, store.config.banks, stamp, true);
             });
         });
@@ -2029,7 +2214,7 @@ function rolloverIfNeeded() {
     return true;
 }
 
-// === Sanitização v4 (migração forte) ===
+// === Sanitização v5 (otimizada com fast-path para evitar peso em sincronizações repetidas) ===
 function sanitizeStore(rawData) {
     if (!rawData) return null;
     let data = rawData;
@@ -2057,11 +2242,13 @@ function sanitizeStore(rawData) {
     if (!data.config.profileColors) data.config.profileColors = {};
     if (!data.config.bankTypes || typeof data.config.bankTypes !== "object") data.config.bankTypes = {};
     data.config.banks.forEach(b => { if (!BANK_TYPES[data.config.bankTypes[b]]) data.config.bankTypes[b] = "cartao"; });
+    if (![3, 6, 12].includes(Number(data.config.reserveMonths))) data.config.reserveMonths = 6;
 
     data.config.profilesList.forEach(prof => {
         if (!data.config.profileColors[prof]) data.config.profileColors[prof] = "#6366f1";
         if (!data.profiles[prof]) data.profiles[prof] = { futurePurchases: [], importedBatches: [] };
         if (!data.profiles[prof].futurePurchases) data.profiles[prof].futurePurchases = [];
+        data.profiles[prof].futurePurchases.forEach(f => { if (f && !f.id) f.id = uid("fut"); });
         if (!Array.isArray(data.profiles[prof].importedBatches)) data.profiles[prof].importedBatches = [];
 
         const legacyRun = {};
@@ -2072,9 +2259,25 @@ function sanitizeStore(rawData) {
             if (!Array.isArray(pData.essenciais)) pData.essenciais = [];
             if (!Array.isArray(pData.naoEssenciais)) pData.naoEssenciais = [];
             if (!Array.isArray(pData.transactions)) pData.transactions = [];
-            pData.transactions.forEach(t => { if (t && t.parcela != null) t.parcela = cleanParcelaDisplay(t.parcela); });
+            pData.receitas.forEach(r => { if (r && !r.id) r.id = uid("row"); });
+            pData.essenciais.forEach(e => { if (e && !e.id) e.id = uid("row"); });
+            pData.naoEssenciais.forEach(n => { if (n && !n.id) n.id = uid("row"); });
+            pData.transactions.forEach(t => {
+                if (!t) return;
+                if (t.id == null) t.id = uid("tx");
+                if (t.parcela != null) t.parcela = cleanParcelaDisplay(t.parcela);
+            });
             if (!pData.cardStatus) pData.cardStatus = {};
             if (!pData.paymentStatus || typeof pData.paymentStatus !== "object") pData.paymentStatus = {};
+
+            // Fast-path quando o modelo já está em v5+: garante apenas os objetos dos bancos sem reprocessar migrações antigas
+            if (!legacyModel && !needsV5) {
+                data.config.banks.forEach(b => {
+                    if (!pData.cardStatus[b]) pData.cardStatus[b] = { venc: "Dia 10", status: "Pendente", manualExtra: 0, paidAt: null, paidMonthKey: null, statusUpdatedAt: 0 };
+                    if (!pData.paymentStatus[b]) pData.paymentStatus[b] = { status: "Pendente", updatedAt: 0, monthKey: m, paidAt: null, resetPendingOverride: false };
+                });
+                return;
+            }
 
             // v5: meses depois do mês real sempre começam Pendentes (bug: "pago" seguia para o mês seguinte)
             if (needsV5 && todayMonthIndex >= 0 && mIdx > todayMonthIndex) resetMonthStatuses(pData, m, data.config.banks, Date.now() + mIdx, true);
@@ -2114,12 +2317,9 @@ function sanitizeStore(rawData) {
                 }
 
                 const origPago = ps.status === "Pago";
-                // Validação: se Pago, o monthKey deve bater e paidAt deve existir
                 if (ps.status === "Pago") {
                     const validMonthKey = !ps.monthKey || ps.monthKey === m;
                     let hasStamp = ps.paidAt || cs.paidAt;
-                    // Dados antigos sem carimbo: o 1º mês de uma sequência de "Pago" até o mês atual é considerado
-                    // pagamento real (mantém o histórico); os seguintes são cópia indevida e voltam a Pendente.
                     if (validMonthKey && !hasStamp && legacyModel && todayMonthIndex >= 0 && mIdx <= todayMonthIndex && !legacyRun[b]) {
                         ps.paidAt = cs.paidAt = Date.now(); ps.monthKey = m; ps.action = "user"; hasStamp = true; legacyRun[b] = true;
                     } else if (hasStamp) legacyRun[b] = false;
@@ -2130,7 +2330,6 @@ function sanitizeStore(rawData) {
                     }
                 }
 
-                // Se Pendente mas monthKey de outro mês, alinhar
                 if (ps.status !== "Pago" && ps.monthKey && ps.monthKey !== m) {
                     ps.monthKey = m;
                 }
@@ -2303,8 +2502,11 @@ const ENC_SALT = "controle-financeiro-v1";
 let _ek = null, _ekPass = null;
 function b64(buf) { const a = new Uint8Array(buf); let str = ""; for (let i = 0; i < a.length; i += 0x8000) str += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000)); return btoa(str); }
 function unb64(x) { return Uint8Array.from(atob(x), c => c.charCodeAt(0)); }
+function getStoredEncPass() {
+    try { return sessionStorage.getItem("fin_enc_pass") || localStorage.getItem("fin_enc_pass") || ""; } catch (e) { return localStorage.getItem("fin_enc_pass") || ""; }
+}
 async function getEncKey() {
-    const pass = localStorage.getItem("fin_enc_pass"); if (!pass) return null;
+    const pass = getStoredEncPass(); if (!pass) return null;
     if (_ek && _ekPass === pass) return _ek;
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
     _ek = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: new TextEncoder().encode(ENC_SALT), iterations: 250000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
@@ -2478,7 +2680,7 @@ function attachCloud() {
         if (isTyping) { updateTotalsOnly(); } else renderAll();
         checkNotifications(); updateBankSelects();
         setTimeout(() => isSyncing = false, 350);
-        if (keptLocal || (!raw.enc && localStorage.getItem("fin_enc_pass"))) pushCloud();
+        if (keptLocal || (!raw.enc && getStoredEncPass())) pushCloud();
     });
 }
 function initFirebase() {
@@ -2500,15 +2702,24 @@ function showCloudLogin(msg) {
     const o = document.createElement("div"); o.id = "cloudLogin";
     o.style.cssText = "position:fixed;inset:0;z-index:2500;background:rgba(15,23,42,.94);display:flex;align-items:center;justify-content:center;padding:16px";
     const inp = "width:100%;padding:10px;border-radius:8px;margin-top:4px;background:#0f172a;border:1px solid #334155;color:#e2e8f0";
-    o.innerHTML = `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:400px;color:#e2e8f0;display:flex;flex-direction:column;gap:12px"><h3 style="display:inline-flex;align-items:center;gap:8px;">${ico("cloud", 20)} Entrar na nuvem</h3><div id="cloudMsg" style="color:#fbbf24;font-size:.85rem;min-height:1em">${esc(msg || "")}</div><label style="font-size:.8rem">E-mail<input id="cloudEmail" type="email" style="${inp}" value="${esc(localStorage.getItem("fin_email") || "")}"></label><label style="font-size:.8rem">Senha<input id="cloudPass" type="password" style="${inp}"></label><label style="font-size:.8rem">Senha de criptografia (opcional)<input id="cloudEnc" type="password" style="${inp}" value="${esc(localStorage.getItem("fin_enc_pass") || "")}"></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-outline" onclick="document.getElementById('cloudLogin').remove()">Local</button><button class="btn" onclick="doCloudLogin()">Entrar</button></div></div>`;
+    const hasPersistentPass = !!localStorage.getItem("fin_enc_pass");
+    o.innerHTML = `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:400px;color:#e2e8f0;display:flex;flex-direction:column;gap:12px"><h3 style="display:inline-flex;align-items:center;gap:8px;">${ico("cloud", 20)} Entrar na nuvem</h3><div id="cloudMsg" style="color:#fbbf24;font-size:.85rem;min-height:1em">${esc(msg || "")}</div><label style="font-size:.8rem">E-mail<input id="cloudEmail" type="email" style="${inp}" value="${esc(localStorage.getItem("fin_email") || "")}"></label><label style="font-size:.8rem">Senha<input id="cloudPass" type="password" style="${inp}"></label><label style="font-size:.8rem">Senha de criptografia (opcional)<input id="cloudEnc" type="password" style="${inp}" value="${esc(getStoredEncPass())}"></label><label style="display:flex;align-items:flex-start;gap:8px;font-size:.75rem;color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="cloudRememberEnc" ${hasPersistentPass ? "checked" : ""} style="margin-top:2px;width:16px;height:16px;"><span>Lembrar senha de criptografia neste aparelho <small style="display:block;opacity:.8;">(Desmarcado = dura só enquanto o app estiver aberto; salvo no aparelho fica legível caso o celular esteja desbloqueado)</small></span></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-outline" onclick="document.getElementById('cloudLogin').remove()">Local</button><button class="btn" onclick="doCloudLogin()">Entrar</button></div></div>`;
     document.body.appendChild(o);
 }
 async function doCloudLogin() {
     const email = document.getElementById("cloudEmail").value.trim();
     const pass = document.getElementById("cloudPass").value;
     const enc = document.getElementById("cloudEnc").value;
+    const rememberEnc = !!document.getElementById("cloudRememberEnc")?.checked;
     const msgEl = document.getElementById("cloudMsg");
-    if (enc) localStorage.setItem("fin_enc_pass", enc); else localStorage.removeItem("fin_enc_pass");
+    if (enc) {
+        try { sessionStorage.setItem("fin_enc_pass", enc); } catch (e) {}
+        if (rememberEnc) localStorage.setItem("fin_enc_pass", enc);
+        else localStorage.removeItem("fin_enc_pass");
+    } else {
+        try { sessionStorage.removeItem("fin_enc_pass"); } catch (e) {}
+        localStorage.removeItem("fin_enc_pass");
+    }
     _ek = null; localStorage.setItem("fin_email", email);
     try {
         if (firebase.auth().currentUser) { cloudBlocked = false; document.getElementById("cloudLogin").remove(); attachCloud(); return; }
@@ -2618,6 +2829,12 @@ async function cloudAccount() {
 }
 function openFirebaseModal() { document.getElementById('firebaseConfigInput').value = store.config.firebaseConfig || ""; document.getElementById('firebaseModal').style.display = 'flex'; }
 function closeFirebaseModal() { document.getElementById('firebaseModal').style.display = 'none'; }
+function copyFirebaseRules() {
+    const txt = document.getElementById("fbRulesPre")?.textContent || "";
+    if (!txt) return;
+    try { navigator.clipboard.writeText(txt); toast("Regras de segurança copiadas!", null, "ok"); }
+    catch (e) { toast("Copie o bloco JSON exibido.", null, "info"); }
+}
 function saveFirebaseConfig() {
     const val = document.getElementById('firebaseConfigInput').value.trim();
     if (val && !val.includes("apiKey")) return toast("Formato inválido. Cole o JSON contendo apiKey.", null, "warn");
@@ -2647,22 +2864,25 @@ function saveProfileSettings() {
 }
 async function deleteCurrentProfile() {
     if (store.config.profilesList.length <= 1) return toast("É necessário manter pelo menos um perfil.", null, "warn");
+    const gone = currentProfile;
     const ok = await uiConfirm({
-        title: `Excluir perfil "${currentProfile}"?`,
-        message: `Todos os dados e lançamentos exclusivos do perfil "${currentProfile}" serão removidos. Esta ação não pode ser desfeita.`,
+        title: `Excluir perfil "${gone}"?`,
+        message: `Todos os dados e lançamentos exclusivos do perfil "${gone}" serão removidos. Esta ação não pode ser desfeita.`,
         confirmText: "Excluir perfil",
         danger: true,
         icon: "trash"
     });
     if (ok) {
-        const idx = store.config.profilesList.indexOf(currentProfile);
-        store.config.profilesList.splice(idx, 1);
-        delete store.profiles[currentProfile];
-        delete store.config.profileColors[currentProfile];
+        store.config.profilesList = store.config.profilesList.filter(p => p !== gone);
+        delete store.profiles[gone];
+        if (store.config.profileColors) delete store.config.profileColors[gone];
+        if (store.meta) Object.keys(store.meta).forEach(k => { if (k.startsWith(gone + "|")) delete store.meta[k]; });
         currentProfile = store.config.profilesList[0];
         saveStore(); closeProfileModal(); init();
+        toast(`Perfil "${gone}" excluído.`, null, "del");
     }
 }
+const deleteProfile = deleteCurrentProfile;
 async function promptNewProfile() {
     const name = await uiPrompt({
         title: "Novo perfil",
@@ -2927,18 +3147,64 @@ function toggleDueMonth(bank, event) {
     saveStore(); renderAll(); checkNotifications();
     toast(nv ? `${bank}: a fatura de cada mês vence no mês seguinte.` : `${bank}: a fatura de cada mês vence no próprio mês.`);
 }
+function projectInstallmentTx(t, startMonth = currentMonth) {
+    if (!t) return 0;
+    const m = String(t.parcela || "").match(/^(\d+)\/(\d+)$/);
+    if (!m) return 0;
+    const n = +m[1], total = +m[2];
+    if (n >= total || total > 120) return 0;
+    const idx = MONTHS.indexOf(startMonth);
+    if (idx < 0) return 0;
+    const profile = store.profiles[currentProfile];
+    const baseDesc = cleanDisplayDesc(stripCatTag(t.desc));
+    let added = 0;
+    for (let k = 1; k <= total - n; k++) {
+        const targetMonth = MONTHS[idx + k];
+        if (!targetMonth) break;
+        if (!profile[targetMonth]) profile[targetMonth] = getDefaultMonthData();
+        const nextList = profile[targetMonth].transactions || (profile[targetMonth].transactions = []);
+        const parcela = `${n + k}/${total}`;
+        const exists = nextList.some(x =>
+            x.bank === t.bank &&
+            cleanParcelaDisplay(x.parcela) === parcela &&
+            cleanDisplayDesc(stripCatTag(x.desc)) === baseDesc &&
+            Math.abs((Number(x.val) || 0) - (Number(t.val) || 0)) < 0.01
+        );
+        if (!exists) {
+            nextList.push({
+                id: uid("tx"),
+                createdAt: Date.now(),
+                date: t.date || "-",
+                bank: t.bank,
+                desc: t.desc,
+                parcela,
+                val: Number(t.val) || 0,
+                dueDate: "",
+                paid: false,
+                fromInstallmentId: t.id
+            });
+            added++;
+        }
+    }
+    return added;
+}
 function projectInstallmentsToNextMonth(bank) {
-    const idx = MONTHS.indexOf(currentMonth), nextMonth = MONTHS[idx + 1]; if (!nextMonth) return 0;
-    const profile = store.profiles[currentProfile]; if (!profile[nextMonth]) profile[nextMonth] = getDefaultMonthData();
-    const cur = profile[currentMonth], next = profile[nextMonth]; let added = 0;
-    (cur.transactions || []).filter(t => t.bank === bank).forEach(t => {
-        const m = String(t.parcela || "").match(/^(\d+)\/(\d+)$/); if (!m) return;
-        const n = +m[1], total = +m[2]; if (n >= total) return;
-        const parcela = `${n + 1}/${total}`, desc = cleanDisplayDesc(t.desc);
-        const exists = (next.transactions || []).some(x => x.bank === bank && x.parcela === parcela && cleanDisplayDesc(x.desc) === desc && Math.abs((Number(x.val) || 0) - (Number(t.val) || 0)) < .01);
-        if (!exists) { next.transactions.push({ id: `${Date.now()}_${Math.floor(Math.random() * 1e6)}`, date: t.date || "-", bank, desc: t.desc, parcela, val: Number(t.val) || 0, fromInstallmentId: t.id }); added++; }
+    const cur = store.profiles[currentProfile]?.[currentMonth];
+    if (!cur) return 0;
+    let added = 0;
+    (cur.transactions || []).filter(t => !bank || t.bank === bank).forEach(t => {
+        added += projectInstallmentTx(t, currentMonth);
     });
     return added;
+}
+function projectAllInstallmentsFromCurrent() {
+    const added = projectInstallmentsToNextMonth(null);
+    if (added > 0) {
+        saveStore(); renderAll(); checkNotifications();
+        toast(`${added} parcela(s) futura(s) projetada(s) nas faturas dos próximos meses!`, null, "ok");
+    } else {
+        toast("Todas as parcelas futuras deste mês já estão lançadas nos meses seguintes.", null, "info");
+    }
 }
 
 function ensureMonthCardStatus(profile, monthKey, bank) {
@@ -3094,27 +3360,53 @@ function parseTxDateSortable(dateStr) {
     return 0;
 }
 
+let txGlobalSearch = false;
+function toggleGlobalTxSearch() {
+    txGlobalSearch = !txGlobalSearch;
+    const btn = document.getElementById("btnGlobalTxSearch");
+    const lbl = document.getElementById("lblGlobalTxSearch");
+    if (btn) btn.classList.toggle("active", txGlobalSearch);
+    if (lbl) lbl.textContent = txGlobalSearch ? "Todos os meses" : "Mês atual";
+    renderTransactionsOnly();
+}
 function clearTxSearch() { const inp = document.getElementById("searchTxInput"); if (inp) { inp.value = ""; inp.focus(); } renderTransactionsOnly(); }
 
 function renderTransactionsOnly() {
     const txBody = document.getElementById("txTableBody"); if (!txBody) return;
-    const data = store.profiles[currentProfile][currentMonth];
+    const prof = store.profiles[currentProfile];
+    const data = prof[currentMonth];
     const searchInp = document.getElementById("searchTxInput");
     const clearBtn = document.getElementById("clearSearchTxBtn");
     const summaryEl = document.getElementById("txFilterSummary");
     const sortSel = document.getElementById("sortTxSelect");
+    const btnGlobal = document.getElementById("btnGlobalTxSearch");
+    const lblGlobal = document.getElementById("lblGlobalTxSearch");
     if (sortSel && sortSel.value !== txSortOrder) sortSel.value = txSortOrder;
+    if (btnGlobal) btnGlobal.classList.toggle("active", txGlobalSearch);
+    if (lblGlobal) lblGlobal.textContent = txGlobalSearch ? "Todos os meses" : "Mês atual";
     renderActiveFilterChips();
 
     const rawQuery = searchInp ? searchInp.value.trim() : "";
     const q = normText(rawQuery);
     if (clearBtn) clearBtn.style.display = rawQuery ? "block" : "none";
 
-    const rawList = (data.transactions || []).map((t, idx) => ({ t, idx }));
-    const filtered = rawList.filter(({ t }) => {
+    const rawList = [];
+    if (txGlobalSearch) {
+        MONTHS.forEach(mKey => {
+            (prof[mKey]?.transactions || []).forEach((t, idx) => {
+                rawList.push({ t, idx, mKey });
+            });
+        });
+    } else {
+        (data.transactions || []).forEach((t, idx) => {
+            rawList.push({ t, idx, mKey: currentMonth });
+        });
+    }
+
+    const filtered = rawList.filter(({ t, mKey }) => {
         if (selectedFilterBanks.size > 0 && !selectedFilterBanks.has(t.bank)) return false;
         if (!q) return true;
-        const hay = normText(`${t.desc || ""} ${t.bank || ""} ${t.date || ""} ${t.dueDate || ""} ${t.parcela || ""} ${fmtBRL(t.val)} ${String(t.val || "")}`);
+        const hay = normText(`${t.desc || ""} ${t.bank || ""} ${t.date || ""} ${t.dueDate || ""} ${t.parcela || ""} ${mKey || ""} ${fmtBRL(t.val)} ${String(t.val || "")}`);
         return hay.includes(q);
     });
 
@@ -3142,12 +3434,10 @@ function renderTransactionsOnly() {
         return b.idx - a.idx;
     });
 
-    const list = filtered.map(x => x.t);
-    txBody.innerHTML = "";
-    if (list.length === 0) {
+    if (filtered.length === 0) {
         txBody.innerHTML = `<tr class="tx-empty"><td colspan="4" style="text-align:center; padding:18px; color:var(--text-muted);">${rawQuery || selectedFilterBanks.size ? 'Nenhum lançamento encontrado para o filtro selecionado.' : 'Sem lançamentos neste mês.'}</td></tr>`;
     } else {
-        list.forEach(t => {
+        txBody.innerHTML = filtered.map(({ t, mKey }) => {
             const rawTag = (String(t.desc || "").match(/^\[(.*?)\]/) || [])[1] || "";
             const tag = cleanCatLabel(rawTag);
             const parc = cleanParcelaDisplay(t.parcela || "");
@@ -3155,25 +3445,26 @@ function renderTransactionsOnly() {
             const col = tag ? RING_COLORS[Math.abs([...tag].reduce((h, c) => h * 31 + c.charCodeAt(0), 7)) % 8] : "#94a3b8";
             const isOutros = getBankType(t.bank) === "outros";
             let dueBadgeHtml = "";
-            if (t.dueDate || isOutros) {
+            if ((t.dueDate || isOutros) && mKey === currentMonth) {
                 const badgeInfo = getAvulsoDueStatus(t);
                 dueBadgeHtml = `<button type="button" class="due-pill-btn ${badgeInfo.cls}" onclick="openTxDuePicker('${jsq(t.id)}', event)" title="Definir vencimento avulso">${ico("calendar", 11)} ${esc(badgeInfo.label)}</button>`;
                 if (isOutros) {
                     dueBadgeHtml += `<button type="button" class="due-pill-btn ${t.paid ? 'due-paid' : ''}" onclick="toggleAvulsoTxPaid('${jsq(t.id)}', event)" title="Marcar conta avulsa como paga">${t.paid ? `${ico("check", 11)} Paga` : `${ico("clock", 11)} Pendente`}</button>`;
                 }
             }
-            txBody.innerHTML += `<tr class="tx-row ${Number(t.val) < 0 ? "is-credit" : ""} ${t.paid ? "is-paid" : ""}">
-                <td class="c-chk"><input type="checkbox" class="cb-tx" value="${t.id}" onchange="toggleTxBtn()"></td>
+            const monthChip = txGlobalSearch ? `<span class="chip" style="cursor:pointer;border-color:rgba(139,124,246,.5);color:#c4b5fd;" onclick="dueGoMonth('${jsq(mKey)}')" title="Ir para ${esc(mKey)}">${esc(mKey)}</span>` : "";
+            return `<tr id="txrow_${esc(t.id)}" class="tx-row ${Number(t.val) < 0 ? "is-credit" : ""} ${t.paid ? "is-paid" : ""}">
+                <td class="c-chk">${mKey === currentMonth ? `<input type="checkbox" class="cb-tx" value="${esc(t.id)}" onchange="toggleTxBtn()" aria-label="Selecionar lançamento">` : ""}</td>
                 <td class="c-ico"><span class="tx-ico" style="--c:${col}">${ico(txIconFor(tag || rawTag), 18)}</span></td>
                 <td class="c-main"><div class="tx-desc" style="${t.paid ? 'text-decoration:line-through;' : ''}">${esc(cleanDisplayDesc(stripCatTag(t.desc)))}</div>
-                    <div class="tx-meta"><span title="Data da compra: ${esc(d)}" style="display:inline-flex;align-items:center;gap:4px;">${ico("calendar", 12)} ${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : ""}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}${dueBadgeHtml}</div></td>
-                <td class="c-val"><div class="tx-val">${fmtBRL(t.val)}</div><button class="tx-edit-btn" onclick="openEditTxSheet('${jsq(t.id)}')" title="Editar lançamento" aria-label="Editar lançamento">${ico("pencil", 15)}</button><button class="tx-del" onclick="deleteTx('${jsq(t.id)}')" title="Excluir lançamento" aria-label="Excluir lançamento">${ico("trash", 16)}</button></td>
+                    <div class="tx-meta">${monthChip}<span title="Data da compra: ${esc(d)}" style="display:inline-flex;align-items:center;gap:4px;">${ico("calendar", 12)} ${esc(shortDate)}</span>${createBankBadgeHTML(t.bank, true)}${parc && parc !== "À vista" ? `<span class="chip">${esc(parc)}</span>` : ""}${tag ? `<span class="chip chip-soft">${esc(tag)}</span>` : ""}${dueBadgeHtml}</div></td>
+                <td class="c-val"><div class="tx-val">${fmtBRL(t.val)}</div><button class="tx-edit-btn" onclick="${mKey !== currentMonth ? `dueGoMonth('${jsq(mKey)}');` : ""}openEditTxSheet('${jsq(t.id)}')" title="Editar lançamento" aria-label="Editar lançamento">${ico("pencil", 15)}</button><button class="tx-del" onclick="${mKey !== currentMonth ? `dueGoMonth('${jsq(mKey)}');` : ""}deleteTx('${jsq(t.id)}')" title="Excluir lançamento" aria-label="Excluir lançamento">${ico("trash", 16)}</button></td>
             </tr>`;
-        });
+        }).join("");
     }
     if (summaryEl) {
-        const sumFiltered = list.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
-        summaryEl.textContent = `${list.length} ${list.length === 1 ? "item" : "itens"} • Total: ${fmtBRL(sumFiltered)}`;
+        const sumFiltered = filtered.reduce((acc, x) => acc + (Number(x.t.val) || 0), 0);
+        summaryEl.textContent = `${filtered.length} ${filtered.length === 1 ? "item" : "itens"}${txGlobalSearch ? " (todos os meses)" : ""} • Total: ${fmtBRL(sumFiltered)}`;
     }
     labelTables();
 }
@@ -3300,18 +3591,22 @@ function categorizeDesc(upDesc) {
     if (has("FARMACIA", "DROGASIL", "PAGUE MENOS", "RAIA", "DROGARIA")) return "Saúde";
     return "";
 }
+function applyAutoCategory(rawDesc) {
+    const s = String(rawDesc || "").trim();
+    if (!s || /^\[.*?\]/.test(s)) return s;
+    const rules = store.profiles[currentProfile]?.catRules || {};
+    const cat = cleanCatLabel(rules[merchantKey(s)] || categorizeDesc(normText(s)));
+    return cat ? `[${cat}] ${s}` : s;
+}
 function updateCSVBankSelect() {
     const csvBank = document.getElementById("csvBankSelect");
-    if (csvBank) { csvBank.innerHTML = ""; store.config.banks.forEach(b => { csvBank.innerHTML += `<option value="${esc(b)}">${esc(b)}</option>`; }); }
+    if (csvBank) { csvBank.innerHTML = store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join(""); }
 }
 function renderImportedBatches() {
     const listEl = document.getElementById("importedBatchesList"); if (!listEl) return;
-    listEl.innerHTML = "";
     const batches = store.profiles[currentProfile].importedBatches || [];
     if (batches.length === 0) { listEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">Nenhum extrato registrado ainda.</p>'; return; }
-    batches.forEach(b => {
-        listEl.innerHTML += `<div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div><span style="font-weight:bold; font-size:0.85rem;">${esc(b.fileName)}</span> <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${esc(b.bank)} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span></div><button class="btn-danger" style="padding:4px 10px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px;" onclick="deleteImportedBatch('${b.id}')">${ico("trash", 13)} Excluir</button></div>`;
-    });
+    listEl.innerHTML = batches.map(b => `<div style="background:var(--bg-input); border:1px solid var(--border); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div><span style="font-weight:bold; font-size:0.85rem;">${esc(b.fileName)}</span> <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${esc(b.bank)} • ${b.count} itens • ${fmtBRL(b.totalVal)})</span></div><button class="btn-danger" style="padding:4px 10px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px;" onclick="deleteImportedBatch('${jsq(b.id)}')">${ico("trash", 13)} Excluir</button></div>`).join("");
 }
 async function deleteImportedBatch(batchId) {
     const ok = await uiConfirm({
@@ -3373,32 +3668,49 @@ async function runCSVImport(text, fileName) {
         items.push({ dateObj, desc, upDesc, val });
     }
     if (items.length === 0) { toast(`Nenhuma compra encontrada.\n${ignored.length} linhas ignoradas.`, null, "warn"); return; }
-    const preTotal = items.reduce((a, i) => a + i.val, 0);
-    const ok = await uiConfirm({
-        title: `Importar ${items.length} lançamentos?`,
-        message: `Cartão: ${bankName}\nTotal somado: ${fmtBRL(preTotal)}\nLinhas ignoradas (pagamentos/estornos): ${ignored.length}`,
-        confirmText: "Importar agora",
-        icon: "upload"
-    });
-    if (!ok) return;
     const destOf = (it) => {
         if (destMode === "selected") return currentMonth;
         const key = `${monthNames[parseInt(it.dateObj.m, 10) - 1]}/${it.dateObj.y}`;
         return MONTHS.includes(key) ? key : currentMonth;
     };
-    const destMonths = new Set(items.map(destOf));
+    let dupSkipped = 0;
+    const toInsert = replaceOption ? items : items.filter(it => {
+        const mKey = destOf(it);
+        const dateStr = `${it.dateObj.d}/${it.dateObj.m}/${it.dateObj.y}`;
+        const cleanItDesc = normText(cleanDisplayDesc(stripCatTag(it.desc)));
+        const existing = store.profiles[currentProfile][mKey]?.transactions || [];
+        const isDup = existing.some(x =>
+            x.bank === bankName &&
+            x.date === dateStr &&
+            Math.abs((Number(x.val) || 0) - it.val) < 0.01 &&
+            normText(cleanDisplayDesc(stripCatTag(x.desc))) === cleanItDesc
+        );
+        if (isDup) { dupSkipped++; return false; }
+        return true;
+    });
+    if (toInsert.length === 0) {
+        return toast(`Todos os ${items.length} lançamentos já existem na fatura (${dupSkipped} duplicados ignorados).`, null, "info");
+    }
+    const preTotal = toInsert.reduce((a, i) => a + i.val, 0);
+    const ok = await uiConfirm({
+        title: `Importar ${toInsert.length} lançamentos?`,
+        message: `Cartão: ${bankName}\nTotal somado: ${fmtBRL(preTotal)}\nPagamentos/estornos ignorados: ${ignored.length}${dupSkipped ? `\nDuplicados já existentes ignorados: ${dupSkipped}` : ""}`,
+        confirmText: "Importar agora",
+        icon: "upload"
+    });
+    if (!ok) return;
+    const destMonths = new Set(toInsert.map(destOf));
     if (replaceOption) {
         destMonths.forEach(m => { store.profiles[currentProfile][m].transactions = store.profiles[currentProfile][m].transactions.filter(t => t.bank !== bankName); });
     }
-    const batchId = "batch_" + Date.now();
+    const batchId = uid("batch");
     let batchTotal = 0;
-    items.forEach(it => {
-        let desc = it.desc;
-        const category = cleanCatLabel((store.profiles[currentProfile].catRules || {})[merchantKey(it.desc)] || categorizeDesc(it.upDesc));
-        if (category) desc = `[${category}] ${desc}`;
+    toInsert.forEach(it => {
+        const desc = applyAutoCategory(it.desc);
         const pm = it.desc.match(/(?:parcela\s+|-\s*)(\d{1,2})\s*\/\s*(\d{1,2})\s*$/i);
         store.profiles[currentProfile][destOf(it)].transactions.push({
-            id: String(Date.now()) + "_" + Math.floor(Math.random() * 1000000),
+            id: uid("tx"),
+            createdAt: Date.now(),
             date: `${it.dateObj.d}/${it.dateObj.m}/${it.dateObj.y}`,
             bank: bankName, desc, parcela: pm ? `${pm[1]}/${pm[2]}` : "Auto (CSV)",
             val: it.val, batchId
@@ -3406,25 +3718,26 @@ async function runCSVImport(text, fileName) {
         batchTotal += it.val;
     });
     if (!store.profiles[currentProfile].importedBatches) store.profiles[currentProfile].importedBatches = [];
-    store.profiles[currentProfile].importedBatches.unshift({ id: batchId, fileName, bank: bankName, importDate: new Date().toLocaleString("pt-BR"), count: items.length, totalVal: batchTotal, ignoredCount: ignored.length });
+    store.profiles[currentProfile].importedBatches.unshift({ id: batchId, fileName, bank: bankName, importDate: new Date().toLocaleString("pt-BR"), count: toInsert.length, totalVal: batchTotal, ignoredCount: ignored.length + dupSkipped });
     // Garante que o banco fique visível no perfil
     const prof = store.profiles[currentProfile];
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bankName);
     if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bankName)) prof.enabledBanks.push(bankName);
     saveStore(); renderAll(); checkNotifications();
-    toast(`${items.length} lançamentos importados.`, null, "ok");
+    toast(`${toInsert.length} lançamentos importados${dupSkipped ? ` (${dupSkipped} duplicados ignorados)` : ""}.`, null, "ok");
 }
 
 function renderHistoryTable() {
     const tbody = document.getElementById("historyTableBody"); if (!tbody) return;
-    tbody.innerHTML = "";
+    const rows = [];
     MONTHS.forEach(m => {
         const t = calcMonthTotals(m);
         if (t.rec > 0 || t.saidas > 0 || m === currentMonth) {
             const isPos = t.saldo >= 0;
-            tbody.innerHTML += `<tr><td style="font-weight:700;">${m === currentMonth ? m + ' (Atual)' : m}</td><td class="val-col" style="color:var(--success); font-weight:600;">${fmtBRL(t.rec)}</td><td class="val-col">${fmtBRL(t.ess)}</td><td class="val-col">${fmtBRL(t.cards + t.out)}</td><td class="val-col" style="color:var(--danger); font-weight:600;">${fmtBRL(t.saidas)}</td><td class="val-col"><span style="background:${isPos ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}; color:${isPos ? 'var(--success)' : 'var(--danger)'}; padding:4px 8px; border-radius:6px; font-weight:700;">${fmtBRL(t.saldo)}</span></td></tr>`;
+            rows.push(`<tr><td style="font-weight:700;">${m === currentMonth ? m + ' (Atual)' : m}</td><td class="val-col" style="color:var(--success); font-weight:600;">${fmtBRL(t.rec)}</td><td class="val-col">${fmtBRL(t.ess)}</td><td class="val-col">${fmtBRL(t.cards + t.out)}</td><td class="val-col" style="color:var(--danger); font-weight:600;">${fmtBRL(t.saidas)}</td><td class="val-col"><span style="background:${isPos ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}; color:${isPos ? 'var(--success)' : 'var(--danger)'}; padding:4px 8px; border-radius:6px; font-weight:700;">${fmtBRL(t.saldo)}</span></td></tr>`);
         }
     });
+    tbody.innerHTML = rows.join("");
 }
 function updateBankSelects() {
     const txBank = document.getElementById("txBank"); const filterBank = document.getElementById("filterBank"); const futureBank = document.getElementById("futureBank");
@@ -3432,18 +3745,16 @@ function updateBankSelects() {
     const banksForTx = vis.length ? vis : store.config.banks;
     if (txBank) {
         const prevVal = txBank.value;
-        txBank.innerHTML = "";
-        banksForTx.forEach(b => { txBank.innerHTML += `<option value="${esc(b)}">${esc(b)}</option>`; });
-        store.config.banks.filter(b => !banksForTx.includes(b)).forEach(b => { txBank.innerHTML += `<option value="${esc(b)}">${esc(b)} (Oculta)</option>`; });
+        txBank.innerHTML =
+            banksForTx.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("") +
+            store.config.banks.filter(b => !banksForTx.includes(b)).map(b => `<option value="${esc(b)}">${esc(b)} (Oculta)</option>`).join("");
         if (prevVal && store.config.banks.includes(prevVal)) txBank.value = prevVal;
     }
     if (filterBank) {
-        filterBank.innerHTML = '<option value="TODOS">Todas as Faturas</option>';
-        store.config.banks.forEach(b => { filterBank.innerHTML += `<option value="${esc(b)}">${esc(b)}</option>`; });
+        filterBank.innerHTML = '<option value="TODOS">Todas as Faturas</option>' + store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
     }
     if (futureBank) {
-        futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>';
-        store.config.banks.forEach(b => { futureBank.innerHTML += `<option value="${esc(b)}">${esc(b)}</option>`; });
+        futureBank.innerHTML = '<option value="À Vista">À Vista (Pix/Dinheiro)</option>' + store.config.banks.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
     }
     if (typeof updateCSVBankSelect === 'function') updateCSVBankSelect();
     onTxBankChange();
@@ -3547,12 +3858,13 @@ function addRow(group) {
     if (group === "essenciais") toggleDespSub("ess", true);
     if (group === "naoEssenciais") toggleDespSub("var", true);
     const defaultName = group === "receitas" ? "Nova Receita" : group === "essenciais" ? "Nova Despesa Fixa" : "Nova Despesa Variável";
-    store.profiles[currentProfile][currentMonth][group].push({ nome: defaultName, valor: 0, paid: false, venc: "" });
+    store.profiles[currentProfile][currentMonth][group].push({ id: uid("row"), nome: defaultName, valor: 0, paid: false, venc: "" });
     saveStore(); renderAll();
 }
-async function removeRow(group, index) {
-    const item = store.profiles[currentProfile][currentMonth]?.[group]?.[index];
+async function removeRow(group, idOrIdx) {
+    const { item } = resolveRowItem(group, idOrIdx);
     if (!item) return;
+    const targetId = item.id || idOrIdx;
     const ok = await uiConfirm({
         title: "Remover item?",
         message: `Deseja excluir "${item.nome || 'item'}" (${fmtBRL(item.valor)}) de ${currentMonth}?`,
@@ -3560,10 +3872,13 @@ async function removeRow(group, index) {
         danger: true
     });
     if (ok) {
-        const removed = store.profiles[currentProfile][currentMonth][group].splice(index, 1)[0];
+        const { index: curIdx, list } = resolveRowItem(group, targetId);
+        if (curIdx < 0) return;
+        const removed = list.splice(curIdx, 1)[0];
         saveStore(); renderAll(); checkNotifications();
         toast(`"${removed.nome}" removido.`, () => {
-            store.profiles[currentProfile][currentMonth][group].splice(index, 0, removed);
+            const dst = store.profiles[currentProfile][currentMonth]?.[group];
+            if (Array.isArray(dst)) dst.splice(Math.min(curIdx, dst.length), 0, removed);
             saveStore(); renderAll(); checkNotifications();
         }, "del");
     }
@@ -3574,7 +3889,7 @@ function marketAdd() {
     const inp = document.getElementById("mkInput"); if (!inp) return;
     const parts = inp.value.split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); if (!parts.length) return;
     const l = marketList();
-    parts.forEach(n => l.push({ id: Date.now() + "_" + Math.random().toString(36).slice(2, 7), nome: n.slice(0, 80), done: false }));
+    parts.forEach(n => l.push({ id: uid("mk"), nome: n.slice(0, 80), done: false }));
     inp.value = ""; saveStore(); renderMarket(); inp.focus();
 }
 function marketToggle(id) { const it = marketList().find(x => x.id === id); if (!it) return; it.done = !it.done; saveStore(); renderMarket(); }
@@ -3667,10 +3982,12 @@ function getAvulsoDueStatus(tx) {
     if (diff <= 3) return { label: `Vence ${dd}/${mm} (${diff}d)`, cls: "due-soon" };
     return { label: `Vence ${dd}/${mm}`, cls: "has-due" };
 }
-function openItemDuePicker(group, index, event) {
+function openItemDuePicker(group, idOrIdx, event) {
     if (event) event.stopPropagation();
-    const item = store.profiles?.[currentProfile]?.[currentMonth]?.[group]?.[index];
+    const { item } = resolveRowItem(group, idOrIdx);
     if (!item) return;
+    if (!item.id) item.id = uid("row");
+    const rowRef = item.id;
     const old = document.getElementById("itemDueSheet"); if (old) old.remove();
     const dt = parseExpenseDueDate(item.venc, currentMonth);
     const isoVal = dt ? isoDate(dt) : "";
@@ -3681,7 +3998,7 @@ function openItemDuePicker(group, index, event) {
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1.02rem;margin-bottom:4px;">
             <span style="display:inline-flex;align-items:center;gap:7px;">${ico("calendar", 18)} Vencimento · ${esc(item.nome || "Despesa")}</span>
-            <button class="btn-icon" onclick="document.getElementById('itemDueSheet').remove()">${ico("x", 16)}</button>
+            <button class="btn-icon" onclick="document.getElementById('itemDueSheet').remove()" aria-label="Fechar">${ico("x", 16)}</button>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">
             Defina a data de vencimento para receber alertas e notificações antes de vencer.
@@ -3697,8 +4014,8 @@ function openItemDuePicker(group, index, event) {
             <input type="checkbox" id="itemDueRepeatNext" style="width:18px;height:18px;"> Aplicar este dia também nos próximos meses
         </label>
         <div style="display:flex;gap:8px;margin-top:16px;">
-            ${item.venc ? `<button type="button" class="btn-danger" style="padding:11px 14px;" onclick="saveItemDueDate('${group}', ${index}, '')">Remover data</button>` : ""}
-            <button type="button" class="btn" style="flex:1;padding:11px 14px;" onclick="saveItemDueDate('${group}', ${index}, document.getElementById('itemDueDateInput').value)">Salvar vencimento</button>
+            ${item.venc ? `<button type="button" class="btn-danger" style="padding:11px 14px;" onclick="saveItemDueDate('${group}', '${jsq(rowRef)}', '')">Remover data</button>` : ""}
+            <button type="button" class="btn" style="flex:1;padding:11px 14px;" onclick="saveItemDueDate('${group}', '${jsq(rowRef)}', document.getElementById('itemDueDateInput').value)">Salvar vencimento</button>
         </div>
     </div>`;
     document.body.appendChild(o);
@@ -3713,9 +4030,9 @@ function setItemQuickDay(day) {
     if (inp) inp.value = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     document.querySelectorAll("#itemDueSheet .day-pick-btn").forEach(b => b.classList.toggle("sel", b.textContent === `Dia ${day}`));
 }
-function saveItemDueDate(group, index, val) {
+function saveItemDueDate(group, idOrIdx, val) {
     const prof = store.profiles[currentProfile];
-    const item = prof?.[currentMonth]?.[group]?.[index];
+    const { item } = resolveRowItem(group, idOrIdx);
     if (!item) return;
     item.venc = val || "";
     const rep = document.getElementById("itemDueRepeatNext")?.checked;
@@ -3734,12 +4051,27 @@ function saveItemDueDate(group, index, val) {
     toast(val ? `Vencimento de "${item.nome}" salvo.` : `Vencimento removido.`, null, "ok");
 }
 
-function updateItem(group, index, field, val) {
-    const list = store.profiles?.[currentProfile]?.[currentMonth]?.[group];
-    if (!list || !list[index]) return;
-    list[index][field] = val; if (field === "paid" && val) markSessionPaid(); saveStore();
+function updateItem(group, idOrIdx, field, val) {
+    const { item } = resolveRowItem(group, idOrIdx);
+    if (!item) return;
+    item[field] = val; if (field === "paid" && val) markSessionPaid(); saveStore();
     if ((group === "essenciais" || group === "naoEssenciais") && field === "paid") renderAll(); else updateTotalsOnly();
     checkNotifications();
+}
+function cycleReserveMonths() {
+    const cur = Number(store.config.reserveMonths) || 6;
+    const next = cur === 3 ? 6 : cur === 6 ? 12 : 3;
+    store.config.reserveMonths = next;
+    saveStore();
+    updateTotalsOnly();
+    toast(`Reserva Ideal ajustada para ${next} meses de custos essenciais.`, null, "info");
+}
+function updateReservaKPI(essVal) {
+    const mult = [3, 6, 12].includes(Number(store.config.reserveMonths)) ? Number(store.config.reserveMonths) : 6;
+    const tEl = document.getElementById("kpiReservaTitle");
+    const vEl = document.getElementById("kpiReserva");
+    if (tEl) tEl.textContent = `Reserva Ideal (${mult}x) ↻`;
+    if (vEl) vEl.textContent = fmtBRL((Number(essVal) || 0) * mult);
 }
 function updateSaldoKPI(t) {
     document.getElementById("kpiSaldo").textContent = fmtBRL(t.falta);
@@ -3761,7 +4093,7 @@ function updateTotalsOnly() {
     document.getElementById("kpiEntradas").textContent = fmtBRL(curTot.rec);
     document.getElementById("kpiSaidas").textContent = fmtBRL(curTot.saidas);
     updateSaldoKPI(curTot);
-    document.getElementById("kpiReserva").textContent = fmtBRL(curTot.ess * 6);
+    updateReservaKPI(curTot.ess);
     document.getElementById("kpiFuturas").textContent = fmtBRL(store.profiles[currentProfile].futurePurchases.filter(f => f.status === "Pendente").reduce((a, b) => a + (Number(b.val) || 0), 0));
     const maxVal = Math.max(curTot.rec, curTot.saidas, 1);
     document.getElementById("barValEntradas").textContent = fmtBRL(curTot.rec); document.getElementById("barFillEntradas").style.width = Math.min(100, (curTot.rec / maxVal) * 100) + "%";
@@ -3772,38 +4104,42 @@ function updateTotalsOnly() {
     else { document.getElementById("kpiCompEntradas").style.display = 'none'; document.getElementById("kpiCompSaidas").style.display = 'none'; }
     if (typeof renderHistoryTable === 'function') renderHistoryTable();
     if (typeof renderCategoryReport === 'function') renderCategoryReport();
+    if (typeof renderInvoiceReport === 'function') renderInvoiceReport();
+    if (typeof renderDueCalendar === 'function') renderDueCalendar();
     if (typeof renderEvolution === 'function') renderEvolution();
 }
 function renderTableRows(group, containerId) {
     const body = document.getElementById(containerId); if (!body) return;
-    body.innerHTML = "";
     const isExpense = group === "essenciais" || group === "naoEssenciais";
-    store.profiles[currentProfile][currentMonth][group].forEach((item, i) => {
+    const list = store.profiles[currentProfile][currentMonth][group] || [];
+    body.innerHTML = list.map((item, i) => {
+        if (!item.id) item.id = uid("row");
+        const rId = item.id;
         const dueInfo = isExpense ? getExpenseDueBadgeInfo(item, currentMonth) : null;
         const isPaid = isExpense && !!item.paid;
-        body.innerHTML += `<tr id="row_${group}_${i}" class="${isPaid ? 'row-paid' : ''}">
+        return `<tr id="row_${group}_${esc(rId)}" class="${isPaid ? 'row-paid' : ''}">
             <td class="${isExpense ? 'has-chk' : ''}">
                 <div class="item-row-main">
-                    ${isExpense ? `<input type="checkbox" class="pay-chk" title="Marcar como paga neste mês" ${isPaid ? 'checked' : ''} onchange="updateItem('${group}', ${i}, 'paid', this.checked)">` : ''}
-                    <input type="text" value="${esc(item.nome)}" title="${esc(item.nome)}" oninput="updateItem('${group}', ${i}, 'nome', this.value)" onchange="updateItem('${group}', ${i}, 'nome', this.value)">
-                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', ${i}, event)" title="${dueInfo.empty ? 'Definir data de vencimento' : 'Vencimento: ' + esc(dueInfo.label)}">${ico("calendar", 11)}${dueInfo.shortLabel ? ' ' + esc(dueInfo.shortLabel) : ''}</button>` : ''}
+                    ${isExpense ? `<input type="checkbox" class="pay-chk" title="Marcar como paga neste mês" aria-label="Marcar ${esc(item.nome)} como paga" ${isPaid ? 'checked' : ''} onchange="updateItem('${group}', '${jsq(rId)}', 'paid', this.checked)">` : ''}
+                    <input type="text" value="${esc(item.nome)}" title="${esc(item.nome)}" aria-label="Nome do item" oninput="updateItem('${group}', '${jsq(rId)}', 'nome', this.value)" onchange="updateItem('${group}', '${jsq(rId)}', 'nome', this.value)">
+                    ${isExpense ? `<button type="button" class="due-pill-btn ${dueInfo.cls}" onclick="openItemDuePicker('${group}', '${jsq(rId)}', event)" title="${dueInfo.empty ? 'Definir data de vencimento' : 'Vencimento: ' + esc(dueInfo.label)}">${ico("calendar", 11)}${dueInfo.shortLabel ? ' ' + esc(dueInfo.shortLabel) : ''}</button>` : ''}
                 </div>
             </td>
-            <td class="val-col"><input type="text" inputmode="numeric" value="${fmtBRL(item.valor)}" oninput="maskCurrencyInput(this); updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))" onchange="updateItem('${group}', ${i}, 'valor', parseInputCurrency(this.value))"></td>
-            <td class="action-col"><button type="button" class="row-del-btn" onclick="removeRow('${group}', ${i})" title="Excluir item" aria-label="Excluir item">${ico("trash", 13)}</button></td>
+            <td class="val-col"><input type="text" inputmode="numeric" value="${fmtBRL(item.valor)}" aria-label="Valor de ${esc(item.nome)}" oninput="maskCurrencyInput(this); updateItem('${group}', '${jsq(rId)}', 'valor', parseInputCurrency(this.value))" onchange="updateItem('${group}', '${jsq(rId)}', 'valor', parseInputCurrency(this.value))"></td>
+            <td class="action-col"><button type="button" class="row-del-btn" onclick="removeRow('${group}', '${jsq(rId)}')" title="Excluir item" aria-label="Excluir item">${ico("trash", 13)}</button></td>
         </tr>`;
-    });
+    }).join("");
 }
 function addFuturePurchase() {
     const desc = document.getElementById("futureDesc").value.trim(); const val = parseInputCurrency(document.getElementById("futureVal").value);
     const bank = document.getElementById("futureBank").value; const priority = document.getElementById("futurePriority").value;
     if (!desc || val <= 0) return toast("Informe descrição e valor.", null, "warn");
-    store.profiles[currentProfile].futurePurchases.push({ id: Date.now(), desc, val, bank, priority, status: "Pendente" });
+    store.profiles[currentProfile].futurePurchases.push({ id: uid("fut"), desc, val, bank, priority, status: "Pendente" });
     document.getElementById("futureDesc").value = ""; document.getElementById("futureVal").value = "";
     saveStore(); renderAll();
 }
 async function deleteFuturePurchase(id) {
-    const item = store.profiles[currentProfile].futurePurchases.find(f => f.id === id);
+    const item = store.profiles[currentProfile].futurePurchases.find(f => String(f.id) === String(id));
     if (!item) return;
     const ok = await uiConfirm({
         title: "Excluir compra planejada?",
@@ -3812,12 +4148,12 @@ async function deleteFuturePurchase(id) {
         danger: true
     });
     if (!ok) return;
-    store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => f.id !== id);
+    store.profiles[currentProfile].futurePurchases = store.profiles[currentProfile].futurePurchases.filter(f => String(f.id) !== String(id));
     saveStore(); renderAll();
 }
-function toggleFutureStatus(id) { const item = store.profiles[currentProfile].futurePurchases.find(f => f.id === id); if (item) { item.status = item.status === "Pendente" ? "Comprado" : "Pendente"; saveStore(); renderAll(); } }
+function toggleFutureStatus(id) { const item = store.profiles[currentProfile].futurePurchases.find(f => String(f.id) === String(id)); if (item) { item.status = item.status === "Pendente" ? "Comprado" : "Pendente"; saveStore(); renderAll(); } }
 async function moveFutureToCurrentMonth(id) {
-    const item = store.profiles[currentProfile].futurePurchases.find(f => f.id === id); if (!item) return;
+    const item = store.profiles[currentProfile].futurePurchases.find(f => String(f.id) === String(id)); if (!item) return;
     const ok = await uiConfirm({
         title: "Lançar compra no mês atual?",
         message: `Deseja lançar "${item.desc}" (${fmtBRL(item.val)}) nas faturas de ${currentMonth}?`,
@@ -3826,7 +4162,7 @@ async function moveFutureToCurrentMonth(id) {
     });
     if (ok) {
         const bankName = store.config.banks.includes(item.bank) ? item.bank : store.config.banks[0];
-        store.profiles[currentProfile][currentMonth].transactions.push({ id: Date.now(), date: new Date().toLocaleDateString("pt-BR"), bank: bankName, desc: item.desc, parcela: "À vista", val: item.val });
+        store.profiles[currentProfile][currentMonth].transactions.push({ id: uid("tx"), createdAt: Date.now(), date: new Date().toLocaleDateString("pt-BR"), bank: bankName, desc: applyAutoCategory(item.desc), parcela: "À vista", val: item.val, dueDate: "", paid: false });
         const prof = store.profiles[currentProfile];
         if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bankName);
         if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bankName)) prof.enabledBanks.push(bankName);
@@ -3835,16 +4171,17 @@ async function moveFutureToCurrentMonth(id) {
     }
 }
 function renderFuturePurchases() {
-    const tbody = document.getElementById("futureTableBody"); tbody.innerHTML = "";
-    const list = store.profiles[currentProfile].futurePurchases;
+    const tbody = document.getElementById("futureTableBody");
+    const list = store.profiles[currentProfile].futurePurchases || [];
     if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhuma compra futura.</td></tr>`; document.getElementById("futureTotalBadge").textContent = "Total: R$ 0,00"; return; }
     let totFut = 0;
-    list.forEach(item => {
+    tbody.innerHTML = list.map(item => {
+        if (!item.id) item.id = uid("fut");
         if (item.status === "Pendente") totFut += Number(item.val) || 0;
         const prioCls = item.priority === "Alta" ? "prio-alta" : (item.priority === "Média" ? "prio-media" : "prio-baixa");
         const isDone = item.status === "Comprado";
-        tbody.innerHTML += `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td><input type="checkbox" class="cb-fut" value="${item.id}" onchange="toggleFutBtn()"></td><td style="width:105px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus(${item.id})">${isDone ? `${ico("check", 12)} Comprado` : `${ico("clock", 12)} Pendente`}</button></td><td style="font-weight:600;">${esc(item.desc)}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : esc(item.bank)}</td><td class="${prioCls}">${esc(item.priority)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;white-space:nowrap;"><button class="btn" style="padding:4px 9px; font-size:0.74rem; display:inline-flex; align-items:center; gap:4px;" onclick="moveFutureToCurrentMonth(${item.id})">${ico("arrowRight", 12)} Lançar</button> <button class="btn-danger" style="padding:4px 7px;" onclick="deleteFuturePurchase(${item.id})" aria-label="Excluir">${ico("trash", 13)}</button></td></tr>`;
-    });
+        return `<tr style="${isDone ? 'opacity:0.5; text-decoration:line-through;' : ''}"><td><input type="checkbox" class="cb-fut" value="${esc(item.id)}" onchange="toggleFutBtn()" aria-label="Selecionar compra futura"></td><td style="width:105px;"><button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; display:inline-flex; align-items:center; gap:5px; border-color:${isDone?'var(--success)':'var(--border)'}; color:${isDone?'var(--success)':'var(--text-muted)'};" onclick="toggleFutureStatus('${jsq(item.id)}')">${isDone ? `${ico("check", 12)} Comprado` : `${ico("clock", 12)} Pendente`}</button></td><td style="font-weight:600;">${esc(item.desc)}</td><td>${store.config.banks.includes(item.bank) ? createBankBadgeHTML(item.bank, false) : esc(item.bank)}</td><td class="${prioCls}">${esc(item.priority)}</td><td class="val-col" style="font-weight:700;">${fmtBRL(item.val)}</td><td style="text-align:center;white-space:nowrap;"><button class="btn" style="padding:4px 9px; font-size:0.74rem; display:inline-flex; align-items:center; gap:4px;" onclick="moveFutureToCurrentMonth('${jsq(item.id)}')">${ico("arrowRight", 12)} Lançar</button> <button class="btn-danger" style="padding:4px 7px;" onclick="deleteFuturePurchase('${jsq(item.id)}')" aria-label="Excluir">${ico("trash", 13)}</button></td></tr>`;
+    }).join("");
     document.getElementById("futureTotalBadge").textContent = "Total Pendente: " + fmtBRL(totFut);
 }
 function calcMonthTotals(month) {
@@ -3866,6 +4203,10 @@ function getBankTotal(bank, month = currentMonth, profName = currentProfile) {
     const sumTx = (data.transactions || []).filter(t => t.bank === bank).reduce((acc, t) => acc + (Number(t.val) || 0), 0);
     const manual = Number(data.cardStatus?.[bank]?.manualExtra) || 0;
     return sumTx + manual;
+}
+function getBankCredits(bank, month = currentMonth, profName = currentProfile) {
+    const data = store.profiles?.[profName]?.[month]; if (!data) return 0;
+    return (data.transactions || []).filter(t => (!bank || t.bank === bank) && Number(t.val) < 0).reduce((acc, t) => acc + Math.abs(Number(t.val) || 0), 0);
 }
 function renderCompareBadge(curr, prev, elemId, invert = false) {
     const el = document.getElementById(elemId);
@@ -3914,7 +4255,10 @@ function renderInstallments() {
     });
     const keys = Object.keys(byMonth);
     if (!keys.length) { el.innerHTML = `<p style="color:var(--text-muted); padding: 12px 0;">Nenhuma parcela em aberto.</p>`; return; }
-    let html = `<div class="cat-hint" style="margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;">${ico("info", 14)} Toque no mês para expandir as parcelas projetadas.</div>`;
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <div class="cat-hint" style="margin:0;display:inline-flex;align-items:center;gap:6px;">${ico("info", 14)} Toque no mês para expandir as parcelas projetadas.</div>
+        <button type="button" class="btn-outline" style="padding:5px 11px;font-size:.75rem;display:inline-flex;align-items:center;gap:5px;" onclick="projectAllInstallmentsFromCurrent()">${ico("layers", 13)} Projetar parcelas nas faturas futuras</button>
+    </div>`;
     keys.forEach(k => {
         const mData = byMonth[k];
         const isOpen = openInstallmentMonths.has(k);
@@ -3945,6 +4289,82 @@ function renderCategoryReport() {
     });
     catContainer.innerHTML = html;
 }
+function renderInvoiceReport() {
+    const el = document.getElementById("invoiceReportBody"); if (!el) return;
+    const banks = getProfileVisibleBanks(currentProfile, currentMonth);
+    const items = banks.map(b => ({ name: b, val: Math.max(0, getBankTotal(b, currentMonth)), credits: getBankCredits(b, currentMonth), color: getBankColor(b) })).filter(x => x.val > 0 || x.credits > 0).sort((a, b) => b.val - a.val);
+    const total = items.reduce((a, x) => a + x.val, 0);
+    if (!items.length || total <= 0) {
+        el.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:18px;">Nenhuma fatura com saldo positivo em ${esc(currentMonth)}.</p>`;
+        return;
+    }
+    const rows = items.map(it => {
+        const pct = total > 0 ? ((it.val / total) * 100).toFixed(1) : "0.0";
+        return `<div style="margin-bottom:10px;cursor:pointer;" onclick="bnGo('cartoes');selectSingleFilterBank('${jsq(it.name)}')">
+            <div class="bar-label" style="font-size:.84rem;">
+                <span style="display:inline-flex;align-items:center;gap:6px;">${createBankBadgeHTML(it.name, false)}${it.credits > 0 ? `<small style="color:var(--success);">(-${fmtBRL(it.credits)} estorno)</small>` : ""}</span>
+                <span class="hv" style="font-weight:700;">${fmtBRL(it.val)} (${pct}%)</span>
+            </div>
+            <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${pct}%;background:${it.color};"></div></div>
+        </div>`;
+    }).join("");
+    el.innerHTML = `<div style="display:flex;justify-content:center;margin-bottom:14px;">${ringSVG(items, total, 195)}</div>${rows}`;
+}
+function renderDueCalendar() {
+    const el = document.getElementById("dueCalendarBody"); if (!el) return;
+    const [mName, yStr] = currentMonth.split("/");
+    const mo = Math.max(0, _mn.indexOf(mName));
+    const yr = Number(yStr) || new Date().getFullYear();
+    const firstDow = new Date(yr, mo, 1).getDay();
+    const daysInMonth = new Date(yr, mo + 1, 0).getDate();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const md = store.profiles[currentProfile]?.[currentMonth];
+    const byDay = {};
+    const addEv = (day, label, paid, dueDt) => {
+        if (!day || day < 1 || day > daysInMonth) return;
+        if (!byDay[day]) byDay[day] = [];
+        const cls = paid ? "paid" : (dueDt && dueDt < today ? "late" : "pend");
+        byDay[day].push({ label, cls });
+    };
+    if (md) {
+        const visBanks = getProfileVisibleBanks(currentProfile, currentMonth);
+        visBanks.forEach(b => {
+            const tot = getBankTotal(b, currentMonth);
+            if (tot <= 0) return;
+            const cs = md.cardStatus?.[b];
+            const dt = dueDateFor(new Date(yr, mo, 1), currentMonth, cs, today);
+            if (dt && dt.getMonth() === mo && dt.getFullYear() === yr) {
+                const paid = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, b) === "Pago";
+                addEv(dt.getDate(), b, paid, dt);
+            }
+        });
+        (md.essenciais || []).forEach(it => {
+            if ((Number(it.valor) || 0) <= 0 || !it.venc) return;
+            const dt = parseExpenseDueDate(it.venc, currentMonth);
+            if (dt && dt.getMonth() === mo && dt.getFullYear() === yr) addEv(dt.getDate(), it.nome, !!it.paid, dt);
+        });
+        (md.naoEssenciais || []).forEach(it => {
+            if ((Number(it.valor) || 0) <= 0 || !it.venc) return;
+            const dt = parseExpenseDueDate(it.venc, currentMonth);
+            if (dt && dt.getMonth() === mo && dt.getFullYear() === yr) addEv(dt.getDate(), it.nome, !!it.paid, dt);
+        });
+        (md.transactions || []).forEach(tx => {
+            if ((Number(tx.val) || 0) <= 0 || !tx.dueDate) return;
+            const dt = parseExpenseDueDate(tx.dueDate, currentMonth);
+            if (dt && dt.getMonth() === mo && dt.getFullYear() === yr) addEv(dt.getDate(), cleanDisplayDesc(stripCatTag(tx.desc)), !!tx.paid, dt);
+        });
+    }
+    const dows = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(d => `<div class="cal-dow">${d}</div>`).join("");
+    const cells = [];
+    for (let i = 0; i < firstDow; i++) cells.push(`<div class="cal-day empty"></div>`);
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = today.getFullYear() === yr && today.getMonth() === mo && today.getDate() === d;
+        const evs = byDay[d] || [];
+        const pills = evs.slice(0, 2).map(e => `<span class="cal-pill ${e.cls}" title="${esc(e.label)}">${esc(e.label)}</span>`).join("") + (evs.length > 2 ? `<span class="cal-pill pend">+${evs.length - 2}</span>` : "");
+        cells.push(`<div class="cal-day ${isToday ? "today" : ""} ${evs.length ? "has-due" : ""}" ${evs.length ? `onclick="openDueSheet()"` : ""}><span class="cal-day-num">${d}</span><div class="cal-dots">${pills}</div></div>`);
+    }
+    el.innerHTML = `<div style="font-size:.78rem;color:var(--text-muted);margin-bottom:6px;display:flex;gap:12px;flex-wrap:wrap;"><span><b style="color:#fcd34d;">●</b> Pendente</span><span><b style="color:#fda4af;">●</b> Vencida</span><span><b style="color:#6ee7b7;">●</b> Paga</span></div><div class="cal-grid">${dows}${cells.join("")}</div>`;
+}
 function setGoal(idx, val) {
     const c = _catList[idx]; if (!c) return;
     const prof = store.profiles[currentProfile]; if (!prof.goals) prof.goals = {};
@@ -3953,6 +4373,7 @@ function setGoal(idx, val) {
 }
 
 function renderAll() {
+    syncMonthLabel();
     document.getElementById("btnDelBulkTx").style.display = "none";
     document.getElementById("btnDelBulkFut").style.display = "none";
     if (document.getElementById("selectAllTx")) document.getElementById("selectAllTx").checked = false;
@@ -3973,12 +4394,13 @@ function renderAll() {
         manageBtn.innerHTML = `${ico("eye", 13)} ${esc(lbl)}`;
     }
 
-    // Barra executiva de resumo das Faturas (#faturasOverviewBar)
+    // Barra executiva de resumo das Faturas (#faturasOverviewBar) com destaque de créditos/estornos
     const foBar = document.getElementById("faturasOverviewBar");
     if (foBar) {
-        let sumAll = 0, sumPaid = 0, sumPend = 0, cntPaid = 0, cntPend = 0;
+        let sumAll = 0, sumPaid = 0, sumPend = 0, cntPaid = 0, cntPend = 0, sumCredits = 0;
         profileVisibleBanks.forEach(b => {
             const v = getBankTotal(b, currentMonth);
+            sumCredits += getBankCredits(b, currentMonth);
             if (Math.abs(v) < 0.009) return;
             sumAll += v;
             if (getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, b) === "Pago") {
@@ -3991,7 +4413,7 @@ function renderAll() {
             <div class="fo-card">
                 <div class="fo-label">${ico("layers", 12)} Total em Faturas</div>
                 <div class="fo-val hv">${fmtBRL(sumAll)}</div>
-                <div class="fo-sub">${profileVisibleBanks.length} fatura${profileVisibleBanks.length === 1 ? '' : 's'} ativa${profileVisibleBanks.length === 1 ? '' : 's'}</div>
+                <div class="fo-sub">${sumCredits > 0 ? `<span style="color:var(--success);">Estornos: -${fmtBRL(sumCredits)}</span>` : `${profileVisibleBanks.length} fatura${profileVisibleBanks.length === 1 ? '' : 's'} ativa${profileVisibleBanks.length === 1 ? '' : 's'}`}</div>
             </div>
             <div class="fo-card ok">
                 <div class="fo-label">${ico("check", 12)} Pago no mês</div>
@@ -4005,27 +4427,27 @@ function renderAll() {
             </div>`;
     }
 
-    const cardBody = document.getElementById("cartoesResumoBody"); cardBody.innerHTML = "";
+    const cardBody = document.getElementById("cartoesResumoBody");
     if (profileVisibleBanks.length === 0) {
         cardBody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--text-muted);font-size:.8rem;">Nenhuma fatura selecionada neste perfil. <button type="button" class="btn-outline" style="padding:3px 9px;font-size:.74rem;margin-left:6px;display:inline-flex;align-items:center;gap:4px;" onclick="openManageBanksSheet()">${ico("plus", 12)} Escolher faturas</button></td></tr>`;
     } else {
-        profileVisibleBanks.forEach(bank => {
+        cardBody.innerHTML = profileVisibleBanks.map(bank => {
             const tot = getBankTotal(bank);
             const isPaidCard = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, bank) === "Pago" && Math.abs(tot) > 0.009;
-            cardBody.innerHTML += `<tr class="${isPaidCard ? 'row-paid' : ''}">
+            return `<tr class="${isPaidCard ? 'row-paid' : ''}">
                 <td>
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
                         ${createBankBadgeHTML(bank, true)}
-                        ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="color:var(--text-muted);" title="Ocultar fatura zerada" onclick="hideBankCard('${jsq(bank)}', event)">${ico("eyeOff", 14)}</button>` : ""}
+                        ${Math.abs(tot) < 0.01 ? `<button type="button" class="btn-icon" style="color:var(--text-muted);" title="Ocultar fatura zerada" aria-label="Ocultar fatura ${esc(bank)}" onclick="hideBankCard('${jsq(bank)}', event)">${ico("eyeOff", 14)}</button>` : ""}
                     </div>
                 </td>
-                <td class="val-col" style="font-weight:700;">${fmtBRL(tot)}</td>
-                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button type="button" class="row-del-btn" title="Excluir ou ocultar fatura zerada" onclick="deleteBankCard('${jsq(bank)}', event)">${ico("trash", 13)}</button>` : ""}</td>
+                <td class="val-col" style="font-weight:700;${tot < 0 ? 'color:var(--success);' : ''}">${fmtBRL(tot)}</td>
+                <td class="action-col">${Math.abs(tot) < 0.01 ? `<button type="button" class="row-del-btn" title="Excluir ou ocultar fatura zerada" aria-label="Excluir fatura ${esc(bank)}" onclick="deleteBankCard('${jsq(bank)}', event)">${ico("trash", 13)}</button>` : ""}</td>
             </tr>`;
-        });
+        }).join("");
     }
 
-    const bankContainer = document.getElementById("bankCardsContainer"); bankContainer.innerHTML = "";
+    const bankContainer = document.getElementById("bankCardsContainer");
     renderGroupTabs();
     const visibleBanks = profileVisibleBanks.filter(b => {
         if (faturaGroup !== "todos" && getBankType(b) !== faturaGroup) return false;
@@ -4033,8 +4455,9 @@ function renderAll() {
         return true;
     });
 
+    let bankCardsHtml = "";
     if (profileVisibleBanks.length === 0) {
-        bankContainer.innerHTML = `<div class="fatura-onboarding">
+        bankCardsHtml = `<div class="fatura-onboarding">
             <h4 style="display:inline-flex;align-items:center;gap:7px;">${ico("card", 18)} Escolha as faturas do perfil "${esc(currentProfile)}"</h4>
             <p>Este perfil ainda não possui saldo devedor ativo. Toque uma por uma nas faturas que deseja utilizar aqui ou crie uma nova:</p>
             <div class="bank-picker-grid">
@@ -4049,12 +4472,12 @@ function renderAll() {
             </div>
         </div>`;
     } else if (!visibleBanks.length) {
-        bankContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:22px;font-size:.88rem;">Nenhuma fatura encontrada para este filtro/grupo.</div>`;
+        bankCardsHtml = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:22px;font-size:.88rem;">Nenhuma fatura encontrada para este filtro/grupo.</div>`;
     }
 
-    store.config.banks.forEach(bank => {
+    bankCardsHtml += store.config.banks.map(bank => {
         const info = ensureMonthCardStatus(store.profiles[currentProfile], currentMonth, bank);
-        if (!visibleBanks.includes(bank)) return;
+        if (!visibleBanks.includes(bank)) return "";
         const effectiveStatus = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, bank);
         const isOutros = getBankType(bank) === "outros";
         const dueNext = vencIsNextMonth(info, currentMonth, new Date());
@@ -4063,6 +4486,7 @@ function renderAll() {
         const dueFull = dueDt ? `Vence em ${String(dueDt.getDate()).padStart(2, "0")}/${String(dueDt.getMonth() + 1).padStart(2, "0")}/${dueDt.getFullYear()}` : "";
         const dueDisplay = String(info.venc || "Dia 10").replace(/^Dia\s*/i, "");
         const bankTotalVal = getBankTotal(bank);
+        const bankCredVal = getBankCredits(bank);
         const isZeroed = Math.abs(bankTotalVal) < 0.01;
         const bankTx = (data.transactions || []).filter(t => t.bank === bank);
         const detailRows = bankTx.length ? bankTx.map(t => {
@@ -4071,7 +4495,7 @@ function renderAll() {
                 : "";
             return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;font-size:.78rem;border-top:1px solid var(--border);">
                 <span style="min-width:0;overflow-wrap:anywhere;${t.paid ? 'text-decoration:line-through;opacity:.65;' : ''}">${esc(cleanDisplayDesc(t.desc))} ${cleanParcelaDisplay(t.parcela || "") && !/^(à\s*vista)$/i.test(cleanParcelaDisplay(t.parcela || "")) ? `(${esc(cleanParcelaDisplay(t.parcela))})` : ""}${avulsoBadge}</span>
-                <b style="white-space:nowrap;">${fmtBRL(t.val)}</b>
+                <b style="white-space:nowrap;${Number(t.val) < 0 ? 'color:var(--success);' : ''}">${fmtBRL(t.val)}</b>
             </div>`;
         }).join("") : `<div style="font-size:.78rem;color:var(--text-muted);padding:6px 0;">Nenhum lançamento neste mês.</div>`;
 
@@ -4079,10 +4503,10 @@ function renderAll() {
             ? `<span>Venc. Avulso: <input type="date" value="${dueDt ? isoDate(dueDt) : ''}" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:128px;padding:2px 5px;font-size:.74rem;"></span>`
             : `<span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">${ico("calendar", 12)} ${dueLabel}</button></span>`;
 
-        bankContainer.innerHTML += `<div class="bank-card ${effectiveStatus === 'Pago' ? 'is-paid-card' : ''}" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')">
+        return `<div class="bank-card ${effectiveStatus === 'Pago' ? 'is-paid-card' : ''}" data-bank="${esc(bank)}" onclick="this.classList.toggle('expanded')">
             <div class="bank-card-strip" style="background:${getBankColor(bank)};"></div>
             <div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?`${ico("check", 12)} Pago`:`${ico("clock", 12)} Pendente`}</button></div>
-            <div class="bank-total">${fmtBRL(bankTotalVal)}</div>
+            <div class="bank-total" style="${bankTotalVal < 0 ? 'color:var(--success);' : ''}">${fmtBRL(bankTotalVal)}${bankCredVal > 0 ? `<small style="display:block;font-size:.68rem;font-weight:600;color:var(--success);">Estornos no mês: -${fmtBRL(bankCredVal)}</small>` : ""}</div>
             <div class="bank-due" style="display:inline-flex;align-items:center;gap:5px;">${ico("calendar", 13)} ${dueFull || (isOutros ? "Contas avulsas (defina por item ou data)" : "Sem vencimento definido")}</div>
             <div class="bank-more">Toque para ver detalhes e opções ▾</div>
             <div class="bank-card-detail">
@@ -4098,13 +4522,16 @@ function renderAll() {
                 </div>
             </div>
         </div>`;
-    });
+    }).join("");
+    bankContainer.innerHTML = bankCardsHtml;
 
     renderFinishedInstallments();
     renderTransactionsOnly();
     renderFuturePurchases();
     renderHistoryTable();
     renderCategoryReport();
+    renderInvoiceReport();
+    renderDueCalendar();
     renderInstallments();
     renderEvolution();
     labelTables();
@@ -4123,7 +4550,7 @@ function renderAll() {
     document.getElementById("kpiEntradas").textContent = fmtBRL(curTot.rec);
     document.getElementById("kpiSaidas").textContent = fmtBRL(curTot.saidas);
     updateSaldoKPI(curTot);
-    document.getElementById("kpiReserva").textContent = fmtBRL(curTot.ess * 6);
+    updateReservaKPI(curTot.ess);
     document.getElementById("kpiFuturas").textContent = fmtBRL(store.profiles[currentProfile].futurePurchases.filter(f => f.status === "Pendente").reduce((a, b) => a + (Number(b.val) || 0), 0));
     const maxVal = Math.max(curTot.rec, curTot.saidas, 1);
     document.getElementById("barValEntradas").textContent = fmtBRL(curTot.rec); document.getElementById("barFillEntradas").style.width = Math.min(100, (curTot.rec / maxVal) * 100) + "%";
@@ -4164,15 +4591,16 @@ function cleanDisplayDesc(desc) {
 }
 
 function addTransaction() {
-    const desc = document.getElementById("txDesc").value.trim();
+    const rawDesc = document.getElementById("txDesc").value.trim();
     const val = parseInputCurrency(document.getElementById("txVal").value) * (document.getElementById("txCredit") && document.getElementById("txCredit").checked ? -1 : 1);
-    if (!desc || val === 0) return toast("Preencha descrição e valor.", null, "warn");
+    if (!rawDesc || val === 0) return toast("Preencha descrição e valor.", null, "warn");
+    const desc = applyAutoCategory(rawDesc);
     const bank = document.getElementById("txBank").value;
     const dueDate = document.getElementById("txDueDate") ? document.getElementById("txDueDate").value : "";
     const parcela = cleanParcelaDisplay(document.getElementById("txParcela").value) || "À vista";
     const dateFmt = document.getElementById("txDate").value ? document.getElementById("txDate").value.split("-").reverse().join("/") : new Date().toLocaleDateString("pt-BR");
     const newTx = {
-        id: Date.now(),
+        id: uid("tx"),
         createdAt: Date.now(),
         date: dateFmt,
         bank,
@@ -4183,6 +4611,7 @@ function addTransaction() {
         paid: false
     };
     store.profiles[currentProfile][currentMonth].transactions.push(newTx);
+    const projectedCount = projectInstallmentTx(newTx, currentMonth);
     // Garante que a fatura usada fique visível no perfil
     const prof = store.profiles[currentProfile];
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bank);
@@ -4192,7 +4621,7 @@ function addTransaction() {
     if (document.getElementById("txDueDate")) document.getElementById("txDueDate").value = "";
     if (document.getElementById("txCredit")) document.getElementById("txCredit").checked = false;
     saveStore(); updateBankSelects(); renderAll(); checkNotifications();
-    toast(`"${desc}" adicionado em ${bank}.`, null, "ok");
+    toast(`"${rawDesc}" adicionado em ${bank}${projectedCount > 0 ? ` (+${projectedCount} parcelas futuras projetadas)` : ""}.`, null, "ok");
 }
 async function deleteTx(id) {
     const list = store.profiles[currentProfile][currentMonth].transactions || [];
@@ -4332,8 +4761,14 @@ function importBackup(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(evt) {
-        try { store = sanitizeStore(JSON.parse(evt.target.result)); saveStore(); init(); toast("Backup restaurado com sucesso!", null, "ok"); }
-        catch (err) { toast("Erro ao processar arquivo de backup.", null, "warn"); }
+        try {
+            const fb = store.config?.firebaseConfig, gk = store.config?.geminiApiKey;
+            store = sanitizeStore(JSON.parse(evt.target.result));
+            if (!store.config.firebaseConfig && fb) store.config.firebaseConfig = fb;
+            if (!store.config.geminiApiKey && gk) store.config.geminiApiKey = gk;
+            saveStore(); init();
+            toast("Backup restaurado com sucesso!", null, "ok");
+        } catch (err) { toast("Erro ao processar arquivo de backup.", null, "warn"); }
     };
     reader.readAsText(file); e.target.value = "";
 }
@@ -4367,7 +4802,7 @@ async function fetchWithTimeout(url, options = {}, ms = 25000) {
 function buildChatSystemPrompt() {
     const curTot = calcMonthTotals(currentMonth);
     const prevTot = prevMonthStr ? calcMonthTotals(prevMonthStr) : null;
-    let ctx = `Consultor financeiro objetivo. PT-BR. ~250 palavras.\nPERFIL: ${currentProfile}\nMÊS (${currentMonth}): Entradas R$ ${curTot.rec.toFixed(2)}, Essenciais R$ ${curTot.ess.toFixed(2)}, Cartões R$ ${curTot.cards.toFixed(2)}, Variáveis R$ ${curTot.out.toFixed(2)}, Saldo R$ ${curTot.saldo.toFixed(2)}\n`;
+    let ctx = `Consultor financeiro objetivo. PT-BR. ~250 palavras.\nPERFIL: ${currentProfile}\nMÊS (${currentMonth}): Entradas R$ ${curTot.rec.toFixed(2)}, Essenciais R$ ${curTot.ess.toFixed(2)}, Cartões R$ ${curTot.cards.toFixed(2)}, Variáveis R$ ${curTot.out.toFixed(2)}, Saldo em caixa R$ ${curTot.saldo.toFixed(2)}, Previsto fim do mês R$ ${(curTot.rec - curTot.saidas).toFixed(2)}\n`;
     const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((a, b) => b.val - a.val).slice(0, 10);
     if (cats.length) ctx += `\nCATEGORIAS:\n` + cats.map(c => `- ${c.name}: R$ ${c.val.toFixed(2)}`).join("\n");
     if (prevTot) ctx += `\n\nMÊS ANTERIOR: entradas R$ ${prevTot.rec.toFixed(2)}, saídas R$ ${prevTot.saidas.toFixed(2)}`;
@@ -4388,7 +4823,7 @@ async function sendChatMessage() {
     const inputEl = document.getElementById("chatInput");
     const text = inputEl.value.trim();
     const apiKey = (store.config.geminiApiKey || document.getElementById("chatApiKey").value || "").trim();
-    if (!apiKey) { document.getElementById("apiSetupBox").style.display = 'block'; alert("Cole a API Key."); return; }
+    if (!apiKey) { document.getElementById("apiSetupBox").style.display = 'block'; toast("Cole a chave da API Gemini para consultar a IA.", null, "warn"); return; }
     if (!store.config.geminiApiKey) saveApiKey(apiKey);
     if (!text) return;
     chatBusy = true;
@@ -4467,17 +4902,31 @@ function renderEvolution() {
     el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; min-width:420px; height:auto;">${grid}${labels}${line("rec", "#22c55e")}${line("saidas", "#ef4444")}</svg><div style="font-size:.8rem; color:var(--text-muted); text-align:center;"><span style="color:#22c55e;">● Entradas</span> &nbsp; <span style="color:#ef4444;">● Saídas</span></div>`;
 }
 
-async function hashPin(p) { try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("fin:" + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return btoa("fin:" + p); } }
+function getPinSalt() {
+    let s = localStorage.getItem("fin_pin_salt");
+    if (!s) {
+        s = uid("salt") + "_" + Math.random().toString(36).slice(2, 10);
+        try { localStorage.setItem("fin_pin_salt", s); } catch (e) {}
+    }
+    return s;
+}
+async function hashPinLegacy(p) {
+    try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("fin:" + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return btoa("fin:" + p); }
+}
+async function hashPin(p, saltOverride) {
+    const salt = saltOverride !== undefined ? saltOverride : getPinSalt();
+    try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`fin:${salt}:${p}`)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return btoa(`fin:${salt}:${p}`); }
+}
 async function configurePin() {
     const p = await uiPrompt({
         title: "PIN de Acesso · FinEly",
-        message: "Defina um PIN numérico (4 ou mais dígitos). Deixe em branco para desativar o bloqueio:",
+        message: "Defina um PIN numérico (4 ou mais dígitos). Nota: o PIN é um bloqueio visual contra curiosos; os dados no navegador (localStorage) permanecem acessíveis neste aparelho. Deixe em branco para desativar:",
         placeholder: "Ex.: 1234",
         confirmText: "Salvar PIN",
         icon: "lock"
     });
     if (p === null) return;
-    if (!p) { localStorage.removeItem("fin_pin_hash"); return toast("PIN de bloqueio removido.", null, "info"); }
+    if (!p) { localStorage.removeItem("fin_pin_hash"); localStorage.removeItem("fin_pin_salt"); return toast("PIN de bloqueio removido.", null, "info"); }
     if (p.length < 4) return toast("Use pelo menos 4 dígitos.", null, "warn");
     localStorage.setItem("fin_pin_hash", await hashPin(p));
     toast("PIN ativado com sucesso.", null, "ok");
@@ -4485,11 +4934,23 @@ async function configurePin() {
 function showLock() {
     const h = localStorage.getItem("fin_pin_hash"); if (!h) return;
     const o = document.createElement("div"); o.id = "lockScreen";
-    o.style.cssText = "position:fixed;inset:0;z-index:3000;background:#090b12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#e2e8f0";
-    o.innerHTML = `<div style="width:52px;height:52px;border-radius:16px;background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.32);color:#c4b5fd;display:grid;place-items:center;">${ico("lock", 24)}</div><h2 style="font-weight:800;letter-spacing:-.02em;">FinEly</h2><p style="font-size:.84rem;color:#94a3b8;margin-top:-6px;">Digite seu PIN para desbloquear</p><input id="pinInput" type="password" inputmode="numeric" placeholder="••••" autocomplete="off" style="text-align:center;font-size:1.3rem;padding:11px;border-radius:12px;width:180px;background:#131726;border:1px solid rgba(255,255,255,.12);color:#fff;"><div id="pinErr" style="color:#f87171;font-size:.85rem;min-height:1.2em"></div>`;
+    o.style.cssText = "position:fixed;inset:0;z-index:3000;background:#090b12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#e2e8f0;padding:20px;text-align:center;";
+    o.innerHTML = `<div style="width:52px;height:52px;border-radius:16px;background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.32);color:#c4b5fd;display:grid;place-items:center;">${ico("lock", 24)}</div><h2 style="font-weight:800;letter-spacing:-.02em;">FinEly</h2><p style="font-size:.84rem;color:#94a3b8;margin-top:-6px;">Digite seu PIN para desbloquear a tela</p><input id="pinInput" type="password" inputmode="numeric" aria-label="PIN de desbloqueio" placeholder="••••" autocomplete="off" style="text-align:center;font-size:1.3rem;padding:11px;border-radius:12px;width:180px;background:#131726;border:1px solid rgba(255,255,255,.12);color:#fff;"><div id="pinErr" style="color:#f87171;font-size:.85rem;min-height:1.2em"></div><small style="color:#64748b;font-size:.72rem;max-width:260px;">Bloqueio de tela local contra acesso casual (não criptografa o armazenamento do navegador).</small>`;
     document.body.appendChild(o);
     const inp = o.querySelector("#pinInput"); inp.focus();
-    const check = async (showErr) => { if (await hashPin(inp.value) === h) o.remove(); else if (showErr) { o.querySelector("#pinErr").textContent = "PIN incorreto"; inp.value = ""; } };
+    const check = async (showErr) => {
+        const val = inp.value;
+        if (!val) return;
+        const saltedMatch = await hashPin(val) === h;
+        const legacyMatch = !saltedMatch && (await hashPinLegacy(val) === h);
+        if (saltedMatch || legacyMatch) {
+            if (legacyMatch) { try { localStorage.setItem("fin_pin_hash", await hashPin(val)); } catch (e) {} }
+            o.remove();
+        } else if (showErr) {
+            o.querySelector("#pinErr").textContent = "PIN incorreto";
+            inp.value = "";
+        }
+    };
     inp.addEventListener("input", () => check(false));
     inp.addEventListener("keydown", e => { if (e.key === "Enter") check(true); });
 }
@@ -4549,7 +5010,7 @@ function getDueList() {
             const due = parseExpenseDueDate(item.venc, key); if (!due) return;
             const diff = Math.round((due - today) / 86400000);
             if (diff < -30 || diff > 7) return;
-            out.push({ kind: "fixa", itemIdx: idx, bank: item.nome || "Despesa Fixa", title: item.nome || "Despesa Fixa", key, total: val, diff, iso: isoDate(due), type: "fixa" });
+            out.push({ kind: "fixa", itemIdx: idx, itemId: item.id || idx, bank: item.nome || "Despesa Fixa", title: item.nome || "Despesa Fixa", key, total: val, diff, iso: isoDate(due), type: "fixa" });
         });
 
         // 3. Despesas Variáveis (naoEssenciais) com data de vencimento
@@ -4559,7 +5020,7 @@ function getDueList() {
             const due = parseExpenseDueDate(item.venc, key); if (!due) return;
             const diff = Math.round((due - today) / 86400000);
             if (diff < -30 || diff > 7) return;
-            out.push({ kind: "variavel", itemIdx: idx, bank: item.nome || "Despesa Variável", title: item.nome || "Despesa Variável", key, total: val, diff, iso: isoDate(due), type: "variavel" });
+            out.push({ kind: "variavel", itemIdx: idx, itemId: item.id || idx, bank: item.nome || "Despesa Variável", title: item.nome || "Despesa Variável", key, total: val, diff, iso: isoDate(due), type: "variavel" });
         });
 
         // 4. Contas avulsas em Lançamentos (ex.: fatura Outros com dueDate individual)
@@ -4593,6 +5054,28 @@ function getAlerts(includeDismissed) {
     });
     const cur = calcMonthTotals(currentMonth);
     if (cur.falta > 0) al.push({ level: "danger", icon: "trend", title: "Saídas maiores que as entradas", text: `${currentMonth}: faltam ${fmtBRL(cur.falta)}`, key: `neg_${currentMonth}`, tab: "visao" });
+
+    // Alertas de Orçamento / Meta por Categoria (>= 80% ou > 100%)
+    const goals = store.profiles[currentProfile]?.goals || {};
+    if (Object.keys(goals).length) {
+        buildCategoryData(currentMonth).forEach(cat => {
+            const g = Number(goals[cat.name]) || 0;
+            if (g <= 0 || cat.val <= 0) return;
+            const ratio = cat.val / g;
+            if (ratio >= 0.8) {
+                const over = ratio > 1;
+                const cleanName = cleanCatLabel(cat.name);
+                al.push({
+                    level: over ? "danger" : "warn",
+                    icon: "target",
+                    title: `${over ? "Meta estourada" : "Alerta de meta"}: ${cleanName}`,
+                    text: `${fmtBRL(cat.val)} de ${fmtBRL(g)} (${(ratio * 100).toFixed(0)}%) em ${currentMonth}`,
+                    key: `goal_${currentMonth}_${cat.name}_${over ? "100" : "80"}`,
+                    tab: "openfinance"
+                });
+            }
+        });
+    }
     return includeDismissed ? al : al.filter(a => !dis[a.key]);
 }
 function clearNotifications() {
@@ -4638,14 +5121,15 @@ function dueOpenItem(kind, ref, key) {
             const acc = document.querySelector('.acc-head[data-k="des"]');
             if (acc && !acc.parentElement.classList.contains("open")) acc.parentElement.classList.add("open");
             toggleDespSub(kind === "fixa" ? "ess" : "var", true);
-            const tbId = kind === "fixa" ? "essenciaisBody" : "naoEssenciaisBody";
-            const el = document.getElementById(tbId);
-            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+            const listKey = kind === "fixa" ? "essenciais" : "naoEssenciais";
+            const rowEl = document.getElementById(`row_${listKey}_${ref}`) || document.getElementById(kind === "fixa" ? "essenciaisBody" : "naoEssenciaisBody");
+            if (rowEl) rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 350);
     } else if (kind === "avulsa") {
         bnGo("cartoes");
         setTimeout(() => {
-            const tb = document.getElementById("transactionsBody");
+            const rowEl = document.getElementById(`txrow_${ref}`);
+            const tb = rowEl || document.getElementById("txTableBody");
             if (tb) tb.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 350);
     }
@@ -4658,8 +5142,7 @@ function duePayItem(kind, ref, key) {
     }
     if (kind === "fixa" || kind === "variavel") {
         const listKey = kind === "fixa" ? "essenciais" : "naoEssenciais";
-        const idx = Number(ref);
-        const item = md[listKey]?.[idx];
+        const { item } = resolveRowItem(listKey, ref, key);
         if (!item) return;
         item.paid = true;
         markSessionPaid();
@@ -4711,7 +5194,7 @@ function openDueSheet() {
         const badgeHtml = x.kind === "fatura"
             ? createBankBadgeHTML(x.bank)
             : `<span class="bank-badge" style="background:${x.kind === 'fixa' ? '#3b82f6' : x.kind === 'variavel' ? '#f59e0b' : '#10b981'};">${esc(x.title || x.bank)}</span>`;
-        const refArg = x.kind === "fatura" ? x.bank : (x.kind === "avulsa" ? x.txId : x.itemIdx);
+        const refArg = x.kind === "fatura" ? x.bank : (x.kind === "avulsa" ? x.txId : (x.itemId !== undefined ? x.itemId : x.itemIdx));
         const openBtnLabel = x.kind === "fatura" ? "Ver fatura" : "Ver item";
         return `<div class="due-row ${x.diff < 0 ? "late" : ""}">
             <div class="due-top">${badgeHtml}<b class="hv due-val">${fmtBRL(x.total)}</b></div>
@@ -4737,15 +5220,20 @@ function renderGreeting() {
     el.textContent = `${h < 5 ? "Boa madrugada" : h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite"}, ${currentProfile}`;
     document.getElementById("greetMonth").textContent = currentMonth;
     const sd = document.getElementById("greetSaldo"); sd.textContent = fmtBRL(t.saldo); sd.style.color = t.saldo >= 0 ? "#fff" : "#fecaca";
+    const previsto = t.rec - t.saidas;
+    const pv = document.getElementById("greetPrevisto");
+    if (pv) { pv.textContent = fmtBRL(previsto); pv.style.color = previsto >= 0 ? "#6ee7b7" : "#fda4af"; }
     document.getElementById("greetCard").dataset.t = h < 5 ? "n" : h < 12 ? "m" : h < 18 ? "a" : "n";
     const pct = t.rec > 0 ? Math.min(100, t.saidas / t.rec * 100) : (t.saidas > 0 ? 100 : 0);
     document.getElementById("greetBar").style.width = pct + "%";
     const hr = document.getElementById("heroRec"), ho = document.getElementById("heroOut"); if (hr) hr.textContent = fmtBRL(t.rec); if (ho) ho.textContent = fmtBRL(t.saidas);
     document.getElementById("greetSub").textContent = `${pct.toFixed(0)}% da renda comprometida`;
     const due = getDueList(), nx = due.find(x => x.diff >= 0), od = due.filter(x => x.diff < 0).length;
+    const budgetAlerts = getAlerts().filter(a => String(a.key || "").startsWith("goal_"));
     document.getElementById("greetDue").innerHTML =
         (od ? `<button class="due-chip danger" onclick="openDueSheet()">${ico("alert", 16)}<span>${od} ${od > 1 ? "vencimentos atrasados" : "vencimento atrasado"}</span><span class="due-go">Ver quais ›</span></button>` : "") +
-        (nx ? `<button class="due-chip" onclick="openDueSheet()">${ico("card", 16)}<span><b>${esc(nx.title || nx.bank)}</b> ${nx.diff === 0 ? "vence hoje" : nx.diff === 1 ? "vence amanhã" : "vence em " + nx.diff + " dias"} · ${fmtBRL(nx.total)}</span><span class="due-go">›</span></button>` : "");
+        (nx ? `<button class="due-chip" onclick="openDueSheet()">${ico("card", 16)}<span><b>${esc(nx.title || nx.bank)}</b> ${nx.diff === 0 ? "vence hoje" : nx.diff === 1 ? "vence amanhã" : "vence em " + nx.diff + " dias"} · ${fmtBRL(nx.total)}</span><span class="due-go">›</span></button>` : "") +
+        (budgetAlerts.length ? `<button class="due-chip ${budgetAlerts.some(b => b.level === 'danger') ? 'danger' : ''}" onclick="goAlert('openfinance')">${ico("target", 16)}<span><b>${esc(budgetAlerts[0].title)}</b> · ${esc(budgetAlerts[0].text)}</span><span class="due-go">Metas ›</span></button>` : "");
 }
 function renderMonthSummary() {
     const el = document.getElementById("monthSummary"); if (!el) return;
@@ -4842,7 +5330,7 @@ function renderQuickAddContent() {
     o.innerHTML = `<div class="sheet">
         <div style="display:flex;justify-content:space-between;align-items:center;font-weight:750;font-size:1rem;">
             <span style="display:inline-flex;align-items:center;gap:7px;">${ico(_qaMode === 'tx' ? 'plus' : 'cart', 17)} ${_qaMode === 'tx' ? 'Novo lançamento · ' + esc(currentMonth) : 'Adicionar às Compras'}</span>
-            <button class="btn-icon" onclick="document.getElementById('quickSheet').remove()">${ico("x", 16)}</button>
+            <button class="btn-icon" aria-label="Fechar" onclick="document.getElementById('quickSheet').remove()">${ico("x", 16)}</button>
         </div>
         <div class="qa-mode-tabs">
             <button type="button" class="qa-mode-btn ${_qaMode === 'tx' ? 'active' : ''}" onclick="setQuickAddMode('tx')">${ico("receipt", 15)} Lançamento</button>
@@ -4864,7 +5352,7 @@ function submitQuickAdd() {
             const parts = (inp ? inp.value : "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean);
             if (!parts.length) return toast("Digite pelo menos um item para a lista.", null, "warn");
             const l = marketList();
-            parts.forEach(n => l.push({ id: Date.now() + "_" + Math.random().toString(36).slice(2, 7), nome: n.slice(0, 80), done: false }));
+            parts.forEach(n => l.push({ id: uid("mk"), nome: n.slice(0, 80), done: false }));
             saveStore(); renderMarket();
             document.getElementById("quickSheet")?.remove();
             toast(`${parts.length} ${parts.length === 1 ? 'item adicionado' : 'itens adicionados'} à Lista do Mercado.`, null, "ok");
@@ -4875,33 +5363,38 @@ function submitQuickAdd() {
             const bank = document.getElementById("qaFutBank")?.value || "À Vista";
             const priority = document.getElementById("qaFutPrio")?.value || "Média";
             if (!desc || val <= 0) return toast("Informe descrição e valor estimado.", null, "warn");
-            store.profiles[currentProfile].futurePurchases.push({ id: Date.now(), desc, val, bank, priority, status: "Pendente" });
+            store.profiles[currentProfile].futurePurchases.push({ id: uid("fut"), desc, val, bank, priority, status: "Pendente" });
             saveStore(); renderAll();
             document.getElementById("quickSheet")?.remove();
             toast(`"${desc}" adicionado às Compras Planejadas.`, null, "ok");
             return;
         }
     }
-    const desc = document.getElementById("qaDesc").value.trim(), v = parseInputCurrency(document.getElementById("qaVal").value);
-    if (!desc || !v) return toast("Informe descrição e valor.", null, "warn");
+    const rawDesc = document.getElementById("qaDesc").value.trim(), v = parseInputCurrency(document.getElementById("qaVal").value);
+    if (!rawDesc || !v) return toast("Informe descrição e valor.", null, "warn");
+    const desc = applyAutoCategory(rawDesc);
     const bank = document.getElementById("qaBank").value, d = new Date(), z = n => String(n).padStart(2, "0");
     const dueDate = document.getElementById("qaDue") ? document.getElementById("qaDue").value : "";
-    store.profiles[currentProfile][currentMonth].transactions.push({
-        id: Date.now(),
+    const parcela = cleanParcelaDisplay(document.getElementById("qaParc").value.trim()) || "À vista";
+    const newTx = {
+        id: uid("tx"),
         createdAt: Date.now(),
         date: `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()}`,
         bank,
         desc,
-        parcela: document.getElementById("qaParc").value.trim() || "À vista",
+        parcela,
         val: document.getElementById("qaCredit").checked ? -v : v,
         dueDate: dueDate || "",
         paid: false
-    });
+    };
+    store.profiles[currentProfile][currentMonth].transactions.push(newTx);
+    const projected = projectInstallmentTx(newTx, currentMonth);
     const prof = store.profiles[currentProfile];
     if (Array.isArray(prof.hiddenBanks)) prof.hiddenBanks = prof.hiddenBanks.filter(b => b !== bank);
     if (Array.isArray(prof.enabledBanks) && !prof.enabledBanks.includes(bank)) prof.enabledBanks.push(bank);
     saveStore(); updateBankSelects(); renderAll(); checkNotifications();
-    document.getElementById("quickSheet").remove(); toast(`${desc} lançado.`, null, "ok");
+    document.getElementById("quickSheet").remove();
+    toast(projected > 0 ? `${rawDesc} lançado (+${projected} parcela(s) futura(s)).` : `${rawDesc} lançado.`, null, "ok");
 }
 
 const RING_COLORS = ["#8b5cf6", "#ec4899", "#38bdf8", "#34d399", "#fbbf24", "#6366f1", "#f472b6", "#2dd4bf"];
@@ -4916,10 +5409,10 @@ function ringSVG(cats, total, size) {
     }).join("");
     return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="max-width:100%;height:auto;"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="${sw}"/>${segs}<text class="hv" x="${cx}" y="${cx - 2}" text-anchor="middle" font-size="${size / 7}" font-weight="800" fill="#f1f5f9">${fmtCompact(total)}</text><text x="${cx}" y="${cx + size / 11}" text-anchor="middle" font-size="${size / 17}" fill="#94a3b8">gastos esse mês</text></svg>`;
 }
-function toggleHomeFixedPaid(index, checked) {
-    const list = store.profiles[currentProfile]?.[currentMonth]?.essenciais;
-    if (!list || !list[index]) return;
-    list[index].paid = !!checked; if (checked) markSessionPaid();
+function toggleHomeFixedPaid(idOrIdx, checked) {
+    const { item } = resolveRowItem("essenciais", idOrIdx);
+    if (!item) return;
+    item.paid = !!checked; if (checked) markSessionPaid();
     saveStore(); renderAll(); checkNotifications();
 }
 function renderHomeSpend() {
@@ -4930,9 +5423,11 @@ function renderHomeSpend() {
     const fixed = store.profiles[currentProfile][currentMonth].essenciais || [];
     const paidN = fixed.filter(i => i.paid).length;
     const fixedHtml = `<details class="fix-box" ${window._fixOpen ? "open" : ""} ontoggle="window._fixOpen=this.open"><summary><span>Despesas fixas</span><span class="fix-count">${paidN}/${fixed.length} pagas</span></summary>${fixed.length ? fixed.map((item, i) => {
+        if (!item.id) item.id = uid("row");
+        const rowId = item.id;
         const bInfo = getExpenseDueBadgeInfo(item, currentMonth);
-        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', ${i}, event)">${ico("calendar", 11)}${bInfo.shortLabel ? ' ' + esc(bInfo.shortLabel) : ''}</button>`;
-        return `<label class="${item.paid ? 'fix-paid-row' : ''}" style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-top:1px solid var(--border);"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid(${i},this.checked)" style="accent-color:${item.paid ? '#475569' : 'var(--accent)'};width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;">${esc(item.nome)}</span>${dueBtn}<b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`;
+        const dueBtn = `<button type="button" class="due-pill-btn ${bInfo.cls}" style="padding:1px 6px;font-size:.66rem;" onclick="event.preventDefault();openItemDuePicker('essenciais', '${jsq(rowId)}', event)">${ico("calendar", 11)}${bInfo.shortLabel ? ' ' + esc(bInfo.shortLabel) : ''}</button>`;
+        return `<label class="${item.paid ? 'fix-paid-row' : ''}" style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-top:1px solid var(--border);"><input type="checkbox" aria-label="Marcar ${esc(item.nome || 'despesa fixa')} como paga" ${item.paid ? 'checked' : ''} onchange="toggleHomeFixedPaid('${jsq(rowId)}',this.checked)" style="accent-color:${item.paid ? '#475569' : 'var(--accent)'};width:18px;height:18px;flex:0 0 18px;"><span style="flex:1;min-width:0;">${esc(item.nome)}</span>${dueBtn}<b class="hv" style="font-size:.84rem;white-space:nowrap;">${fmtBRL(item.valor)}</b></label>`;
     }).join('') : `<div style="color:var(--text-muted);font-size:.8rem;padding:6px 2px;">Nenhuma despesa fixa.</div>`}</details>`;
     const cats = buildCategoryData(currentMonth).filter(c => c.val > 0).sort((x, y) => y.val - x.val);
     const total = cats.reduce((acc, c) => acc + c.val, 0);
@@ -4988,7 +5483,7 @@ function renderNotifications() {
     const n = al.filter(a => a.level !== "info").length;
     badge.textContent = n; badge.style.display = n ? "grid" : "none";
     const notifGranted = ("Notification" in window && Notification.permission === "granted");
-    panel.innerHTML = `<div class="np-head"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("bell", 16)} Notificações</span><button class="btn-icon" onclick="toggleNotifPanel()">${ico("x", 15)}</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="${a.due ? "goAlert('');openDueSheet()" : `goAlert('${a.tab || ""}')`}"><div class="np-ico">${ico(ICONS[a.icon] ? a.icon : (EMO2ICO[a.icon] || "bell"), 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;display:inline-flex;align-items:center;justify-content:center;gap:6px;" onclick="toggleNotifications()">${ico("bell", 14)} ${notifGranted ? "Avisos ativados" : "Ativar avisos"}</button></div></div>`;
+    panel.innerHTML = `<div class="np-head"><span style="display:inline-flex;align-items:center;gap:6px;">${ico("bell", 16)} Notificações</span><button class="btn-icon" aria-label="Fechar notificações" onclick="toggleNotifPanel()">${ico("x", 15)}</button></div>` + (al.length ? al.map(a => `<div class="np-card ${a.level}" onclick="${a.due ? "goAlert('');openDueSheet()" : `goAlert('${a.tab || ""}')`}"><div class="np-ico">${ico(ICONS[a.icon] ? a.icon : (EMO2ICO[a.icon] || "bell"), 20)}</div><div><div class="np-t">${esc(a.title)}</div><div class="np-s">${esc(a.text)}</div></div></div>`).join("") : `<div class="np-empty">Tudo em dia.</div>`) + `<div class="np-foot"><div class="np-clear">${al.length ? `<button class="btn-outline" style="flex:1;" onclick="clearNotifications()">Zerar</button>` : ""}<button class="btn-outline" style="flex:2;display:inline-flex;align-items:center;justify-content:center;gap:6px;" onclick="toggleNotifications()">${ico("bell", 14)} ${notifGranted ? "Avisos ativados" : "Ativar avisos"}</button></div></div>`;
 }
 function toggleNotifPanel(e) { if (e) e.stopPropagation(); document.getElementById("notifPanel").classList.toggle("open"); }
 function goAlert(tab) {
@@ -5043,7 +5538,7 @@ function renderDrawer() {
     document.getElementById("drawer").innerHTML = `
         <div class="dr-head">
             <span style="display:inline-flex;align-items:center;gap:7px;">${ico("layers", 17)} Menu · FinEly</span>
-            <button class="btn-icon" onclick="toggleDrawer(false)">${ico("x", 16)}</button>
+            <button class="btn-icon" aria-label="Fechar menu" onclick="toggleDrawer(false)">${ico("x", 16)}</button>
         </div>
         <div class="dr-body">
             <div class="dr-cloud-box">
@@ -5083,7 +5578,7 @@ function renderDrawer() {
             <div class="dr-topic-card">
                 <div class="dr-topic-head"><span>Backups & Segurança</span></div>
                 <div class="dr-grid">
-                    ${tile("upload", "Salvar .json", "Backup manual", "exportBackup()")}
+                    ${tile("upload", "Salvar .json", "Backup sem chaves", "exportBackup()")}
                     ${tile("folder", "Importar .json", "Restaurar arquivo", "document.getElementById('importFile').click()")}
                     ${tile("clock", "Cópias auto", snapCount() + " salva(s)", "openBackups()")}
                     ${tile("lock", "PIN de acesso", pinActive, "configurePin()")}
@@ -5096,7 +5591,7 @@ function renderDrawer() {
                     ${tile("pencil", "Editar perfil", "Nome e cor", "openProfileModal()")}
                     ${tile("plus", "Novo perfil", "Separar contas", "promptNewProfile()")}
                     ${tile("refresh", "Recalcular", "Atualizar tela", "manualRefresh()")}
-                    ${tile("trash", "Excluir perfil", "Remover atual", "deleteProfile()", true)}
+                    ${tile("trash", "Excluir perfil", "Remover atual", "deleteCurrentProfile()", true)}
                 </div>
             </div>
         </div>`;
@@ -5107,7 +5602,7 @@ function openAdvanced() {
     const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1];
     const o = document.createElement("div"); o.id = "advSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("settings", 17)} Ferramentas avançadas</span><button class="btn-icon" onclick="document.getElementById('advSheet').remove()">${ico("x", 16)}</button></div>
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("settings", 17)} Ferramentas avançadas</span><button class="btn-icon" aria-label="Fechar" onclick="document.getElementById('advSheet').remove()">${ico("x", 16)}</button></div>
         <div style="font-size:.8rem;color:var(--text-muted);margin:10px 0 4px;">Mover do mês aberto (<b>${esc(currentMonth)}</b>) para ${next ? "<b>" + esc(next) + "</b>" : "—"}. Use quando lançou tudo no mês errado.</div>
         ${[["essenciais", "Despesas fixas (contas)", 1], ["naoEssenciais", "Despesas variáveis", 1], ["receitas", "Entradas", 0], ["tx", "Lançamentos das faturas (compras)", 0]].map(([k, l, on]) => `<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:.9rem;"><input type="checkbox" class="mv-chk" value="${k}" ${on ? "checked" : ""} style="width:18px;height:18px;accent-color:var(--accent);">${l}</label>`).join("")}
         <button class="btn" style="width:100%;margin-top:10px;padding:12px;" ${next ? "" : "disabled"} onclick="moveToNextMonth()">Mover para ${next ? esc(next) : "o próximo mês"}</button>
@@ -5132,7 +5627,7 @@ async function moveToNextMonth() {
     let n = 0;
     ["essenciais", "naoEssenciais", "receitas"].filter(k => kinds.includes(k)).forEach(k => {
         src[k].forEach(it => {
-            const copy = { ...it }; if ("paid" in copy) copy.paid = false;
+            const copy = { ...it, id: it.id || uid("row") }; if ("paid" in copy) copy.paid = false;
             const ph = dst[k].find(x => x.nome === it.nome && !(Number(x.valor) > 0));
             if (ph) Object.assign(ph, copy); else dst[k].push(copy);
             n++;
@@ -5178,7 +5673,11 @@ async function saveBackupFile(json, name) {
     try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e.name === "AbortError") return; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
 }
-function exportBackup() { saveBackupFile(JSON.stringify(store, null, 2), backupName()); toast("Salve em Arquivos.", null, "ok"); }
+function exportBackup() {
+    const safeCopy = cloudCopy();
+    saveBackupFile(JSON.stringify(safeCopy, null, 2), backupName());
+    toast("Backup exportado (chaves de API omitidas por segurança).", null, "ok");
+}
 let _snapN = 0, _snapsCache = [];
 const idb = () => new Promise((res, rej) => { const r = indexedDB.open("fin_db", 1); r.onupgradeneeded = () => r.result.createObjectStore("snaps", { keyPath: "ts" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 async function getSnaps() {
@@ -5203,7 +5702,7 @@ async function openBackups() {
     const snaps = _snapsCache = await getSnaps();
     const o = document.createElement("div"); o.id = "backupSheet"; o.className = "sheet-ov";
     o.onclick = e => { if (e.target === o) o.remove(); };
-    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:6px;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("clock", 18)} Backups</span><button class="btn-icon" onclick="document.getElementById('backupSheet').remove()">${ico("x", 16)}</button></div><button class="btn" style="width:100%;margin-bottom:6px;" onclick="takeSnapshot('manual', true).then(openBackups)">${ico("plus", 15)} Criar cópia agora</button>${snaps.length ? snaps.map((x, i) => `<div class="snap-row"><div><div style="font-weight:600;">${esc(x.name)}</div><div style="color:var(--text-muted);">${new Date(x.ts).toLocaleString("pt-BR")}</div></div><div style="display:flex;gap:6px;"><button class="btn-outline" onclick="restoreSnap(${i})">Restaurar</button></div></div>`).join("") : `<p style="color:var(--text-muted);padding:14px 0;">Nenhuma cópia.</p>`}</div>`;
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:6px;"><span style="display:inline-flex;align-items:center;gap:7px;">${ico("clock", 18)} Backups</span><button class="btn-icon" aria-label="Fechar" onclick="document.getElementById('backupSheet').remove()">${ico("x", 16)}</button></div><button class="btn" style="width:100%;margin-bottom:6px;" onclick="takeSnapshot('manual', true).then(openBackups)">${ico("plus", 15)} Criar cópia agora</button>${snaps.length ? snaps.map((x, i) => `<div class="snap-row"><div><div style="font-weight:600;">${esc(x.name)}</div><div style="color:var(--text-muted);">${new Date(x.ts).toLocaleString("pt-BR")}</div></div><div style="display:flex;gap:6px;"><button class="btn-outline" onclick="restoreSnap(${i})">Restaurar</button></div></div>`).join("") : `<p style="color:var(--text-muted);padding:14px 0;">Nenhuma cópia.</p>`}</div>`;
     document.body.appendChild(o);
 }
 async function restoreSnap(i) {
@@ -5226,24 +5725,8 @@ async function restoreSnap(i) {
     if (!store.config.profilesList.includes(currentProfile)) currentProfile = store.config.profilesList[0];
     init(); toast("Backup restaurado.", null, "ok");
 }
-async function deleteProfile() {
-    const list = store.config.profilesList;
-    if (list.length < 2) return toast("Mantenha pelo menos um perfil.", null, "warn");
-    const ok = await uiConfirm({
-        title: "Excluir perfil?",
-        message: `Tem certeza que deseja excluir o perfil "${currentProfile}" e todos os dados dele?`,
-        confirmText: "Excluir perfil",
-        danger: true
-    });
-    if (!ok) return;
-    const gone = currentProfile;
-    store.config.profilesList = list.filter(p => p !== gone);
-    delete store.profiles[gone]; if (store.meta) Object.keys(store.meta).forEach(k => { if (k.startsWith(gone + "|")) delete store.meta[k]; });
-    currentProfile = store.config.profilesList[0];
-    saveStore(); init(); toast(`Perfil "${gone}" excluído.`, null, "del");
-}
 async function copyFixedFromPrev() {
-    if (!prevMonthStr) return alert("Sem mês anterior.");
+    if (!prevMonthStr) return toast("Sem mês anterior.", null, "warn");
     const ok = await uiConfirm({
         title: "Copiar dados do mês anterior?",
         message: `Deseja copiar entradas e despesas de ${prevMonthStr} para ${currentMonth}?`,
@@ -5251,7 +5734,9 @@ async function copyFixedFromPrev() {
     });
     if (!ok) return;
     const prev = store.profiles[currentProfile][prevMonthStr], cur = store.profiles[currentProfile][currentMonth];
-    ["receitas", "essenciais", "naoEssenciais"].forEach(g => { cur[g] = JSON.parse(JSON.stringify(prev[g] || [])); });
+    ["receitas", "essenciais", "naoEssenciais"].forEach(g => {
+        cur[g] = JSON.parse(JSON.stringify(prev[g] || [])).map(it => ({ ...it, id: uid("row") }));
+    });
     const [curMName, curYStr] = currentMonth.split("/");
     const curMIdx = _mn.indexOf(curMName);
     const curY = Number(curYStr) || new Date().getFullYear();
@@ -5303,7 +5788,7 @@ togglePrivacy(localStorage.getItem("fin_hide") === "1");
     window.addEventListener("load", hide); setTimeout(hide, 3500);
 })();
 takeSnapshot("auto"); getSnaps();
-if ("Notification" in window && Notification.permission === "granted") registerSW();
+registerSW();
 showLock();
 hydrateIcons();
 (function () { const v = document.getElementById("tabsViewport"); if (v) v.addEventListener("scroll", markTabMoving, { passive: true }); })();
