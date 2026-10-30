@@ -706,13 +706,32 @@
                 box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
                 align-items: center;
                 justify-content: space-around;
+                position: fixed !important;
+                z-index: 120 !important;
             }
-            #bottomNav button { flex: 1; padding: 2px 2px 1px !important; font-size: .64rem !important; line-height: 1.05; border-radius: 14px; gap: 1px !important; }
-            #bottomNav button span { width: 40px; height: 23px; border-radius: 11px; transition: background .2s, color .2s; }
+            #bottomNav button {
+                flex: 1;
+                padding: 2px 2px 1px !important;
+                font-size: .64rem !important;
+                line-height: 1.05;
+                border-radius: 14px;
+                gap: 1px !important;
+                transition: color 0.1s ease !important;
+            }
+            #bottomNav button span {
+                width: 40px;
+                height: 23px;
+                border-radius: 11px;
+                transition: background-color 0.1s ease, color 0.1s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+            }
             #bottomNav button.active { background: transparent; color: #fff; }
-            #bottomNav button.active span { background: var(--brand-soft); color: #c4b5fd; }
+            #bottomNav button.active span {
+                background: var(--brand-soft);
+                color: #c4b5fd;
+                transform: scale(1.04);
+            }
             #bottomNav .bn-add { flex: 0 0 48px; width: 48px; height: 48px; margin-top: -16px; border-radius: 50%; background: var(--brand); color: #fff; padding: 0 !important; justify-content: center; border: 3px solid var(--bg-main); box-shadow: 0 10px 22px -6px rgba(139,92,246,.85); position: relative; }
-            #bottomNav .bn-add span { width: 24px; height: 24px; background: transparent; }
+            #bottomNav .bn-add span { width: 24px; height: 24px; background: transparent; transform: none !important; }
             #fab { display: none !important; }
             #btnBackToTop { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
         }
@@ -2533,7 +2552,8 @@ function init() {
 // ===== SWIPE NATIVO POR SCROLL-SNAP =====
 let programmaticScroll = false;
 let programmaticScrollTimer = null;
-let scrollSyncTimer = null;
+let _scrollRafId = null;
+let _lastSyncedIdx = 0;
 
 function initTabsViewport() {
     const viewport = document.getElementById("tabsViewport");
@@ -2547,27 +2567,46 @@ function initTabsViewport() {
         if (width <= 0) return;
         const idx = Math.round(scrollLeft / width);
         const safeIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, idx));
-        const tabId = TAB_ORDER[safeIdx];
-        applyActiveTab(tabId);
+        if (safeIdx !== _lastSyncedIdx) {
+            _lastSyncedIdx = safeIdx;
+            applyActiveTab(TAB_ORDER[safeIdx]);
+        }
     };
 
+    // Sincronização em tempo real (60/120fps via requestAnimationFrame) enquanto arrasta o dedo
+    viewport.addEventListener("scroll", () => {
+        if (programmaticScroll) return;
+        if (!_scrollRafId) {
+            _scrollRafId = requestAnimationFrame(() => {
+                _scrollRafId = null;
+                syncActiveFromScroll();
+            });
+        }
+    }, { passive: true });
+
     if ("onscrollend" in viewport) {
-        viewport.addEventListener("scrollend", syncActiveFromScroll);
-    } else {
-        viewport.addEventListener("scroll", () => {
-            clearTimeout(scrollSyncTimer);
-            scrollSyncTimer = setTimeout(syncActiveFromScroll, 100);
-        }, { passive: true });
+        viewport.addEventListener("scrollend", () => {
+            if (_scrollRafId) { cancelAnimationFrame(_scrollRafId); _scrollRafId = null; }
+            syncActiveFromScroll();
+        });
     }
 }
 
 function applyActiveTab(tabId) {
+    const newIdx = TAB_ORDER.indexOf(tabId);
+    if (newIdx >= 0) _lastSyncedIdx = newIdx;
     document.querySelectorAll(".tab-content").forEach(el => el.classList.toggle("active", el.id === "tab-" + tabId));
     document.querySelectorAll(".tab-btn").forEach(el => {
         el.classList.toggle("active", el.getAttribute("onclick") && el.getAttribute("onclick").includes(`'${tabId}'`));
     });
-    document.querySelectorAll("#bottomNav button").forEach(el => el.classList.toggle("active", el.dataset.t === tabId));
+    document.querySelectorAll("#bottomNav button").forEach(el => {
+        const isActive = el.dataset.t === tabId;
+        el.classList.toggle("active", isActive);
+    });
     // Rolar botão tab para aparecer
+    const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
+    if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+}
     const btn = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
     if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 }
