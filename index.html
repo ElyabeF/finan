@@ -601,6 +601,7 @@
             </div>
             <div class="grp-tabs" id="grpTabs"></div>
             <div class="cards-grid" id="bankCardsContainer"></div>
+            <div class="panel" id="finishedPanel" style="margin-bottom:12px;"></div>
             <button class="next-invoice-link" onclick="goToNextInvoiceMonth()">↗ Ver próxima fatura</button>
 
             <div class="panel tx-entry-panel">
@@ -848,6 +849,16 @@ function resetMonthStatuses(pData, m, banks, stamp, includeFixed) {
         (pData.essenciais || []).forEach(e => { if (e) e.paid = false; });
         (pData.naoEssenciais || []).forEach(e => { if (e && e.paid) e.paid = false; });
     }
+}
+const sessionPaid = new Set();
+const markSessionPaid = () => sessionPaid.add(currentProfile + "|" + currentMonth);
+// Ao navegar para um mês POSTERIOR ao mês real, tudo volta a Pendente (a menos que tenha sido marcado como pago nesta mesma visita).
+function guardFutureMonth() {
+    const realIdx = MONTHS.indexOf(realMonthKey()), idx = MONTHS.indexOf(currentMonth);
+    if (realIdx < 0 || idx <= realIdx || sessionPaid.has(currentProfile + "|" + currentMonth)) return;
+    const prof = store.profiles[currentProfile], pd = prof && prof[currentMonth]; if (!pd) return;
+    const anyPaid = store.config.banks.some(b => getEffectivePaymentStatus(prof, currentMonth, b) === "Pago") || (pd.essenciais || []).some(e => e && e.paid);
+    if (anyPaid) { resetMonthStatuses(pd, currentMonth, store.config.banks, Date.now(), true); saveStore(); }
 }
 function realMonthKey() { const d = new Date(); return `${_mn[d.getMonth()]}/${d.getFullYear()}`; }
 // Virou o mês (data real): tudo que estava pago no mês atual (e seguintes) volta a Pendente.
@@ -1424,6 +1435,7 @@ function payCard(bank) {
     if (!monthData.cardStatus) monthData.cardStatus = {};
     const stamp = Date.now();
 
+    markSessionPaid();
     // 1. Marca o mês atual como Pago
     monthData.paymentStatus[bank] = { status: "Pago", updatedAt: stamp, monthKey: currentMonth, paidAt: stamp, action: "user" };
     const card = monthData.cardStatus[bank] || (monthData.cardStatus[bank] = {});
@@ -1465,8 +1477,10 @@ function toggleDueMonth(bank, event) {
     if (event) event.stopPropagation();
     const cs = store.profiles[currentProfile][currentMonth].cardStatus[bank];
     if (!cs) return;
-    cs.vencNextMonth = !cs.vencNextMonth;
-    saveStore(); renderAll();
+    const nv = !vencIsNextMonth(cs, currentMonth, new Date());
+    MONTHS.forEach(m => { const c = store.profiles[currentProfile][m]?.cardStatus?.[bank]; if (c) c.vencNextMonth = nv; }); // vale para todos os meses desta fatura
+    saveStore(); renderAll(); checkNotifications();
+    toast(nv ? `${bank}: a fatura de cada mês vence no mês seguinte.` : `${bank}: a fatura de cada mês vence no próprio mês.`);
 }
 function projectInstallmentsToNextMonth(bank) {
     const idx = MONTHS.indexOf(currentMonth), nextMonth = MONTHS[idx + 1]; if (!nextMonth) return 0;
@@ -1511,6 +1525,7 @@ function changeMonth() {
     if (!profile || !MONTHS.includes(selectedMonth)) return;
     if (!profile[selectedMonth]) profile[selectedMonth] = getDefaultMonthData();
     currentMonth = selectedMonth;
+    guardFutureMonth();
     prevMonthStr = selectedIdx > 0 ? MONTHS[selectedIdx - 1] : null;
     MONTHS.forEach(key => (profile[key]?.transactions || []).forEach(t => {
         if (!t) return;
@@ -1525,6 +1540,7 @@ function goToNextInvoiceMonth() {
     if (!next) return toast("Não há mês seguinte.");
     if (!store.profiles[currentProfile][next]) store.profiles[currentProfile][next] = getDefaultMonthData();
     currentMonth = next;
+    guardFutureMonth();
     const sel = document.getElementById("monthSelect"); if (sel) sel.value = next;
     prevMonthStr = idx >= 0 ? MONTHS[idx] : null;
     saveStore(); renderAll(); checkNotifications();
@@ -1813,6 +1829,43 @@ function setBankType(bank, t) {
 }
 let faturaGroup = (() => { try { const v = localStorage.getItem("fin_fat_group"); return v === "cartao" || v === "emprestimo" || v === "outros" ? v : "todos"; } catch (e) { return "todos"; } })();
 function setFaturaGroup(g) { faturaGroup = g; try { localStorage.setItem("fin_fat_group", g); } catch (e) {} renderAll(); }
+// ---- Parcelas finalizadas (última parcela já vencida/paga) ----
+function finishedKey(t, total) { return normText(t.bank + "|" + cleanDisplayDesc(stripCatTag(t.desc)) + "|" + total); }
+function getFinishedInstallments() {
+    const prof = store.profiles[currentProfile], realIdx = MONTHS.indexOf(realMonthKey()), map = {};
+    MONTHS.forEach((m, i) => (prof[m]?.transactions || []).forEach(t => {
+        const mt = String(t.parcela || "").match(/^(\d+)\/(\d+)$/); if (!mt) return;
+        const n = +mt[1], total = +mt[2]; if (total < 2 || n < total) return;
+        const done = i < realIdx || (i === realIdx && getEffectivePaymentStatus(prof, m, t.bank) === "Pago");
+        if (!done) return;
+        const key = finishedKey(t, total);
+        if (!map[key] || map[key].idx < i) map[key] = { key, bank: t.bank, desc: cleanDisplayDesc(stripCatTag(t.desc)), total, val: Math.abs(Number(t.val) || 0), month: m, idx: i };
+    }));
+    return Object.values(map).filter(x => faturaGroup === "todos" || getBankType(x.bank) === faturaGroup).sort((a, b) => b.idx - a.idx);
+}
+function toggleFinishedPaid(key) {
+    const prof = store.profiles[currentProfile]; if (!prof.finishedPaid) prof.finishedPaid = {};
+    if (prof.finishedPaid[key]) delete prof.finishedPaid[key]; else prof.finishedPaid[key] = Date.now();
+    saveStore(); renderFinishedInstallments();
+}
+function markAllFinishedPaid() {
+    const prof = store.profiles[currentProfile]; if (!prof.finishedPaid) prof.finishedPaid = {};
+    const list = getFinishedInstallments().filter(x => !prof.finishedPaid[x.key]);
+    if (!list.length) return toast("Tudo já está marcado como pago.");
+    if (!confirm(`Marcar ${list.length} parcelamento(s) finalizado(s) como totalmente pagos?`)) return;
+    list.forEach(x => { prof.finishedPaid[x.key] = Date.now(); });
+    saveStore(); renderFinishedInstallments();
+}
+function renderFinishedInstallments() {
+    const el = document.getElementById("finishedPanel"); if (!el) return;
+    const paidMap = store.profiles[currentProfile].finishedPaid || {}, list = getFinishedInstallments();
+    const pend = list.filter(x => !paidMap[x.key]).length;
+    el.innerHTML = `<div class="panel-header"><span>PARCELAS FINALIZADAS <small style="color:var(--text-muted);font-weight:500;">(${list.length})</small></span>${pend ? `<button class="btn" style="padding:4px 10px;font-size:.78rem;" onclick="markAllFinishedPaid()">✔ Tudo pago</button>` : ""}</div>` +
+        (list.length ? `<div style="padding:8px 12px 12px;">` + list.map(x => {
+            const ok = !!paidMap[x.key];
+            return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);opacity:${ok ? .6 : 1};"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.88rem;overflow-wrap:anywhere;${ok ? "text-decoration:line-through;" : ""}">${esc(x.desc)}</div><div class="tx-meta">${createBankBadgeHTML(x.bank)}<span class="chip">${x.total}/${x.total} · finalizado</span><span>${esc(x.month)}</span></div></div><div style="text-align:right;"><div class="hv" style="font-weight:700;font-size:.85rem;">${fmtBRL(x.val * x.total)}</div><button class="${ok ? "btn-outline" : "btn"}" style="padding:3px 8px;font-size:.72rem;margin-top:4px;" onclick="toggleFinishedPaid('${jsq(x.key)}')">${ok ? "↩ Desfazer" : "✔ Pago"}</button></div></div>`;
+        }).join("") + `</div>` : `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.84rem;">Nenhum parcelamento finalizado ainda. Quando a última parcela vencer, ele aparece aqui.</div>`);
+}
 function renderGroupTabs() {
     const el = document.getElementById("grpTabs"); if (!el) return;
     const count = k => store.config.banks.filter(b => getBankType(b) === k).length;
@@ -1860,7 +1913,7 @@ function openMarket() { switchTab("futuras"); futSub("market"); }
 function updateItem(group, index, field, val) {
     const list = store.profiles?.[currentProfile]?.[currentMonth]?.[group];
     if (!list || !list[index]) return;
-    list[index][field] = val; saveStore();
+    list[index][field] = val; if (field === "paid" && val) markSessionPaid(); saveStore();
     if (group === "essenciais" && field === "paid") renderAll(); else updateTotalsOnly();
     checkNotifications();
 }
@@ -2053,13 +2106,17 @@ function renderAll() {
         const info = ensureMonthCardStatus(store.profiles[currentProfile], currentMonth, bank);
         if (!visibleBanks.includes(bank)) return;
         const effectiveStatus = getEffectivePaymentStatus(store.profiles[currentProfile], currentMonth, bank);
-        const dueLabel = info.vencNextMonth ? "Mês seguinte" : "Mês atual";
+        const dueNext = vencIsNextMonth(info, currentMonth, new Date());
+        const dueLabel = dueNext ? "Mês seguinte" : "Mês atual";
+        const dueDt = dueDateFor(new Date(Number(currentMonth.split("/")[1]), _mn.indexOf(currentMonth.split("/")[0]), 1), currentMonth, info, new Date());
+        const dueFull = dueDt ? `Vence em ${String(dueDt.getDate()).padStart(2, "0")}/${String(dueDt.getMonth() + 1).padStart(2, "0")}/${dueDt.getFullYear()}` : "";
         const dueDisplay = String(info.venc || "Dia 10").replace(/^Dia\s*/i, "");
         const bankTx = (data.transactions || []).filter(t => t.bank === bank);
         const detailRows = bankTx.length ? bankTx.map(t => `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:.78rem;border-top:1px solid var(--border);"><span>${esc(cleanDisplayDesc(t.desc))} ${cleanParcelaDisplay(t.parcela || "") && !/^(à\s*vista)$/i.test(cleanParcelaDisplay(t.parcela || "")) ? `(${esc(cleanParcelaDisplay(t.parcela))})` : ""}</span><b>${fmtBRL(t.val)}</b></div>`).join("") : `<div style="font-size:.78rem;color:var(--text-muted);padding:6px 0;">Nenhum lançamento.</div>`;
-        bankContainer.innerHTML += `<div class="bank-card" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta" style="margin-bottom:6px;"><span>Tipo: <select class="type-sel" onclick="event.stopPropagation()" onchange="setBankType('${jsq(bank)}', this.value)">${Object.keys(BANK_TYPES).map(k => `<option value="${k}" ${getBankType(bank) === k ? "selected" : ""}>${BANK_TYPES[k].label}</option>`).join("")}</select></span></div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" onclick="event.stopPropagation()" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" onclick="event.stopPropagation()" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div><div class="bank-card-detail">${detailRows}</div></div>`;
+        bankContainer.innerHTML += `<div class="bank-card" onclick="this.classList.toggle('expanded')"><div class="bank-card-strip" style="background:${getBankColor(bank)};"></div><div class="bank-header">${createBankBadgeHTML(bank, true)}<button class="status-pill ${effectiveStatus==='Pago'?'paid':'pending'}" onclick="event.stopPropagation();updateCardStatus('${jsq(bank)}','status','${effectiveStatus==='Pago'?'Pendente':'Pago'}')">${effectiveStatus==='Pago'?'✅ Pago':'⏳ Pendente'}</button></div><div class="bank-total">${fmtBRL(getBankTotal(bank))}</div><div class="bank-meta" style="margin-bottom:6px;"><span>Tipo: <select class="type-sel" onclick="event.stopPropagation()" onchange="setBankType('${jsq(bank)}', this.value)">${Object.keys(BANK_TYPES).map(k => `<option value="${k}" ${getBankType(bank) === k ? "selected" : ""}>${BANK_TYPES[k].label}</option>`).join("")}</select></span></div><div class="bank-meta"><span>Venc: <input type="text" value="${esc(dueDisplay)}" placeholder="DD/MM" onclick="event.stopPropagation()" oninput="updateCardStatusSilent('${jsq(bank)}','venc',this.value)" onchange="updateCardStatus('${jsq(bank)}','venc',this.value)" style="width:58px;padding:2px;font-size:.75rem;"><button class="venc-toggle" onclick="toggleDueMonth('${jsq(bank)}',event)">📅 ${dueLabel}</button></span><span>Fixo: <input type="text" inputmode="numeric" value="${fmtBRL(info.manualExtra)}" onclick="event.stopPropagation()" oninput="maskCurrencyInput(this); updateCardStatusSilent('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" onchange="updateCardStatus('${jsq(bank)}','manualExtra',parseInputCurrency(this.value))" style="width:75px;padding:2px;font-size:.75rem;"></span></div><div style="font-size:.74rem;color:var(--text-muted);margin-top:6px;">📆 ${dueFull} · fatura de ${esc(currentMonth)}</div><div class="bank-card-detail">${detailRows}</div></div>`;
     });
 
+    renderFinishedInstallments();
     renderTransactionsOnly();
     renderFuturePurchases();
     renderHistoryTable();
@@ -2273,12 +2330,17 @@ function showLock() {
 
 const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 // Data real de vencimento da fatura do mês `key` (respeita "mês seguinte")
+// A fatura do mês X costuma vencer no início do mês X+1. Sem marcação manual:
+// vencimento até o dia 15 (ou dia que já passou neste mês) => mês seguinte.
+function vencIsNextMonth(cs, key, today) {
+    if (typeof cs?.vencNextMonth === "boolean") return cs.vencNextMonth;
+    const day = parseInt((String(cs?.venc || "").match(/\d+/) || [0])[0], 10) || 0;
+    return day <= 15 || (key === realMonthKey() && day < (today || new Date()).getDate());
+}
 function dueDateFor(base, key, cs, today) {
     const dm = String(cs?.venc || "").match(/\d+/); if (!dm) return null;
     const day = parseInt(dm[0], 10); if (!day) return null;
-    let next;
-    if (typeof cs.vencNextMonth === "boolean") next = cs.vencNextMonth;
-    else next = key === realMonthKey() && day < today.getDate(); // sem marcação: dia já passou neste mês => próximo mês
+    const next = vencIsNextMonth(cs, key, today);
     const m0 = new Date(base.getFullYear(), base.getMonth() + (next ? 1 : 0), 1);
     const last = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
     return new Date(m0.getFullYear(), m0.getMonth(), Math.min(day, last));
@@ -2292,8 +2354,6 @@ function getDueList() {
         store.config.banks.forEach(b => {
             const cs = md.cardStatus[b], total = getBankTotal(b, key);
             if (!cs || getEffectivePaymentStatus(store.profiles[currentProfile], key, b) !== "Pendente" || total <= 0) return;
-            // mês passado sem marcação explícita: não gera alerta (evita "atraso" falso)
-            if (off < 0 && typeof cs.vencNextMonth !== "boolean") return;
             const due = dueDateFor(base, key, cs, today); if (!due) return;
             const diff = Math.round((due - today) / 86400000);
             if (diff < -30 || diff > 7) return;
@@ -2441,7 +2501,7 @@ function ringSVG(cats, total, size) {
 function toggleHomeFixedPaid(index, checked) {
     const list = store.profiles[currentProfile]?.[currentMonth]?.essenciais;
     if (!list || !list[index]) return;
-    list[index].paid = !!checked;
+    list[index].paid = !!checked; if (checked) markSessionPaid();
     saveStore(); renderAll(); checkNotifications();
 }
 function renderHomeSpend() {
@@ -2532,9 +2592,70 @@ function renderDrawer() {
         ["Mês atual", [["📋", "Copiar mês anterior", "Entradas e despesas fixas", "copyFixedFromPrev()"], ["⬇️", "Exportar CSV", "Planilha do mês", "exportMonthCSV()"], ["🖨️", "Salvar PDF", "Aba aberta", "window.print()"], ["🔄", "Atualizar dados", "Recalcular", "manualRefresh()"]]],
         ["Backups", [["📤", "Salvar backup agora", "Arquivo .json", "exportBackup()"], ["🕘", "Backups automáticos", snapCount() + " cópia(s)", "openBackups()"], ["📂", "Importar de arquivo", "Restaurar .json", "document.getElementById('importFile').click()"]]],
         ["Nuvem e segurança", [["☁️", "Configurar Firebase", "Sincronização", "openFirebaseModal()"], ["👤", "Conta da nuvem", cloudUser ? cloudUser.email : "Não conectado", "cloudAccount()"], ["🔒", "PIN de acesso", localStorage.getItem("fin_pin_hash") ? "Ativado" : "Desativado", "configurePin()"], ["🔔", "Avisos de vencimento", notif, "toggleNotifications()"]]],
-        ["Inteligência", [["✨", "Consultor IA", "Gemini", "openChat()"]]]
+        ["Inteligência", [["✨", "Consultor IA", "Gemini", "openChat()"]]],
+        ["Avançado", [["🎯", "Ferramentas avançadas", "Mover contas de mês · backup da nuvem", "openAdvanced()"]]]
     ];
     document.getElementById("drawer").innerHTML = `<div class="dr-head"><span>Menu</span><button class="btn-icon" onclick="toggleDrawer(false)">✖</button></div>` + groups.map(([t, items]) => `<div class="dr-sec">${t}</div>` + items.map(([i, n, d, f]) => `<button class="dr-item" onclick="toggleDrawer(false); ${f.replace(/"/g, "&quot;")}"><span class="dr-ico">${ico(EMO2ICO[i] || "dot", 18)}</span><span><div class="dr-t">${n}</div><div class="dr-s">${esc(d)}</div></span></button>`).join("")).join("");
+}
+// ---------- Ferramentas avançadas (uso pontual) ----------
+function openAdvanced() {
+    const old = document.getElementById("advSheet"); if (old) old.remove();
+    const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1];
+    const o = document.createElement("div"); o.id = "advSheet"; o.className = "sheet-ov";
+    o.onclick = e => { if (e.target === o) o.remove(); };
+    o.innerHTML = `<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;"><span>Ferramentas avançadas</span><button class="btn-icon" onclick="document.getElementById('advSheet').remove()">✖</button></div>
+        <div style="font-size:.8rem;color:var(--text-muted);margin:10px 0 4px;">Mover do mês aberto (<b>${esc(currentMonth)}</b>) para ${next ? "<b>" + esc(next) + "</b>" : "—"}. Use quando lançou tudo no mês errado.</div>
+        ${[["essenciais", "Despesas fixas (contas)", 1], ["naoEssenciais", "Despesas variáveis", 1], ["receitas", "Entradas", 0], ["tx", "Lançamentos das faturas (compras)", 0]].map(([k, l, on]) => `<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:.9rem;"><input type="checkbox" class="mv-chk" value="${k}" ${on ? "checked" : ""} style="width:18px;height:18px;accent-color:var(--accent);">${l}</label>`).join("")}
+        <button class="btn" style="width:100%;margin-top:10px;padding:12px;" ${next ? "" : "disabled"} onclick="moveToNextMonth()">Mover para ${next ? esc(next) : "o próximo mês"}</button>
+        <div style="height:1px;background:var(--border);margin:16px 0;"></div>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:8px;">Substitui os dados deste aparelho pelo backup salvo no Firebase. Uma cópia local é criada antes.</div>
+        <button class="btn-outline" style="width:100%;padding:12px;" onclick="loadCloudBackup()">${ico("cloud", 16)} Carregar backup do Firebase</button></div>`;
+    document.body.appendChild(o);
+}
+function moveToNextMonth() {
+    const idx = MONTHS.indexOf(currentMonth), next = MONTHS[idx + 1]; if (!next) return toast("Não há mês seguinte.");
+    const kinds = Array.from(document.querySelectorAll("#advSheet .mv-chk:checked")).map(c => c.value);
+    if (!kinds.length) return toast("Marque o que deseja mover.");
+    if (!confirm(`Mover os itens marcados de ${currentMonth} para ${next}?`)) return;
+    const prof = store.profiles[currentProfile];
+    if (!prof[next]) prof[next] = getDefaultMonthData();
+    const before = JSON.stringify([prof[currentMonth], prof[next]]), src = prof[currentMonth], dst = prof[next];
+    let n = 0;
+    ["essenciais", "naoEssenciais", "receitas"].filter(k => kinds.includes(k)).forEach(k => {
+        src[k].forEach(it => {
+            const copy = { ...it }; if ("paid" in copy) copy.paid = false;
+            const ph = dst[k].find(x => x.nome === it.nome && !(Number(x.valor) > 0));
+            if (ph) Object.assign(ph, copy); else dst[k].push(copy);
+            n++;
+        });
+        src[k] = [];
+    });
+    if (kinds.includes("tx")) { dst.transactions = (dst.transactions || []).concat(src.transactions || []); n += (src.transactions || []).length; src.transactions = []; }
+    takeSnapshot("antes-mover", true);
+    saveStore(); renderAll(); checkNotifications();
+    document.getElementById("advSheet")?.remove();
+    const undo = () => { const [a, b] = JSON.parse(before); prof[currentMonth] = a; prof[next] = b; saveStore(); renderAll(); checkNotifications(); };
+    toast(`✅ ${n} item(ns) movido(s) para ${next}.`, undo);
+}
+async function loadCloudBackup() {
+    if (!store.config.firebaseConfig) return toast("Configure o Firebase primeiro.");
+    if (typeof firebase === "undefined" || !firebase.apps.length || !firebase.auth().currentUser) { document.getElementById("advSheet")?.remove(); return showCloudLogin("Entre na nuvem para carregar o backup."); }
+    if (!confirm("Substituir os dados deste aparelho pelo backup do Firebase?\nUma cópia local será criada antes.")) return;
+    try {
+        const snap = await firebase.database().ref("financeStore").once("value");
+        const data = await decodeCloud(snap.val());
+        if (!data || !data.profiles) return toast("Nenhum backup válido encontrado na nuvem.");
+        await takeSnapshot("antes-carregar-nuvem", true);
+        const fb = store.config.firebaseConfig, gk = store.config.geminiApiKey;
+        delete data._syncId; delete data._updatedAt;
+        store = sanitizeStore(data);
+        store.config.firebaseConfig = fb; if (!store.config.geminiApiKey && gk) store.config.geminiApiKey = gk;
+        store.meta = {}; const u = unitsOf(store), now = Date.now() + 1;
+        Object.keys(u).forEach(k => { store.meta[k] = now; }); _unitHash = u;
+        if (!store.config.profilesList.includes(currentProfile)) currentProfile = store.config.profilesList[0];
+        saveStore(); document.getElementById("advSheet")?.remove();
+        init(); toast("✅ Backup da nuvem carregado.");
+    } catch (e) { toast(e && e.message === "NEEDKEY" ? "Informe a senha de criptografia (Entrar na nuvem)." : e && e.message === "BADKEY" ? "Senha de criptografia incorreta." : "Falha ao carregar: " + (e.message || e)); }
 }
 function backupName(tag) { const d = new Date(), z = n => String(n).padStart(2, "0"); return `backup_financeiro_${isoDate(d)}_${z(d.getHours())}h${z(d.getMinutes())}${tag ? "_" + tag : ""}.json`; }
 async function saveBackupFile(json, name) {
